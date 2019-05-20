@@ -56,7 +56,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?php if (!isset($go_to_login_url)) { ?>
                     <?= Html::a(AmosAdmin::t('amosadmin', '#go_to_login'), ['/admin/security/login'], ['class' => 'btn btn-secondary', 'title' => AmosAdmin::t('amosadmin', '#go_to_login'), 'target' => '_self']) ?>
                 <?php } else { ?>
-                    <?= Html::a(AmosAdmin::t('amosadmin', '#go_to_login'), [$go_to_login_url], ['class' => 'btn btn-secondary', 'title' => AmosAdmin::t('amosadmin', '#go_to_login'), 'target' => '_self']) ?>
+                    <?= Html::a(AmosAdmin::t('amosadmin', '#go_to_login'), $go_to_login_url, ['class' => 'btn btn-secondary', 'title' => AmosAdmin::t('amosadmin', '#go_to_login'), 'target' => '_self']) ?>
                 <?php } ?>
             <?php endif; ?>
         </div>

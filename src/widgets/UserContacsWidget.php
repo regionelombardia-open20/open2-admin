@@ -54,7 +54,6 @@ class UserContacsWidget extends Widget
         if (is_null($this->userId)) {
             throw new \Exception(AmosAdmin::t('amosadmin', 'Missing user id'));
         }
-
     }
 
     /**
@@ -63,6 +62,7 @@ class UserContacsWidget extends Widget
     public function run()
     {
         $confirm = $this->getConfirm();
+        $canAssociateContact = \Yii::$app->user->can('ASSOCIATE_CONTACTS');
 
         $gridId = $this->gridId;
         $url = \Yii::$app->urlManager->createUrl([
@@ -186,7 +186,7 @@ class UserContacsWidget extends Widget
 
         $model = User::findOne($this->userId)->getProfile();
         $loggedUserId = Yii::$app->getUser()->id;
-        $this->isUpdate = $this->isUpdate && ($loggedUserId == $model->user_id);
+        $this->isUpdate = $this->isUpdate && ($loggedUserId == $model->user_id) && $canAssociateContact;
 
         $widget = \lispa\amos\core\forms\editors\m2mWidget\M2MWidget::widget([
             'model' => $model,

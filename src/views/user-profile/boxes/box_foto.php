@@ -27,6 +27,7 @@ $adminModule = Yii::$app->controller->module;
 
 <?php if ($adminModule->confManager->isVisibleField('userProfileImage', ConfigurationManager::VIEW_TYPE_FORM)): ?>
     <?= $form->field($model,'userProfileImage')->widget(CropInput::classname(), [
+        'enableUploadFromGallery' => false,
         'jcropOptions' => [ 'aspectRatio' => '1']
     ])->label(AmosAdmin::t('amosadmin', '#image_field'))->hint(AmosAdmin::t('amosadmin', '#image_field_hint')); ?>
 <?php endif; ?>

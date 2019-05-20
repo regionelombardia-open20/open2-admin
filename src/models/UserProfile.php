@@ -22,6 +22,7 @@ use lispa\amos\attachments\behaviors\FileBehavior;
 use lispa\amos\core\helpers\Html;
 use lispa\amos\core\helpers\T;
 use lispa\amos\core\interfaces\ContentModelInterface;
+use lispa\amos\core\interfaces\FacilitatorInterface;
 use lispa\amos\core\interfaces\ViewModelInterface;
 use lispa\amos\core\interfaces\WorkflowModelInterface;
 use lispa\amos\core\record\CachedActiveQuery;
@@ -46,6 +47,8 @@ use yii\helpers\Url;
  * @property \lispa\amos\core\user\User $user
  * @property \lispa\amos\comuni\models\IstatComuni $residenzaComune
  * @property \lispa\amos\comuni\models\IstatProvince $residenzaProvincia
+ * @property \lispa\amos\core\interfaces\OrganizationsModelInterface $userOrganization
+ * @property string $nomeCognome
  *
  * @method \cornernote\workflow\manager\components\WorkflowDbSource getWorkflowSource()
  * @method \yii\db\ActiveQuery hasOneFile($attribute = 'file', $sort = 'id')
@@ -53,7 +56,7 @@ use yii\helpers\Url;
  *
  * @package lispa\amos\admin\models
  */
-class UserProfile extends BaseUserProfile implements ContentModelInterface, ViewModelInterface
+class UserProfile extends BaseUserProfile implements ContentModelInterface, ViewModelInterface, FacilitatorInterface
 {
     // Event const
     const EVENT_AGGIORNA_RUOLO = 'aggiorna-ruolo';
@@ -66,7 +69,7 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
     public $ruolos2;
     public $insegnamentis2;
     public $insegnamentis3;
-    public $listaRuoli;
+    public $listaRuoli = null;
     public $listaProgetti;
     public $isProfileModified;
 
@@ -213,8 +216,6 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
 
         $this->on(self::EVENT_AGGIORNA_RUOLO, [$this, 'aggiornaRuolo']);
 
-
-
         if ($this->isNewRecord) {
             $this->status = $this->getWorkflowSource()->getWorkflow(self::USERPROFILE_WORKFLOW)->getInitialStatusId();
         }
@@ -240,7 +241,9 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
      */
     public function beforeValidate()
     {
-        if (!\Yii::$app->user->can('ADMIN')) {
+        /** @var AmosAdmin $adminModule */
+        $adminModule = AmosAdmin::instance();
+        if (!$adminModule->dontCheckOneTagPresent && !\Yii::$app->user->can('ADMIN')) {
             if (!$this->checkOneTagPresent()) {
                 return false;
             }
@@ -522,8 +525,9 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
             }
         }
         $percentuale = 0;
-        $id = Yii::$app->getUser()->getId();
-        $email = AmosAdmin::instance()->createModel('User')->findOne(['id' => $id])->getAttribute('email');
+        /** @var User $user */
+        $user = Yii::$app->user->identity;
+        $email = $user->email;
         if ($email && strlen($email)) {
             $compilati++;
         }
@@ -538,7 +542,9 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
      */
     public function getCampiConsigliati()
     {
-        return [
+        $scenarios = $this->scenarios();
+        $scenarioDynamicFields = $scenarios[static::SCENARIO_DYNAMIC];
+        $allCampiConsigliati = [
             'nome',
             'cognome',
             'sesso',
@@ -556,6 +562,13 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
             'domicilio_lat',
             'domicilio_lon',
         ];
+        $campiConsigliatiDynamic = [];
+        foreach ($allCampiConsigliati as $fieldName) {
+            if (in_array($fieldName, $scenarioDynamicFields)) {
+                $campiConsigliatiDynamic[] = $fieldName;
+            }
+        }
+        return $campiConsigliatiDynamic;
     }
 
     /**
@@ -1184,7 +1197,9 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
      */
     private function loadListaRuoli()
     {
-        $this->listaRuoli = ArrayHelper::map(Yii::$app->authManager->getRolesByUser($this->user_id), 'name', 'name');
+        if(is_null($this->listaRuoli)){
+            $this->listaRuoli = ArrayHelper::map(Yii::$app->authManager->getRolesByUser($this->user_id), 'name', 'name');
+        }
     }
 
     /**
@@ -1577,5 +1592,29 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
             }
         }
         return false;
+    }
+
+    public function getFacilitatorRole()
+    {
+        return "FACILITATOR";
+    }
+
+    public function getUserOrganization() {
+        /** @var AmosAdmin $admin */
+        $admin =  AmosAdmin::getInstance();
+        /** @var  $organizationsModule OrganizationsModuleInterface*/
+        $organizationsModule = \Yii::$app->getModule($admin->getOrganizationModuleName());
+
+        if(is_null($organizationsModule)) {
+            return null;
+        }
+
+        $organizations = $organizationsModule->getUserOrganizations($this->user_id);
+
+        if(empty($organizations)) {
+            return null;
+        }
+
+        return reset($organizations);
     }
 }

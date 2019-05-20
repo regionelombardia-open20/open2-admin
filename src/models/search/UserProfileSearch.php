@@ -14,14 +14,15 @@ namespace lispa\amos\admin\models\search;
 use lispa\amos\admin\AmosAdmin;
 use lispa\amos\admin\models\UserProfile;
 use lispa\amos\core\user\User;
+use lispa\amos\core\interfaces\SearchModelInterface;
+use lispa\amos\core\record\SearchResult;
+
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
-use lispa\amos\core\interfaces\SearchModelInterface;
-use lispa\amos\core\record\SearchResult;
 use yii\data\Pagination;
 
 /**
@@ -270,18 +271,28 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface {
      * @param array $params
      * @return ActiveDataProvider
      */
-    public function searchOnceValidatedUsers($params) {
+    public function searchOnceValidatedUsers($params, $pageSize = 20) {
         $query = $this->baseSearch($params);
         $query->andWhere([UserProfile::tableName() . '.attivo' => 1, UserProfile::tableName() . '.validato_almeno_una_volta' => 1]);
 
         $dataProvider = new ActiveDataProvider([
-            'query' => $query
+          'query' => $query
         ]);
 
         $this->setUserProfileSort($dataProvider);
 
+        if (is_int($pageSize)) {
+            $pagination = $dataProvider->getPagination();
+            if (!$pagination) {
+                $pagination = new Pagination();
+                $dataProvider->setPagination($pagination);
+            }
+            $pagination->setPageSize($pageSize);
+        }
+
+        
         if (!($this->load($params) && $this->validate())) {
-            return $dataProvider;
+          return $dataProvider;
         }
 
         $this->baseFilter($query);
@@ -432,9 +443,11 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface {
         $loggedUser = Yii::$app->user->identity;
         /** @var UserProfile $loggedUserProfile */
         $loggedUserProfile = $loggedUser->getProfile();
+        
         $query = new Query();
-        $query->from(UserProfile::tableName());
-        $query->andWhere(['>=', 'created_at', $loggedUserProfile->ultimo_logout]);
+        $query->from(UserProfile::tableName())
+        ->andWhere(['>=', 'created_at', $loggedUserProfile->ultimo_logout]);
+        
         return $query->count();
     }
 
@@ -499,15 +512,8 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface {
                 $imageUrl = "/img/defaultProfiloF.png";
             } 
             $searchResult->immagine = $imageUrl;
-        }
-
-
-       
-
-
-
-
+		}
+		
         return $searchResult;
-    }
-
+	}
 }

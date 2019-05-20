@@ -22,6 +22,9 @@ use lispa\amos\core\icons\AmosIcons;
  * @var lispa\amos\admin\models\UserProfile $model
  */
 
+
+
+
 $this->title = $model;
 $this->params['breadcrumbs'][] = ['label' => AmosAdmin::t('amosadmin', 'Utenti'), 'url' => ['/admin']];
 $this->params['breadcrumbs'][] = ['label' => AmosAdmin::t('amosadmin', 'Elenco'), 'url' => ['index']];
@@ -34,8 +37,20 @@ $adminModule = Yii::$app->controller->module;
 $idTabAdministration = 'tab-administration';
 
 $enableUserContacts = AmosAdmin::getInstance()->enableUserContacts;
+$hideContactsInView = AmosAdmin::getInstance()->hideContactsInView;
+$accordionNetworkOpenOnDefault = AmosAdmin::getInstance()->accordionNetworkOpenOnDefault;
 
 $userCanChangeWorkflow = Yii::$app->user->can('CHANGE_USERPROFILE_WORKFLOW_STATUS');
+
+if($accordionNetworkOpenOnDefault) {
+    $js = <<<JS
+$(document).ready(function(){
+        $('#accordion-network-title').trigger('click');
+});
+JS;
+    $this->registerJs($js);
+}
+
 
 //if($userCanChangeWorkflow) {
 //    if ($model->status != UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) {
@@ -205,7 +220,7 @@ $userCanChangeWorkflow = Yii::$app->user->can('CHANGE_USERPROFILE_WORKFLOW_STATU
             </section>
             <!-- end SCHEDA -->
 
-            <?php if ($enableUserContacts && Yii::$app->user->id != $model->user_id): ?>
+            <?php if ($enableUserContacts && Yii::$app->user->id != $model->user_id && !$hideContactsInView): ?>
                 <?= \lispa\amos\admin\widgets\ConnectToUserWidget::widget([
                     'model' => $model,
                     'isProfileView' => true,
@@ -224,7 +239,7 @@ $userCanChangeWorkflow = Yii::$app->user->can('CHANGE_USERPROFILE_WORKFLOW_STATU
             $accordionNetwork = '';
 
             $moduleCwh = Yii::$app->getModule('cwh');
-            if ($enableUserContacts && $model->validato_almeno_una_volta) {
+            if ($enableUserContacts && $model->validato_almeno_una_volta && !$hideContactsInView) {
                 $accordionUserContacts = \lispa\amos\admin\widgets\UserContacsWidget::widget([
                     'userId' => $model->user_id,
                     'isUpdate' => false
@@ -265,7 +280,7 @@ $userCanChangeWorkflow = Yii::$app->user->can('CHANGE_USERPROFILE_WORKFLOW_STATU
                         'content' => $accordionNetwork,
                     ]
                 ],
-                'headerOptions' => ['tag' => 'h2'],
+                'headerOptions' => ['tag' => 'h2', 'id'=> 'accordion-network-title'],
                 'clientOptions' => [
                     'collapsible' => true,
                     'active' => false,

@@ -39,7 +39,7 @@ ModuleUserProfileAsset::register($this);
 $moduleCwh = \Yii::$app->getModule('cwh');
 
 /** @var AmosAdmin $adminModule */
-$adminModule = Yii::$app->controller->module;
+$adminModule = AmosAdmin::instance();
 
 // Tabs ids
 $idTabCard = 'tab-card';
@@ -120,6 +120,9 @@ $jsIsProfileModified = "
                 haserrorRequired = true;
             } 
         });
+        if(haserror.length <= 0 && haserrorRequired) {
+            $('form').submit();        
+        }
         if( haserror.length <= 0 && !haserrorRequired){
             if(isProfileModified == 1){
                $(modalId).modal('show'); 
@@ -179,9 +182,6 @@ $form = ActiveForm::begin([
         'viewWidgetOnNewRecord' => false
     ]); ?>
 <?php } ?>
-
-
-<?= $form->errorSummary($model, ['class' => 'alert-danger alert fade in']); ?>
 
 <div class="loading" id="loader" hidden></div>
 <div class="user-form col-xs-12">
@@ -346,6 +346,9 @@ $form = ActiveForm::begin([
                             <div class="col-xs-12 nop">
                                 <?= $form->field($model, 'default_facilitatore')->checkbox()->label(AmosAdmin::t('amosadmin', 'Is default facilitator') . '?') ?>
                             </div>
+                        <?php endif; ?>
+                        <?php if (Yii::$app->user->can('ADMIN') && $adminModule->showFacilitatorForModuleSelect ) : ?>
+                            <?= $this->render('boxes/box_facilitator_roles', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
                         <?php endif; ?>
                         <?php if ($adminModule->confManager->isVisibleBox('box_social_account', ConfigurationManager::VIEW_TYPE_FORM)): ?>
                             <?= $this->render('boxes/box_social_account', ['form' => $form, 'model' => $model, 'user' => $user]); ?>

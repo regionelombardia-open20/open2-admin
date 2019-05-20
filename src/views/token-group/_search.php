@@ -8,6 +8,8 @@ use yii\widgets\ActiveForm;
 * @var lispa\amos\admin\models\search\TokenGroupSearch $model
 * @var yii\widgets\ActiveForm $form
 */
+
+$enableAutoOpenSearchPanel = !isset(\Yii::$app->params['enableAutoOpenSearchPanel']) || \Yii::$app->params['enableAutoOpenSearchPanel'] === true;
 ?>
 
 <div class="token-group-search element-to-toggle" data-toggle-element="form-search">
@@ -22,7 +24,6 @@ use yii\widgets\ActiveForm;
     ]);
 
     echo Html::hiddenInput("enableSearch", "1");
-    echo Html::hiddenInput("currentView", Yii::$app->request->getQueryParam('currentView'));
     ?>
 
     <div class="col-sm-6 col-lg-4">    <?= $form->field($model, 'id') ?></div><div class="col-sm-6 col-lg-4">    <?= $form->field($model, 'name') ?></div><div class="col-sm-6 col-lg-4">    <?= $form->field($model, 'Description') ?></div><div class="col-sm-6 col-lg-4">    <?= $form->field($model, 'url_redirect') ?></div><div class="col-sm-6 col-lg-4">    <?= $form->field($model, 'target_class') ?></div>    <?php // echo $form->field($model, 'target_id') ?>

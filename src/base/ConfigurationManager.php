@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Lombardia Informatica S.p.A.
  * OPEN 2.0
@@ -13,13 +12,13 @@ namespace lispa\amos\admin\base;
 
 use lispa\amos\admin\AmosAdmin;
 use lispa\amos\admin\exceptions\AdminException;
-use yii\base\Object;
+use yii\base\BaseObject;
 
 /**
  * Class ConfigurationManager
  * @package lispa\amos\admin\base
  */
-class ConfigurationManager extends Object
+class ConfigurationManager extends BaseObject
 {
     // Form and view types
     const VIEW_TYPE_FORM = 'form';

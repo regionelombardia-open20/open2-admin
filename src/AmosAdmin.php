@@ -16,6 +16,7 @@ use lispa\amos\admin\exceptions\AdminException;
 use lispa\amos\admin\models\UserProfile;
 use lispa\amos\admin\utility\UserProfileUtility;
 use lispa\amos\admin\widgets\graphics\WidgetGraphicMyProfile;
+use lispa\amos\admin\widgets\graphics\WidgetGraphicsUsers;
 use lispa\amos\admin\widgets\icons\WidgetIconMyProfile;
 use lispa\amos\admin\widgets\icons\WidgetIconUserProfile;
 use lispa\amos\core\interfaces\SearchModuleInterface;
@@ -48,6 +49,17 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
      * @var bool $enableRegister - set to true to enable user register to the application and create his own userprofile
      */
     public $enableRegister = false;
+    
+    /**
+     * @var bool $showLogInRegisterButton - set to true to enable user register button on login form
+     */
+    
+    public $showLogInRegisterButton = true;
+
+    /**
+     * @var bool $hideStandardLoginPageSection If true hide the login page section where the user can insert username and password.
+     */
+    public $hideStandardLoginPageSection = false;
 
     /**
      *  @var string $textWarningForRegisterDisabled - set the text that will to show if the register is disabled
@@ -59,6 +71,21 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
      * enable connection to users, send private messages, and see 'contacts' in section 'NETWORK' of the user profile
      */
     public $enableUserContacts = true;
+
+    /**
+     * @var bool $enableSendMessage If this is true and $enableUserContacts is false all users see the "send message" button on view icon.
+     */
+    public $enableSendMessage = false;
+
+    /**
+     * @var bool
+     */
+    public $hideContactsInView = false;
+
+    /**
+     * @var bool
+     */
+    public $accordionNetworkOpenOnDefault = false;
 
     /**
      * @var bool $cached - enable or not admin query caching
@@ -120,11 +147,6 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
         'status',
         'presentazione_breve'
     ];
-
-    /**
-     * @var bool $hideWidgetGraphicsActions
-     */
-    public $hideWidgetGraphicsActions = false;
 
     /**
      * @var ConfigurationManager $confManager
@@ -194,6 +216,18 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
     public $associateTutor = null;
 
     /**
+     *  At the creation of the user, send a private message from the tutor
+     * @var null|boolean
+     */
+    public $defaultPrivateMessage = false;
+
+    /**
+     * Set the backend action (url) to go to if the private message above is sent
+     * @var null|string
+     */
+    public $helpLinkAction = null;
+
+    /**
      * @var bool $roleAndAreaOnOrganizations If true, hide roles and areas standard and enable it on the single network organization row
      */
     public $roleAndAreaOnOrganizations = false;
@@ -202,6 +236,26 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
      * @var bool $roleAndAreaFromOrganizationsWithTypeCat If true, uses "type_cat" field in the roles and areas queries
      */
     public $roleAndAreaFromOrganizationsWithTypeCat = false;
+
+    /**
+     * @var bool $sendUserAssignmentsReportOnDelete Send a report of user assignments via email if true
+     */
+    public $sendUserAssignmentsReportOnDelete = false;
+
+    /**
+     * @var bool $showFacilitatorForModuleSelect Display a select multiple field for assigning specific module facilitator permissions in the user profile form
+     */
+    public $showFacilitatorForModuleSelect = false;
+
+    /**
+     * @var bool $dontCheckOneTagPresent If true the model validation doesn't check if there's at least one tag present for non ADMIN users.
+     */
+    public $dontCheckOneTagPresent = false;
+
+    /**
+     * @var bool $enableMultiUsersSameCF If true the model validation doesn't check the unique of che fiscal code.
+     */
+    public $enableMultiUsersSameCF = false;
 
     /**
      * @inheritdoc
@@ -218,6 +272,18 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
             'category' => 'amosadmin'
         ],
     ];
+
+    /**
+     * @var bool
+     */
+    public $precompileUsernameOnFirstAccess = false;
+
+    /**
+     * @var bool $enableUserContactsWidget
+     */
+    public $enableUserContactsWidget = true;
+    
+    public $defaultProfileImagePath = "@webroot/img/defaultProfilo.png";
 
     /**
      * @return string
@@ -296,7 +362,8 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
     public function getWidgetGraphics()
     {
         return [
-            WidgetGraphicMyProfile::className()
+            WidgetGraphicMyProfile::className(),
+            WidgetGraphicsUsers::className()
         ];
     }
 
@@ -463,5 +530,8 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
         return null;
     }
 
+    public static function getModelClassName() {
+        return __NAMESPACE__ . '\models\UserProfile';
+    }
 
 }

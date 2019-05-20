@@ -117,6 +117,14 @@ $socialProfile = Yii::$app->session->get('social-profile');
                     ]); ?>
                 </div>
 
+                <?php
+
+
+                $communityId = \Yii::$app->request->get('community');
+                if($communityId) { ?>
+                    <?= Html::hiddenInput('community', $communityId)?>
+                <?php } ?>
+
                 <div class="col-xs-12">
                     <?= Html::submitButton(AmosAdmin::t('amosadmin', '#register_now'), ['class' => 'btn btn-primary btn-administration-primary pull-right', 'name' => 'login-button', 'title' => AmosAdmin::t('amosadmin', '#register_now')]) ?>
                     <?php ActiveForm::end(); ?>

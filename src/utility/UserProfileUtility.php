@@ -16,6 +16,8 @@ use lispa\amos\admin\models\UserProfile;
 use lispa\amos\core\user\User;
 use lispa\amos\core\utilities\Email;
 use raoul2000\workflow\base\SimpleWorkflowBehavior;
+use lispa\amos\admin\models\UserContact;
+
 use Yii;
 use yii\db\Expression;
 use yii\db\Query;
@@ -205,7 +207,7 @@ class UserProfileUtility
         if ($adminModule->bypassWorkflow) {
             $userProfile->validato_almeno_una_volta = 1;
         }
-        $userProfile->status = UserProfile::USERPROFILE_WORKFLOW_STATUS_DRAFT;
+        $userProfile->status = $userProfile->getWorkflowSource()->getWorkflow(UserProfile::USERPROFILE_WORKFLOW)->getInitialStatusId();
         $userProfile->nome = $name;
         $userProfile->cognome = $surname;
         $userProfile->privacy = $privacy;
@@ -368,4 +370,106 @@ class UserProfileUtility
         }
         return false;
     }
+
+    /**
+     * @return array
+     * @throws \ReflectionException
+     * Get an array of active facilitator roles in the application (scanning configured plugins)
+     */
+    public static function getFacilitatorForModuleRoles() {
+        /** @var array $facilitatorRoles
+         * List of facilitator roles for modules set in the application
+         */
+        $facilitatorRoles = [];
+        $facilitatorRoles['FACILITATOR'] = AmosAdmin::t('amosadmin', 'FACILITATOR');
+        // Get all modules set in the application
+        foreach (Yii::$app->getModules(false) as $key => $module) {
+            // Get the full class path of a loaded module...
+            $moduleClass = "";
+            if (is_object($module)) {
+                $moduleClass = get_class($module);
+            }
+            // ..if a module is not loaded, yii returns an array of config values.
+            // In this case, get the full class path from the key of the current
+            // value from the array of modules configured in the application
+            if($moduleClass == "") {
+                $module = Yii::$app->getModule($key);
+            }
+            // Check if the getModelClassName function exists in the module
+            if (method_exists($module, 'getModelClassName')) {
+                $moduleModel = $module->getModelClassName();
+                //pr($moduleModel, "modulo con model classname");
+                if(!empty($moduleModel)) {
+                    // Get the model of the module instance
+                    $moduleModel = '\\'.$moduleModel;
+                    $moduleModel = new $moduleModel();
+                    // Check if the model implements the FacilitatorInterface
+                    if (isset(class_implements($moduleModel)['lispa\amos\core\interfaces\FacilitatorInterface'])) {
+                        // If the model has a facilitator role set (is not empty)...
+                        if (!empty($moduleModel->getFacilitatorRole()) && ($moduleModel->getFacilitatorRole() != "FACILITATOR")) {
+                            // ...add the facilitator role for the module to the list of facilitator roles
+                            // ---------------------------------------------------------------------------
+                            // Q: Why is ReflectionClass used to get the shortname of the module class?
+                            // R: Because it seems that is slighly faster than using explode or substring
+                            // functions (source: https://coderwall.com/p/cpxxxw/php-get-class-name-without-namespace)
+                            $facilitatorRoles[$moduleModel->getFacilitatorRole()] = $module::t($module->getAmosUniqueId(), $moduleModel->getFacilitatorRole());
+                        }
+                    }
+                }
+            }
+        }
+        return $facilitatorRoles;
+    }
+
+    /**
+     * @param integer $userId The user id
+     * @param array $facilitatorPermissionsEnabled The facilitator permissions of configured plugins on the application
+     * @return array
+     * Get the facilitator roles activated in the application (passed via $facilitatorPermissionsEnabled param) assigned to a user
+     */
+    public static function getFacilitatorRolesForUser($userId, $facilitatorPermissionsEnabled) {
+        $rows = (new Query())
+                ->select(['item_name'])
+                ->from('auth_assignment')
+                ->where([
+                    'user_id' => $userId,
+                    'item_name' => array_keys($facilitatorPermissionsEnabled),
+                ])
+                ->all();
+
+        $result = [];
+        foreach ($rows as $row) {
+            $result[] = $row['item_name'];
+        }
+
+        return $result;
+    }
+    
+    /**
+     * 
+     * @param type $userId
+     * @return type
+     */
+    public static function getQueryContacts($userId){
+      $contactsInvited =
+        User::find()
+          ->innerJoin('user_contact', 'user.id = user_contact.contact_id')
+          ->innerJoin('user_profile', 'user_profile.user_id = user.id')
+          ->andWhere('user_contact.deleted_at IS NULL AND user_profile.deleted_at IS NULL')
+          ->andWhere("user_contact.user_id = ".$userId)
+          ->andWhere(['user_contact.status' => UserContact::STATUS_ACCEPTED])
+          ->andWhere(['attivo' => 1]);
+
+        $contactsInviting =
+          User::find()
+            ->innerJoin('user_contact', 'user.id = user_contact.user_id')
+            ->innerJoin('user_profile', 'user_profile.user_id = user.id')
+            ->andWhere('user_contact.deleted_at IS NULL AND user_profile.deleted_at IS NULL')
+            ->andWhere("user_contact.contact_id = ".$userId)
+            ->andWhere(['user_contact.status' => UserContact::STATUS_ACCEPTED])
+            ->andWhere(['attivo' => 1]);
+
+        return $contactsInvited->union($contactsInviting);
+    }
+
 }

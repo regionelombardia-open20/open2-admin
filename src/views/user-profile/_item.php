@@ -104,7 +104,7 @@ if ($isAssociateFacilitator) {
                     <?php if ($isAssociateFacilitator): ?>
                         <?= $nomeCognome ?>
                     <?php else: ?>
-                        <?= Html::a($nomeCognome, ['/admin/user-profile/view', 'id' => $model->id], ['title' => AmosAdmin::t('amosadmin', '#icon_name_title_link') . ' ' . $model->getNomeCognome(), 'data-gui' => 'list-view-profiles']); ?>
+                        <?= Html::a($nomeCognome, ['/admin/user-profile/view', 'id' => $model->id], ['title' => AmosAdmin::t('amosadmin', '#icon_name_title_link') . ' ' . $model->getNomeCognome(), 'data-test' => 'list-view-profiles']); ?>
                     <?php endif; ?>
                 </h3>
             <?php endif; ?>

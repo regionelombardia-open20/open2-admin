@@ -29,15 +29,15 @@ $fromAction = (isset($fromAction) ? $fromAction : 'index');
 /** @var \lispa\amos\admin\controllers\UserProfileController $appController */
 $appController = Yii::$app->controller;
 $adminModule = AmosAdmin::instance();
-
-
 ?>
-
 <div class="user-profile-index">
-    <?= $this->render('_search', [
-        'model' => $model,
-        'originAction' => $appController->action->id
-    ]); ?>
+    <?= $this->render(
+        '_search',
+        [
+            'model' => $model,
+            'originAction' => $appController->action->id
+        ]);
+    ?>
     <?= $this->render('_order', ['model' => $model]); ?>
 
     <?php
@@ -60,12 +60,13 @@ $adminModule = AmosAdmin::instance();
                 'attribute' => 'user.email',
                 'label' => AmosAdmin::t('amosadmin', 'Email')
             ];
+
             if ($adminModule->confManager->isVisibleBox('box_prevalent_partnership', ConfigurationManager::VIEW_TYPE_FORM) &&
                 $adminModule->confManager->isVisibleField('prevalent_partnership_id', ConfigurationManager::VIEW_TYPE_FORM)) {
-                    $columns['prevalentPartnership.name'] = [
-                        'attribute' => 'prevalentPartnership.name',
-                        'label' => $model->getAttributeLabel('prevalentPartnership')
-                    ];
+                $columns['prevalentPartnership.name'] = [
+                    'attribute' => 'prevalentPartnership.name',
+                    'label' => $model->getAttributeLabel('prevalentPartnership')
+                ];
             }
 
             $columns[] = [
@@ -79,11 +80,12 @@ $adminModule = AmosAdmin::instance();
         default:
             if ($adminModule->confManager->isVisibleBox('box_prevalent_partnership', ConfigurationManager::VIEW_TYPE_FORM) &&
                 $adminModule->confManager->isVisibleField('prevalent_partnership_id', ConfigurationManager::VIEW_TYPE_FORM)) {
-                     $columns['prevalentPartnership.name'] = [
-                         'attribute' => 'prevalentPartnership.name',
-                         'label' => $model->getAttributeLabel('prevalentPartnership')
-                     ];
-             }
+                $columns['prevalentPartnership.name'] = [
+                    'attribute' => 'prevalentPartnership.name',
+                    'label' => $model->getAttributeLabel('prevalentPartnership')
+                ];
+            }
+
             if ($adminModule->confManager->isVisibleBox('box_facilitatori', ConfigurationManager::VIEW_TYPE_FORM)) {
                 $columns['facilitatore.nomeCognome'] = [
                     'attribute' => 'facilitatore.nomeCognome',
@@ -116,9 +118,18 @@ $adminModule = AmosAdmin::instance();
                 /** @var \lispa\amos\admin\models\UserProfile $model */
                 $utente = Yii::$app->getUser();
                 if ($utente->can('REGISTRAZIONE_ACCESSI')) {
-                    return Html::a(AmosIcons::show('timer', ['class' => 'btn btn-tool-secondary bk-btnPagine']) . '<span class="sr-only">' . AmosAdmin::t('amosadmin', 'Registra l\'accesso al servizio di facilitazione') . '</span>', Yii::$app->urlManager->createUrl(['/puntopei/pei-accessi-servizi-facilitazione/create', 'user_profile_id' => $model->id]), [
-                        'title' => AmosAdmin::t('amosadmin', 'Registra l\'accesso al servizio di facilitazione')
-                    ]);
+                    return Html::a(AmosIcons::show(
+                            'timer',
+                            ['class' => 'btn btn-tool-secondary bk-btnPagine'])
+                        . '<span class="sr-only">'
+                        . AmosAdmin::t('amosadmin', 'Registra l\'accesso al servizio di facilitazione')
+                        . '</span>', Yii::$app->urlManager->createUrl([
+                        '/puntopei/pei-accessi-servizi-facilitazione/create',
+                        'user_profile_id' => $model->id
+                    ]),
+                        [
+                            'title' => AmosAdmin::t('amosadmin', 'Registra l\'accesso al servizio di facilitazione')
+                        ]);
                 } else {
                     return '';
                 }
@@ -156,7 +167,6 @@ $adminModule = AmosAdmin::instance();
             'exportColumns' => $appController->getExportColumns($model)
         ];
     }
-
     ?>
 
     <?= DataProviderView::widget($dataProviderViewWidgetConf); ?>

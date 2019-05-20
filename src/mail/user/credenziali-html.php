@@ -66,7 +66,6 @@ $this->registerCssFile('http://fonts.googleapis.com/css?family=Roboto');
                                 }
 
                             }
-
                             $passwordResetTokenExpire = $passwordResetTokenExpire . ' ' . $textDay;
                             ?>
                             <?= AmosAdmin::tHtml('amosadmin', '#welcome_email_expire', [
@@ -76,7 +75,7 @@ $this->registerCssFile('http://fonts.googleapis.com/css?family=Roboto');
 
                             <?php $link = $appLink . 'admin/security/insert-auth-data?token=' . $profile->user->password_reset_token;
                             if(!empty($community)) {
-                                $link .= '&community_id='.$community->id;
+                                $link .= '&community_id='.$community->id.'&subscribe=1';
                             }
                             ?>
                             <?= Html::beginTag('a', ['href' => $link]) ?>

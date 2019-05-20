@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Lombardia Informatica S.p.A.
  * OPEN 2.0
@@ -19,12 +18,17 @@ use lispa\amos\core\helpers\BreadcrumbHelper;
 use lispa\amos\core\helpers\Html;
 use lispa\amos\core\icons\AmosIcons;
 use lispa\amos\core\user\User;
+use lispa\amos\core\utilities\Email;
+use lispa\amos\core\widget\WidgetAbstract;
 use lispa\amos\dashboard\controllers\TabDashboardControllerTrait;
+use lispa\amos\myactivities\basic\UserProfileToValidate;
 use lispa\amos\notificationmanager\AmosNotify;
 use lispa\amos\notificationmanager\widgets\NotifyFrequencyWidget;
+use lispa\amos\attachments\components\FileImport;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
+use yii\log\Logger;
 
 /**
  * Class UserProfileController
@@ -36,24 +40,20 @@ use yii\helpers\Url;
  */
 class UserProfileController extends CrudController
 {
-    use TabDashboardControllerTrait;
 
+    use TabDashboardControllerTrait;
     /**
      * @var string $layout
      */
     public $layout = 'list';
-
     // La utilizzo per settare il parametri al render anche da classi ereditate.
     // così anche loro potranno aggiungere parametri al render per le viste
     // caso di update
     public $updateParamsRender;
-
     // caso di create
     public $createParamsRender;
-
     //campo di appoggio per poter gestire il dato anche da classi ereditanti
     public $forzaListaRuoli;
-
     protected $gridView = null;
     protected $iconView = null;
     protected $listView = null;
@@ -114,6 +114,10 @@ class UserProfileController extends CrudController
         $this->setAvailableViews($availableViews);
 
         parent::init();
+
+        if (!empty(\Yii::$app->params['dashboardEngine']) && \Yii::$app->params['dashboardEngine'] == WidgetAbstract::ENGINE_ROWS) {
+            $this->view->pluginIcon = 'ic ic-user';
+        }
         $this->setUpLayout();
     }
 
@@ -126,17 +130,19 @@ class UserProfileController extends CrudController
             'createNewBtnLabel' => AmosAdmin::t('amosadmin', 'Add new user')
         ];
 
-        if(\Yii::$app->getModule('invitations')){
+        if (\Yii::$app->getModule('invitations')) {
             $widget = new \lispa\amos\invitations\widgets\icons\WidgetIconInvitations();
-            $invitations = Html::a('Invita utenti', $widget->url, ['class' => 'btn btn-navigation-primary']);
+            $invitations = Html::a('Invita utenti', $widget->url,
+                ['class' => 'btn btn-navigation-primary']);
             Yii::$app->view->params['additionalButtons'] = [
                 'htmlButtons' => [$invitations]
             ];
         }
 
-        $createNewBtnParams = yii\helpers\ArrayHelper::merge(Yii::$app->view->params['createNewBtnParams'], [
-            'layout' => "{buttonCreateNew}"
-        ]);
+        $createNewBtnParams = yii\helpers\ArrayHelper::merge(Yii::$app->view->params['createNewBtnParams'],
+            [
+                'layout' => "{buttonCreateNew}"
+            ]);
 
         Yii::$app->view->params['createNewBtnParams'] = $createNewBtnParams;
     }
@@ -162,24 +168,12 @@ class UserProfileController extends CrudController
     }
 
     /**
-     * Return an array with the values used in boolean fields.
-     * @return array
-     */
-    public function getBooleanFieldsValues()
-    {
-        return [
-            UserProfile::BOOLEAN_FIELDS_VALUE_NO => AmosAdmin::t('amosadmin', 'No'),
-            UserProfile::BOOLEAN_FIELDS_VALUE_YES => AmosAdmin::t('amosadmin', 'Yes')
-        ];
-    }
-
-    /**
      * Lists all UserProfile models.
      * @param string|null $layout
      * @return string
      * @throws \yii\web\NotFoundHttpException
      */
-    public function actionIndex($layout = NULL)
+    public function actionIndex($layout = null)
     {
         Url::remember();
         if (!empty(Yii::$app->session['cwh-scope'])) {
@@ -200,7 +194,8 @@ class UserProfileController extends CrudController
         $this->setListsViewParams();
         $this->setTitleAndBreadcrumbs(AmosAdmin::t('amosadmin', 'All users'));
         $this->view->params['currentDashboard'] = $this->getCurrentDashboard();
-        return parent::actionIndex();
+
+        return parent::actionIndex($this->layout);
     }
 
     /**
@@ -213,11 +208,14 @@ class UserProfileController extends CrudController
     {
         Url::remember();
         $this->setUpLayout('main');
+
         $this->model = $this->findModel($id);
 
-        return $this->render('view', [
-            'model' => $this->model,
-        ]);
+        return $this->render('view',
+            [
+                'model' => $this->model,
+            ]
+        );
     }
 
     /**
@@ -258,22 +256,33 @@ class UserProfileController extends CrudController
             if (!$adminModule->userCanSelectUsername) {
                 $user->username = UserProfileUtility::generateUsername($user->email);
             }
+
+            /**
+             * Questi campi sul db non hanno un valore di default ma sono dichiarati NOT NULL
+             * per cui schianta la query durante la creazione dell'utente,
+             */
+            if ($user->id == null) {
+                $user->auth_key = ' ';
+                $user->password_hash = ' ';
+            }
+
             // Se mi trovo qua posso salvare entrambe le entità senza avere errore
             $user->save();
             $profile->user_id = $user->id;
             $profile->widgets_selected = 'a:2:{s:7:"primary";a:1:{i:0;a:6:{i:0;a:2:{s:4:"code";s:12:"USER_PROFILE";s:11:"module_name";s:5:"admin";}i:1;a:2:{s:4:"code";s:5:"USERS";s:11:"module_name";s:5:"admin";}i:2;a:2:{s:4:"code";s:11:"TAG_MANAGER";s:11:"module_name";s:3:"tag";}i:3;a:2:{s:4:"code";s:4:"ENTI";s:11:"module_name";s:4:"enti";}i:4;a:2:{s:4:"code";s:9:"ENTI_TIPO";s:11:"module_name";s:4:"enti";}i:5;a:2:{s:4:"code";s:4:"SEDI";s:11:"module_name";s:4:"enti";}}}s:5:"admin";a:1:{i:0;a:2:{i:0;a:2:{s:4:"code";s:12:"USER_PROFILE";s:11:"module_name";s:5:"admin";}i:1;a:2:{s:4:"code";s:5:"USERS";s:11:"module_name";s:5:"admin";}}}}';
-            //If admin module bypasses workflow flag is set, user profile is already validated
-            if (Yii::$app->getModule('admin')->bypassWorkflow) {
-                $profile->validato_almeno_una_volta = 1;
-            }
 
             // it's used to create a new profile in the status to validate directly
-            if($profile->getWorkflowSource()->getWorkflow(UserProfile::USERPROFILE_WORKFLOW)->getInitialStatusId() !== UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) {
+            if ($profile->getWorkflowSource()->getWorkflow(UserProfile::USERPROFILE_WORKFLOW)->getInitialStatusId() !== UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) {
                 if ($profile->status == UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) {
                     $profile->status = UserProfile::USERPROFILE_WORKFLOW_STATUS_DRAFT;
                     $profile->save();
                     $profile->status = UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED;
                 }
+            }
+
+            //If admin module bypasses workflow flag is set, user profile is already validated
+            if (($profile->status == UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) || $this->adminModule->bypassWorkflow) {
+                $profile->validato_almeno_una_volta = 1;
             }
 
             $savedProfile = $profile->save();
@@ -291,6 +300,16 @@ class UserProfileController extends CrudController
                         //add cwh permission to create content in 'Personal' scope
                         $cwhAssignCreate = new \lispa\amos\cwh\models\CwhAuthAssignment($permissionCreateArray);
                         $cwhAssignCreate->save(false);
+                    }
+                }
+                if(empty($profile->userProfileImage))
+                {
+                    $adminmodule = AmosAdmin::instance();
+                    if(!is_null($adminmodule))
+                    {
+                        $fileImport = new FileImport();
+                        $ok = $fileImport->importFileForModel($profile, 'userProfileImage',
+                                \Yii::getAlias($adminmodule->defaultProfileImagePath));
                     }
                 }
             }
@@ -326,7 +345,8 @@ class UserProfileController extends CrudController
 
             /** @var AmosAdmin $adminModule */
             $adminModule = \Yii::$app->getModule(AmosAdmin::getModuleName());
-            Yii::$app->getAuthManager()->assign(Yii::$app->getAuthManager()->getRole($adminModule->defaultUserRole), $user->id);
+            Yii::$app->getAuthManager()->assign(Yii::$app->getAuthManager()->getRole($adminModule->defaultUserRole),
+                $user->id);
             Yii::$app->getSession()->addFlash('success', AmosAdmin::t('amosadmin', 'Utente creato correttamente.'));
             //return $this->redirect(['view', 'id' => $this->model->id]);
             return $this->redirectOnCreate($profile);
@@ -354,7 +374,9 @@ class UserProfileController extends CrudController
     public function actionUpdate($id, $render = true, $tabActive = null)
     {
         Url::remember();
+
         $this->setUpLayout('form');
+
         $url = Yii::$app->urlManager->createUrl(['/admin/user-profile/update-profile', 'id' => $id]);
 
         if ($render) {
@@ -369,11 +391,13 @@ class UserProfileController extends CrudController
         // Remove this row to restore the default functionalities.
         $this->model->setScenario(UserProfile::SCENARIO_DYNAMIC);
 
+        $selectedFacilitatorRoles = [];
+
         if (Yii::$app->request->post()) {
             $previousStatus = $this->model->status;
-            $ruoliUtente = (isset(\Yii::$app->request->post()[$this->getModelName()]['listaRuoli']) && is_array(\Yii::$app->request->post()[$this->getModelName()]['listaRuoli'])) ? \Yii::$app->request->post()[$this->getModelName()]['listaRuoli'] : [];
-            $setRuoli = (isset(\Yii::$app->request->post()[$this->getModelName()]['listaRuoli'])) ? true : false;
-//            $modelRuoli = AmosAdmin::instance()->createModel('Ruoli');
+            $ruoliUtente    = (isset(\Yii::$app->request->post()[$this->getModelName()]['listaRuoli']) && is_array(\Yii::$app->request->post()[$this->getModelName()]['listaRuoli']))
+                    ? \Yii::$app->request->post()[$this->getModelName()]['listaRuoli'] : [];
+            $setRuoli       = (isset(\Yii::$app->request->post()[$this->getModelName()]['listaRuoli'])) ? true : false;
 
             /**
              * Keep track of old status
@@ -386,6 +410,20 @@ class UserProfileController extends CrudController
             $notify_from_editorial_staff = $this->model->notify_from_editorial_staff;
 
             /**
+             * Check if facilitator roles are deleted for the current user
+             */
+            $isFacilitatorRoleRemoved = false;
+            $userProfilePost = Yii::$app->request->post('UserProfile');
+            if (!empty($userProfilePost)) {
+                if (array_key_exists('enable_facilitator_box', $userProfilePost)) {
+                    if ($this->model->enable_facilitator_box == true && $userProfilePost['enable_facilitator_box'] == false) {
+                        $isFacilitatorRoleRemoved = true;
+                    }
+                    $this->model->enable_facilitator_box = $userProfilePost['enable_facilitator_box'];
+                }
+            }
+
+            /**
              * Load post data
              */
             $this->model->load(Yii::$app->request->post());
@@ -394,7 +432,7 @@ class UserProfileController extends CrudController
             if ($this->model->validate() && $this->model->user->validate()) {
                 if (empty(Yii::$app->request->post('notify_from_editorial_staff'))) {
                     $this->model->notify_from_editorial_staff = 0;
-                    if($this->model->notify_from_editorial_staff != $notify_from_editorial_staff) {
+                    if ($this->model->notify_from_editorial_staff != $notify_from_editorial_staff) {
                         $sent = UserProfileUtility::sendMail($this->model,
                             '@vendor/lispa/amos-admin/src/mail/user/notify-editorial-staff-subject',
                             '@vendor/lispa/amos-admin/src/mail/user/notify-editorial-staff-html'
@@ -413,7 +451,7 @@ class UserProfileController extends CrudController
                     }
                 }
 
-                if ($this->model->status == UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) {
+                if (($this->model->status == UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) || $this->adminModule->bypassWorkflow) {
                     $this->model->validato_almeno_una_volta = 1;
                 }
 
@@ -421,27 +459,23 @@ class UserProfileController extends CrudController
                 if (!empty(\Yii::$app->request->post()['UserProfile']['isProfileModified'])) {
                     $isProfileModified = \Yii::$app->request->post()['UserProfile']['isProfileModified'];
                 }
-                if (($currentStatus == UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED)
-                    && !empty($isProfileModified) && $isProfileModified == 1) {
+                if (($currentStatus == UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) && !empty($isProfileModified) && $isProfileModified == 1) {
                     $this->model->status = UserProfile::USERPROFILE_WORKFLOW_STATUS_TOVALIDATE;
                 }
-//                if ($currentStatus == UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED
-//                    && $this->model->status == UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) {
-//                    $this->model->status = UserProfile::USERPROFILE_WORKFLOW_STATUS_DRAFT;
-//                }
-//
+
                 if ($this->model->save() && $this->model->user->save()) {
-//                    if ($setRuoli) {
-//                        // Controllo che in ereditariatà mi abbiano settato i ruoli
-//                        // con le logiche di ereditarierà
-//                        if (!empty($this->forzaListaRuoli)) {
-//                            // Se mi hanno forzato i ruoli, prendo buoni quelli passati
-//                            $this->model->setRuoli($this->forzaListaRuoli);
-//                            $this->forzaListaRuoli = null;
-//                        } else {
-//                            $this->model->setRuoli($ruoliUtente);
-//                        }
-//                    }
+                    $this->assignFacilitator($isFacilitatorRoleRemoved);
+
+                    if(empty($this->model->userProfileImage))
+                {
+                    $adminmodule = AmosAdmin::instance();
+                    if(!is_null($adminmodule))
+                    {
+                        $fileImport = new FileImport();
+                        $ok = $fileImport->importFileForModel($this->model, 'userProfileImage',
+                                \Yii::getAlias($adminmodule->defaultProfileImagePath));
+                    }
+                }
 
                     // Save email and sms notify frequency
                     $notifyModule = Yii::$app->getModule('notify');
@@ -460,17 +494,19 @@ class UserProfileController extends CrudController
                             $smsFrequency = Yii::$app->request->post()[NotifyFrequencyWidget::smsFrequencySelectorName()];
                         }
                         if ($atLeastOne) {
-                            $ok = $notifyModule->saveNotificationConf($this->model->user->id, $emailFrequency, $smsFrequency);
+                            $ok = $notifyModule->saveNotificationConf($this->model->user->id, $emailFrequency,
+                                $smsFrequency);
                             if (!$ok) {
                                 Yii::$app->getSession()->addFlash('danger', AmosAdmin::t('amosadmin', 'Error while updating email frequency'));
                                 if ($render) {
-                                    $this->updateParamsRender = ArrayHelper::merge($this->updateParamsRender, [
-                                        'user' => $this->model->user,
-                                        'model' => $this->model,
-                                        'tipologiautente' => $this->model->tipo_utente,
-                                        'permissionSave' => 'USERPROFILE_UPDATE',
-                                        'tabActive' => $tabActive,
-                                    ]);
+                                    $this->updateParamsRender = ArrayHelper::merge($this->updateParamsRender,
+                                        [
+                                            'user' => $this->model->user,
+                                            'model' => $this->model,
+                                            'tipologiautente' => $this->model->tipo_utente,
+                                            'permissionSave' => 'USERPROFILE_UPDATE',
+                                            'tabActive' => $tabActive,
+                                        ]);
                                     return $this->render('update', $this->updateParamsRender);
                                 } else {
                                     return $this->model;
@@ -489,27 +525,83 @@ class UserProfileController extends CrudController
                     Yii::$app->getSession()->addFlash('danger', AmosAdmin::t('amosadmin', 'Si &egrave; verificato un errore durante il salvataggio'));
                 }
             } else {
+                $selectedFacilitatorRoles = Yii::$app->request->post('selectedFacilitatorRoles');
                 if (isset($this->model->user->getErrors()['email'])) {
                     Yii::$app->getSession()->addFlash('danger', $this->model->user->getErrors()['email'][0]);
                 } else {
                     Yii::$app->getSession()->addFlash('danger', AmosAdmin::t('amosadmin', 'Modifiche non salvate. Verifica l\'inserimento dei campi, '));
                 }
             }
-
         }
 
         if ($render) {
-            $this->updateParamsRender = ArrayHelper::merge($this->updateParamsRender, [
-                'user' => $this->model->user,
-                'model' => $this->model,
-                'tipologiautente' => $this->model->tipo_utente,
-                'permissionSave' => 'USERPROFILE_UPDATE',
-                'tabActive' => $tabActive,
-            ]);
+            $this->updateParamsRender = ArrayHelper::merge($this->updateParamsRender,
+                [
+                    'user' => $this->model->user,
+                    'model' => $this->model,
+                    'tipologiautente' => $this->model->tipo_utente,
+                    'permissionSave' => 'USERPROFILE_UPDATE',
+                    'tabActive' => $tabActive,
+                    'selectedFacilitatorRoles' => $selectedFacilitatorRoles,
+                ]);
             return $this->render('update', $this->updateParamsRender);
         } else {
             return $this->model;
         }
+    }
+
+    /**
+     * @param array $resultsArray
+     * @param UserProfile $userProfileFacilitator
+     * @return string
+     */
+    private function createFacilitatorInEliminationRecapBodyText($resultsArray, $userProfileFacilitator)
+    {
+        $bodyText = "";
+
+        // List of user that needs validation by the facilitator in elimination
+        if (array_key_exists('usersNeedsValidation', $resultsArray)) {
+            if (!empty($resultsArray['usersNeedsValidation'])) {
+                $messageUsers = AmosAdmin::t('amosadmin', 'Users');
+                $messageToValidate = strtolower(AmosAdmin::t('amosadmin', 'To validate'));
+                $bodyText .= "<h3><strong>{$messageUsers} {$messageToValidate}</strong></h3>";
+                /** @var UserProfileToValidate $user */
+                foreach ($resultsArray['usersNeedsValidation'] as $user) {
+                    $userNameSurname = $user->getNomeCognome();
+                    $bodyText .= "{$userNameSurname}<br />";
+                }
+                $bodyText .= "<hr />";
+            }
+        }
+
+        // Email body text construction
+        if (!empty($bodyText)) {
+            $messageUserInElimination = AmosAdmin::t('amosadmin', '#user_in_elimination_had_activites_pending',
+                ['userNameSurname' => $userProfileFacilitator->getNomeCognome()]);
+            $messageAllActivitiesInPlugin = AmosAdmin::t('amosadmin', '#find_all_activities_pending_in_plugin');
+            $bodyText = "<br /><h3>{$messageUserInElimination}</h3><hr />" .
+                $bodyText .
+                "<strong>{$messageAllActivitiesInPlugin}</strong>";
+        }
+
+        return $bodyText;
+    }
+
+    private function retrieveUsersToValidateByFacilitator($userId)
+    {
+        $elementList = [];
+
+        if (Yii::$app->hasModule('admin')) {
+            $elementList = UserProfileToValidate::find()
+                ->andWhere(['facilitatore_id' => $userId])
+                ->andWhere(['status' => \lispa\amos\admin\models\UserProfile::USERPROFILE_WORKFLOW_STATUS_TOVALIDATE])
+                ->andWhere(['attivo' => 1])
+                ->all();
+        } else {
+            $elementList = [];
+        }
+
+        return $elementList;
     }
 
     /**
@@ -528,19 +620,10 @@ class UserProfileController extends CrudController
         $this->model->delete();
 
         if (!$this->model->getErrors()) {
-//        $user->delete();
-//        $connection = Yii::$app->db;
-//        $transaction = $connection->beginTransaction();
-//        try {
-//            $transaction->commit();
             Yii::$app->getSession()->addFlash('success', AmosAdmin::t('amosadmin', 'Utente cancellato correttamente.'));
-//        } catch (Exception $ex) {
-//            $transaction->rollback();
-//            Yii::$app->getSession()->addFlash('error', AmosAdmin::t('amosadmin', 'L\'utente non può essere cancellato'));
-//            return $this->redirect(['index']);
-//        }
         } else {
-            Yii::$app->getSession()->addFlash('danger', AmosAdmin::t('amosadmin', "Errori durante la cancellazione dell'utente."));
+            Yii::$app->getSession()->addFlash('danger',
+                AmosAdmin::t('amosadmin', "Errori durante la cancellazione dell'utente."));
         }
 
         return $this->redirect(['index']);
@@ -661,6 +744,117 @@ class UserProfileController extends CrudController
             }
         } else {
             return $this->redirect('/admin/user-profile/validated-users');
+        }
+    }
+
+    /**
+     * @param $isFacilitatorRoleRemoved
+     * @throws \yii\db\Exception
+     */
+    public function assignFacilitator($isFacilitatorRoleRemoved)
+    {
+        /** @var AmosAdmin $adminModule */
+        $adminModule = \Yii::$app->getModule(AmosAdmin::getModuleName());
+        if (Yii::$app->user->can('ADMIN') && $adminModule->showFacilitatorForModuleSelect) {
+            /**
+             * Actions to execute if facilitator roles are deleted (or added) for the current user
+             */
+            if ($isFacilitatorRoleRemoved) {
+                // Get (configured) facilitator roles in the application
+                $activeFacilitatorRoles = \lispa\amos\admin\utility\UserProfileUtility::getFacilitatorForModuleRoles();
+
+                // Remove all assigned facilitator roles to the current user
+                \Yii::$app->db
+                    ->createCommand()
+                    ->delete("auth_assignment",
+                        ['user_id' => $this->model->user_id, 'item_name' => array_keys($activeFacilitatorRoles)])
+                    ->execute();
+
+                $resultsListForEmail = [];
+
+                // Getting list of users that needs validation by facilitator in elimination
+                $usersToValidateByFacilitator = $this->retrieveUsersToValidateByFacilitator($this->model->user_id);
+                if (!empty($usersToValidateByFacilitator)) {
+                    $resultsListForEmail['usersNeedsValidation'] = $usersToValidateByFacilitator;
+                }
+
+                $emailBody = $this->createFacilitatorInEliminationRecapBodyText($resultsListForEmail,
+                    $this->model);
+
+                if (!empty($emailBody)) {
+                    // Invio email
+                    $email = new Email();
+                    $from = '';
+                    $platformName = '';
+
+                    // Ottengo nome applicazione/piattaforma per l'inserimento nel titolo della mail
+                    if (isset(\Yii::$app->name)) {
+                        $platformName = \Yii::$app->name;
+                        $platformName = " {$platformName}";
+                    }
+
+                    $subject = "Ti sono state assegnate attività dell'utente {$this->model->getNomeCognome()} non più facilitatore nella piattaforma{$platformName}";
+                    if (isset(\Yii::$app->params['adminEmail'])) {
+                        //use default platform email assistance
+                        $from = \Yii::$app->params['adminEmail'];
+                    }
+
+                    $defaultFacilitatorsList = User::findAll(['id' => (null != $this->model->getDefaultFacilitator() ? $this->model->getDefaultFacilitator()->id : null)]);
+                    $emailTo = [];
+                    /** @var User $facilitator */
+                    foreach ($defaultFacilitatorsList as $facilitator) {
+                        $emailTo[] = $facilitator->email;
+                    }
+
+                    // Invio Email da Mail Manager
+                    try {
+                        $email->sendMail($from, $emailTo, $subject, $emailBody);
+                    } catch (\Exception $ex) {
+                        \Yii::getLogger()->log($ex->getMessage(), Logger::LEVEL_ERROR);
+                    }
+                }
+
+                Yii::$app->db->createCommand()->update(
+                    UserProfile::tableName(),
+                    [
+                        'facilitatore_id' => (null != $this->model->getDefaultFacilitator() ? $this->model->getDefaultFacilitator()->id : null),
+                    ],
+                    [
+                        'facilitatore_id' => $this->model->id
+                    ]
+                )->execute();
+
+                /* ENABLE BOX FACILITATOR
+                  // TEMPORARY SET ENABLE FACILITATOR BOX AGAIN
+                  $this->model->enable_facilitator_box = 1;
+                  $this->model->save(false);
+                  pr("TEMPORARY SET ENABLE FACILITATOR BOX AGAIN");
+                  // END TEMPORARY SET ENABLE FACILITATOR BOX AGAIN
+                 */
+            } else {
+                // Get (configured) facilitator roles in the application
+                $activeFacilitatorRoles = \lispa\amos\admin\utility\UserProfileUtility::getFacilitatorForModuleRoles();
+
+                // Remove all assigned facilitator roles to the current user
+                \Yii::$app->db
+                    ->createCommand()
+                    ->delete("auth_assignment",
+                        ['user_id' => $this->model->user_id, 'item_name' => array_keys($activeFacilitatorRoles)])
+                    ->execute();
+
+                $selectedFacilitatorRoles = Yii::$app->request->post('selectedFacilitatorRoles');
+                // Assign selected facilitator roles
+                foreach ($selectedFacilitatorRoles as $role) {
+                    Yii::$app->db
+                        ->createCommand()
+                        ->insert('auth_assignment', [
+                            'user_id' => $this->model->user_id,
+                            'item_name' => $role,
+                            'created_at' => time(),
+                        ])
+                        ->execute();
+                }
+            }
         }
     }
 }

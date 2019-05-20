@@ -12,6 +12,8 @@
 namespace lispa\amos\admin\assets;
 
 use yii\web\AssetBundle;
+use lispa\amos\core\widget\WidgetAbstract;
+
 
 /**
  * Class ModuleAdminAsset
@@ -33,6 +35,12 @@ class ModuleAdminAsset extends AssetBundle
     public function init()
     {
         $moduleL = \Yii::$app->getModule('layout');
+
+        if(!empty(\Yii::$app->params['dashboardEngine']) && \Yii::$app->params['dashboardEngine'] == WidgetAbstract::ENGINE_ROWS){
+            $this->css = ['less/admin_fullsize.less','less/widget_users_list.less'];
+            $this->js = ['js/widget_users_list.js'];
+        }
+
         if(!empty($moduleL))
         { $this->depends [] = 'lispa\amos\layout\assets\BaseAsset'; }
         else

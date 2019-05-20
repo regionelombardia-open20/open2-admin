@@ -328,11 +328,14 @@ class SecurityController extends BackendController
                 $userProfile                        = $user->userProfile;
                 $userProfile->first_access_mail_url = null;
                 $userProfile->save(false);
+                if (!is_null($postLoginUrl)) {
+                    return $this->redirect($postLoginUrl);
+                }
                 return $this->redirect($mailUrl.'?user_id='.$user->id);
             } else if (!is_null($postLoginUrl)) {
                 return $this->redirect($postLoginUrl);
             } else if ($community_id != null) {
-                return $this->redirect(Yii::$app->getUrlManager()->createUrl(['/community/join', 'id' => $community_id]));
+                return $this->redirect(Yii::$app->getUrlManager()->createUrl(['/community/join', 'id' => $community_id, 'subscribe' => 1]));
             } else {
                 return $this->goBack();
             }
@@ -347,7 +350,7 @@ class SecurityController extends BackendController
      * Logout action.
      * @return string
      */
-    public function actionLogout()
+    public function actionLogout($goToFrontPage = false)
     {
         Yii::$app->user->logout();
         if (isset(\Yii::$app->params['template-amos']) && \Yii::$app->params['template-amos']) {
@@ -357,7 +360,16 @@ class SecurityController extends BackendController
                 $ids]);
             \lispa\amos\dashboard\models\AmosUserDashboards::deleteAll(['user_id' => $idUtente]);
         }
-        return $this->goHome();
+        if($goToFrontPage) {
+            if(array_key_exists("platform", Yii::$app->params)) {
+                if(array_key_exists("frontendUrl", Yii::$app->params['platform'])) {
+                    return $this->redirect(Yii::$app->params['platform']['frontendUrl']);
+                }
+            }
+            return $this->goHome();
+        } else {
+            return $this->goHome();
+        }
     }
 
     /**
@@ -459,6 +471,9 @@ class SecurityController extends BackendController
         //pre-compile with social-auth session data
         $socialProfile = \Yii::$app->session->get('social-profile');
 
+        // Pre-compile with SPID session data
+        $spidData = \Yii::$app->session->get('IDM');
+
         if (!empty($getParams['name']) && !empty($getParams['surname']) && !empty($getParams['email'])) {
             $model->nome    = $getParams['name'];
             $model->cognome = $getParams['surname'];
@@ -467,6 +482,10 @@ class SecurityController extends BackendController
             $model->nome    = $socialProfile->firstName;
             $model->cognome = $socialProfile->lastName;
             $model->email   = $socialProfile->email;
+        } elseif ($spidData && $spidData['emailAddress']) {
+            $model->nome    = $spidData['nome'];
+            $model->cognome = $spidData['cognome'];
+            $model->email   = $spidData['emailAddress'];
         }
 
         if ($model->load(Yii::$app->request->post())) {
@@ -543,7 +562,13 @@ class SecurityController extends BackendController
                 }
             }
 
-            $sent = UserProfileUtility::sendCredentialsMail($newUserProfile);
+            $communityId = \Yii::$app->request->post('community');
+            $community = null;
+            if(\Yii::$app->getModule('community')){
+                $community = \lispa\amos\community\models\Community::findOne($communityId);
+            }
+
+            $sent = UserProfileUtility::sendCredentialsMail($newUserProfile, $community);
 
             if (!$sent) {
                 //Yii::$app->session->addFlash('danger', AmosAdmin::t('amosadmin', '#error_send_register_mail'));
@@ -614,7 +639,8 @@ class SecurityController extends BackendController
                         'result_message' => [
                             AmosAdmin::t('amosadmin', '#msg_forgot_pwd_result_1').'<br>'.Html::tag('span', $model->email),
                             AmosAdmin::t('amosadmin', '#msg_forgot_pwd_result_2')
-                        ]
+                        ],
+                        'go_to_login_url' =>  !is_null(Yii::$app->getRequest()->get('return_url'))? Yii::$app->getRequest()->get('return_url') : Url::current(),
                 ]);
             }
         }
@@ -692,15 +718,7 @@ class SecurityController extends BackendController
         //Set Current admin user in session
         Yii::$app->session->set('IMPERSONATOR', $impersonator);
 
-        /** @var User $loggedUser */
-        $loggedUser = Yii::$app->user->identity;
-
-        //Back to user profile
-        return $this->redirect(
-                \Yii::$app->urlManager->createUrl(['/admin/user-profile/view',
-                    'id' => $loggedUser->userProfile->id
-                ])
-        );
+        return $this->redirect('/');
     }
 
     /**
@@ -743,6 +761,7 @@ class SecurityController extends BackendController
         $username             = null;
         $community_id         = null;
         $redirectUrl          = \Yii::$app->getUser()->loginUrl;
+        $precompileUsernameOnFirstAccess = $this->module->precompileUsernameOnFirstAccess;
         $isFirstAccess        = false;
         if (NULL !== (Yii::$app->getRequest()->getQueryParam('token'))) {
             $password_reset_token = Yii::$app->getRequest()->getQueryParam('token');
@@ -754,16 +773,16 @@ class SecurityController extends BackendController
             }
         }
 
-        if ((Yii::$app->getRequest()->getQueryParam('community_id')) !== NULL) {
-            $community_id = Yii::$app->getRequest()->getQueryParam('community_id');
-            $redirectUrl  = Yii::$app->getUrlManager()->createUrl(['/community/join', 'id' => $community_id]);
-        }
 
         $postLoginUrl = null;
         if (!is_null(Yii::$app->getRequest()->get('url_previous'))) {
             $postLoginUrl = Yii::$app->getRequest()->get('url_previous');
         }
 
+        if ((Yii::$app->getRequest()->get('community_id')) !== NULL) {
+            $community_id = Yii::$app->getRequest()->getQueryParam('community_id');
+//            $postLoginUrl  = Yii::$app->getUrlManager()->createUrl(['/community/join', 'id' => $community_id]);
+        }
         if ($user && !$username) {
             if (Yii::$app->request->isPost) {
                 $model = new FirstAccessForm();
@@ -793,8 +812,7 @@ class SecurityController extends BackendController
                                 $profile->privacy = 1;
                                 $profile->save(false);
                             }
-                            return $this->login($model->username, $model->password, $community_id, $postLoginUrl,
-                                    $isFirstAccess);
+                            return $this->login($model->username, $model->password, $community_id, $postLoginUrl, $isFirstAccess);
                         } else {
                             //return $this->render('login_error', ['message' => Yii::t('amosadmin', " Errore! Il sito non ha risposto, probabilmente erano in corso operazioni di manutenzione. Riprova più tardi.")]);
                             return $this->render('security-message',
@@ -815,6 +833,9 @@ class SecurityController extends BackendController
                 }
             } else {
                 $model = new FirstAccessForm();
+                if($precompileUsernameOnFirstAccess){
+                    $model->username = $user->email;
+                }
                 if ($isFirstAccess) {
                     $model->setScenario(FirstAccessForm::SCENARIO_CHECK_PRIVACY);
                 }
@@ -826,6 +847,7 @@ class SecurityController extends BackendController
                 ]);
             }
         } else if ($user && $username) {
+
             if (Yii::$app->request->isPost) {
                 $model = new FirstAccessForm();
                 if ($isFirstAccess && is_null($user->userProfile->privacy)) {
@@ -838,7 +860,7 @@ class SecurityController extends BackendController
                     if ($user->validate() && $user->save()) {
                         Yii::$app->getSession()->addFlash('success',
                             Yii::t('amosadmin', 'Perfetto! Hai scelto correttamente la tua password.'));
-                        $user->removePasswordResetToken();
+                            $user->removePasswordResetToken();
                         $user->save();
                         if ($isFirstAccess) {
                             $profile          = $user->userProfile;

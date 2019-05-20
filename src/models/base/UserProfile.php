@@ -77,6 +77,7 @@ use yii\helpers\ArrayHelper;
  * @property integer $facilitatore_id
  * @property integer $default_facilitatore
  * @property integer $dont_show_facilitator
+ * @property integer $enable_facilitator_box
  * @property integer $user_profile_area_id
  * @property string $user_profile_area_other
  * @property integer $user_profile_role_id
@@ -127,9 +128,6 @@ class UserProfile extends NotifyAuditRecord
      */
     const STATUS_DEACTIVATED = 0;
 
-    const BOOLEAN_FIELDS_VALUE_YES = 1;
-    const BOOLEAN_FIELDS_VALUE_NO = 0;
-
     /**
      * All the scenarios listed below are for the wizard.
      */
@@ -168,19 +166,31 @@ class UserProfile extends NotifyAuditRecord
      */
     public function rules()
     {
+        /** @var AmosAdmin $module */
+        $module = Yii::$app->getModule(AmosAdmin::getModuleName());
         /**
          * @var array $requiredArray
          * default required fields are :
          * [ 'nome', 'cognome', 'status', 'presentazione_breve' ]
+         * 
+         * $module = Yii::$app->getModule(AmosAdmin::getModuleName());
+         * 
+         * In this way everything extends AmosAdmin continue to work fine
          */
-        $requiredArray = AmosAdmin::getInstance()->profileRequiredFields;
-
-        //Administrator user may have the need to change userProfiles even if some required fields have not been set yet, if he changes his own profile, the field are required
-        if ((\Yii::$app->user->can('ADMIN') || Yii::$app->user->can('AMMINISTRATORE_UTENTI')) && $this->id !== 1) {
+        $requiredArray = $module::getInstance()->profileRequiredFields;
+        
+        /**
+         * Administrator user may have the need to change userProfiles even 
+         * if some required fields have not been set yet, if he changes his own profile, the field are required
+         */
+        if (
+            (Yii::$app instanceof \yii\console\Application) ||
+            ((\Yii::$app->user->can('ADMIN') || Yii::$app->user->can('AMMINISTRATORE_UTENTI')) && $this->id !== 1)
+        ) {
             $requiredArray = ['nome', 'cognome'];
         }
 
-        return [
+        $rules = [
             [$requiredArray, 'required'],
             [[
                 'sesso',
@@ -211,7 +221,8 @@ class UserProfile extends NotifyAuditRecord
                 'user_profile_role_id',
                 'user_profile_age_group_id',
                 'default_facilitatore',
-                'prevalent_partnership_id'
+                'prevalent_partnership_id',
+                'enable_facilitator_box',
             ], 'integer'],
             [[
                 'nascita_data',
@@ -230,6 +241,7 @@ class UserProfile extends NotifyAuditRecord
                 'prevalent_partnership_id',
                 'notify_from_editorial_staff',
                 'first_access_mail_url',
+                'enable_facilitator_box',
             ], 'safe'],
             [[
                 'nome',
@@ -259,7 +271,6 @@ class UserProfile extends NotifyAuditRecord
             [['presentazione_breve'], 'string', 'max' => 140],
             [['presentazione_personale'], 'string', 'max' => 600],
             [['codice_fiscale'], 'string', 'max' => 16],
-            ['codice_fiscale', 'unique', 'filter' => ['deleted_at' => null]],
             [['user_profile_titoli_studio_id'], 'exist', 'skipOnError' => true, 'targetClass' => AmosAdmin::instance()->createModel('UserProfileTitoliStudio')->className(), 'targetAttribute' => ['user_profile_titoli_studio_id' => 'id']],
             [['facilitatore_id'], 'exist', 'skipOnError' => true, 'targetClass' => AmosAdmin::instance()->createModel('UserProfile')->className(), 'targetAttribute' => ['facilitatore_id' => 'id']],
             [['residenza_nazione_id'], 'exist', 'skipOnError' => true, 'targetClass' => AmosAdmin::instance()->createModel('IstatNazioni')->className(), 'targetAttribute' => ['residenza_nazione_id' => 'id']],
@@ -277,10 +288,16 @@ class UserProfile extends NotifyAuditRecord
                 return ($('#" . Html::getInputId($this, 'user_profile_area_id') . "').val() == " . \lispa\amos\admin\models\UserProfileArea::OTHER . ");
             }"],
             [['facilitatore_id'], 'required', 'when' => function ($model) {
-                return ($this->status != self::USERPROFILE_WORKFLOW_STATUS_DRAFT);
+                return ($this->status != self::USERPROFILE_WORKFLOW_STATUS_DRAFT && !AmosAdmin::instance()->bypassWorkflow);
             }],
             [['privacy'], 'checkPrivacy']
         ];
+
+        if (!$module->enableMultiUsersSameCF) {
+            $rules[] = ['codice_fiscale', 'unique', 'filter' => ['deleted_at' => null]];
+        }
+
+        return $rules;
     }
 
     /**
@@ -416,6 +433,7 @@ class UserProfile extends NotifyAuditRecord
             'note' => AmosAdmin::t('amosadmin', 'Annotazioni'),
             'presentazione_personale' => AmosAdmin::t('amosadmin', 'Presentazione personale'),
             'user_profile_area_id' => AmosAdmin::t('amosadmin', 'Area Id'),
+            'enable_facilitator_box' => AmosAdmin::t('amosadmin', 'Utente facilitatore'),
             'area' => AmosAdmin::t('amosadmin', '#faw_rea_area'),
             'user_profile_area_other' => AmosAdmin::t('amosadmin', 'Other Area'),
             'user_profile_role_id' => AmosAdmin::t('amosadmin', 'Role Id'),
@@ -605,7 +623,9 @@ class UserProfile extends NotifyAuditRecord
      */
     public function getPrevalentPartnership()
     {
-        $admin = AmosAdmin::getInstance();
+        //  $admin = AmosAdmin::getInstance();
+        $admin = Yii::$app->getModule(AmosAdmin::getModuleName());
+        
         /** @var OrganizationsModuleInterface $organizationsModule */
         $organizationsModule = \Yii::$app->getModule($admin->getOrganizationModuleName());
         if (!is_null($organizationsModule)) {

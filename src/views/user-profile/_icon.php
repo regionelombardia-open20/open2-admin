@@ -11,6 +11,8 @@
 
 use lispa\amos\admin\AmosAdmin;
 use lispa\amos\admin\base\ConfigurationManager;
+use lispa\amos\admin\widgets\ConnectToUserWidget;
+use lispa\amos\admin\widgets\SendMessageToUserWidget;
 use lispa\amos\core\forms\ContextMenuWidget;
 use lispa\amos\core\helpers\Html;
 use lispa\amos\core\icons\AmosIcons;
@@ -26,7 +28,7 @@ $appController = Yii::$app->controller;
 $appController->setCwhScopeNetworkInfo($userId);
 
 /** @var AmosAdmin $adminModule */
-$adminModule = Yii::$app->controller->module;
+$adminModule = AmosAdmin::instance();
 
 $nomeCognome = '';
 if ($adminModule->confManager->isVisibleBox('box_informazioni_base', ConfigurationManager::VIEW_TYPE_VIEW)) {
@@ -39,7 +41,6 @@ if ($adminModule->confManager->isVisibleBox('box_informazioni_base', Configurati
 }
 
 $viewUrl = "/admin/user-profile/view?id=" . $model->id;
-$enableUserContacts = AmosAdmin::getInstance()->enableUserContacts;
 
 $prevalentPartnershipTruncated = '';
 $prevalentPartnershipName = '';
@@ -86,14 +87,15 @@ if (!is_null($model->prevalentPartnership)) {
             'css_class' => 'badge badge-left'
         ]); ?>
         <h3 class="title">
-            <?= Html::a($model->getNomeCognome(), $viewUrl, ['title' =>  AmosAdmin::t('amosadmin', '#icon_name_title_link') . ' ' . $model->getNomeCognome(), 'data-gui' => 'icon-view-profiles']); ?>
+            <?= Html::a($model->getNomeCognome(), $viewUrl, ['title' => AmosAdmin::t('amosadmin', '#icon_name_title_link') . ' ' . $model->getNomeCognome(), 'data-gui' => 'icon-view-profiles']); ?>
         </h3>
-        <?php if (
+        <?php 
+        if (
             ($adminModule->confManager->isVisibleBox('box_prevalent_partnership', ConfigurationManager::VIEW_TYPE_VIEW)) &&
             ($adminModule->confManager->isVisibleField('prevalent_partnership_id', ConfigurationManager::VIEW_TYPE_VIEW))
         ): ?>
             <div class="col-xs-12 nop">
-                <span class="prevalent-partnership"><?= (!empty($prevalentPartnershipTruncated)) ? AmosIcons::show('briefcase', '', 'dash') . $prevalentPartnershipTruncated : ''; ?></span>
+                <span class="prevalent-partnership"><?= (!empty($prevalentPartnershipTruncated)) ? AmosIcons::show('briefcase', [], 'dash') . $prevalentPartnershipTruncated : ''; ?></span>
             </div>
         <?php endif; ?>
         <?php
@@ -134,21 +136,25 @@ if (!is_null($model->prevalentPartnership)) {
         $content .= Html::tag('p', $isFacilitator);
         $content .= Html::tag('p', $googleContactTooltip);
 
-        if(!empty($isValidated) || !empty($isFacilitator)){
+        if (!empty($isValidated) || !empty($isFacilitator)) {
             echo Html::tag('div', AmosIcons::show('info-circle', [], 'dash'), [
-                    'class' => 'amos-tooltip pull-left',
-                    'data-toggle' => 'tooltip',
-                    'data-html' => 'true',
-                    'title' => $content]
-            );
+                'class' => 'amos-tooltip pull-left',
+                'data-toggle' => 'tooltip',
+                'data-html' => 'true',
+                'title' => $content
+            ]);
         }
 
-        echo $googleContactIcon;
-
         ?>
+        <?= $googleContactIcon; ?>
 
-        <?php if ($enableUserContacts && Yii::$app->user->id != $model->user_id): ?>
-            <?= \lispa\amos\admin\widgets\ConnectToUserWidget::widget(['model' => $model, 'divClassBtnContainer' => 'pull-right']) ?>
+        <?php if (Yii::$app->user->id != $model->user_id): ?>
+            <?php if ($adminModule->enableUserContacts && !$adminModule->enableSendMessage): ?>
+                <?= ConnectToUserWidget::widget(['model' => $model, 'divClassBtnContainer' => 'pull-right']) ?>
+            <?php endif; ?>
+            <?php if (!$adminModule->enableUserContacts && $adminModule->enableSendMessage): ?>
+                <?= SendMessageToUserWidget::widget(['model' => $model, 'divClassBtnContainer' => 'pull-right']) ?>
+            <?php endif; ?>
         <?php endif; ?>
     </div>
 </div>

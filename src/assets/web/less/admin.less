@@ -406,7 +406,7 @@ FORM TAB-NETWORK
 /**
 ADMIN FORM VIEW
  */
-.user-form{
+.user-form {
   /* override amos-layout form for amos-admin boxes */
   > .row > .col-md-8 > section { /* form main body + sidebar*/
     padding: 0 @padding-default;
@@ -493,6 +493,9 @@ ADMIN CARD VIEW
     display: flex;
     align-items: center;
     justify-content: space-between;
+    > div:last-child {
+      margin-left: auto;
+    }
     .amos-tooltip, .am-google {
       margin-left: @margin-medium;
       color: contrast(@admin-card-background-body);
