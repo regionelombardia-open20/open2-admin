@@ -17,6 +17,11 @@ use lispa\amos\core\forms\ActiveForm;
 $this->title = AmosAdmin::t('amosadmin', 'Password dimenticata');
 $this->params['breadcrumbs'][] = $this->title;
 
+$referrer = \Yii::$app->request->referrer;
+if(strpos($referrer, 'javascript') !== false){
+    $referrer = null;
+}
+
 ModuleAdminAsset::register(Yii::$app->view);
 ?>
 
@@ -31,7 +36,7 @@ ModuleAdminAsset::register(Yii::$app->view);
             </div>
             <div class="col-xs-12 footer-link">
                 <?= Html::submitButton(AmosAdmin::t('amosadmin', '#forgot_pwd_send'), ['class' => 'btn btn-primary btn-administration-primary pull-right', 'name' => 'login-button', 'title' => AmosAdmin::t('amosadmin', '#forgot_pwd_send_title')]) ?>
-                <?= Html::a(AmosAdmin::t('amosadmin', '#go_to_login'), (\Yii::$app->request->referrer ?: ['/admin/security/login']), ['class' => 'btn btn-secondary pull-left', 'title' => AmosAdmin::t('amosadmin', '#go_to_login_title')]) ?>
+                <?= Html::a(AmosAdmin::t('amosadmin', '#go_to_login'), (strip_tags($referrer) ?: ['/admin/security/login']), ['class' => 'btn btn-secondary pull-left', 'title' => AmosAdmin::t('amosadmin', '#go_to_login_title')]) ?>
             </div>
         </div>
         <?php ActiveForm::end(); ?>

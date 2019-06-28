@@ -43,7 +43,7 @@ if ($found) {
     $parsedUrl = parse_url($previousUrl);
     parse_str($parsedUrl['query'], $query_params);
     if ($query_params) {
-        $communityId = $query_params['id'];
+        $communityId = \lispa\amos\admin\utility\UserProfileUtility::cleanIntegerParam($query_params['id']);
     }
 }
 

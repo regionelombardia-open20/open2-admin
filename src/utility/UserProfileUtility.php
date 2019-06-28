@@ -472,4 +472,14 @@ class UserProfileUtility
         return $contactsInvited->union($contactsInviting);
     }
 
+    /**
+     * @param $int_param
+     * @return null
+     */
+    public static function cleanIntegerParam($int_param){
+        if(is_integer($int_param)){
+            return $int_param;
+        }
+        return null;
+    }
 }
