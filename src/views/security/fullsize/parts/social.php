@@ -1,25 +1,26 @@
 <?php
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  * @licence GPLv3
- * @licence https://opensource.org/proscriptions/gpl-3.0.html GNU General Public Proscription version 3
+ * @licence https://opensource.org/licenses/gpl-3.0.html GNU General Public License version 3
  *
  * @package amos-admin
  * @category CategoryName
+ * @author Lombardia Informatica S.p.A.
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\admin\assets\ModuleAdminAsset;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\core\helpers\Html;
+use open20\amos\admin\assets\ModuleAdminAsset;
 use yii\bootstrap\ActiveForm;
 use yii\helpers\ArrayHelper;
 
 ModuleAdminAsset::register(Yii::$app->view);
 
 /**
- * @var $socialAuthModule \lispa\amos\socialauth\Module
+ * @var $socialAuthModule \open20\amos\socialauth\Module
  */
 $socialAuthModule = Yii::$app->getModule('socialauth');
 
@@ -31,8 +32,11 @@ if(empty($communityId)) {
     $communityId = \Yii::$app->request->get('community');
 }
 $paramCommunity = '';
+$paramsRedirectUrl = '';
 if($communityId){
     $paramCommunity = '&community='.$communityId;
+}else if($redirectUrl){
+    $paramsRedirectUrl = '';/**'&redirectUrl='.$redirectUrl;*/
 }
 
 
@@ -47,7 +51,7 @@ if($communityId){
                     class="btn btn-<?= strtolower($name); ?> social-link"
                     title="<?= ($type == 'login') ? AmosAdmin::t('amosadmin', '#login_with_social') : AmosAdmin::t('amosadmin', '#register_with_social') ?> <?= $name; ?>"
                     target="_self"
-                    href="<?= Yii::$app->urlManager->createAbsoluteUrl($urlSocial . strtolower($name).$paramCommunity); ?>"
+                    href="<?= Yii::$app->urlManager->createAbsoluteUrl($urlSocial . strtolower($name).$paramCommunity.$paramsRedirectUrl); ?>"
             >
                 <span class="am am-<?= strtolower($name); ?>"></span>
                 <span class="text"><?= $name; ?></span>

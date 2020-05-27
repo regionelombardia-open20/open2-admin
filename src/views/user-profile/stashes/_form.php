@@ -1,26 +1,26 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\user-profile
+ * @package    open20\amos\admin\views\user-profile
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\assets\AmosAsset;
-use lispa\amos\admin\assets\ModuleUserProfileAsset;
-use lispa\amos\admin\base\ConfigurationManager;
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\admin\rules\ValidateUserProfileWorkflowRule;
-use lispa\amos\core\forms\ActiveForm;
-use lispa\amos\core\forms\CloseSaveButtonWidget;
-use lispa\amos\core\forms\RequiredFieldsTipWidget;
-use lispa\amos\core\forms\Tabs;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\privileges\widgets\UserPrivilegesWidget;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\assets\AmosAsset;
+use open20\amos\admin\assets\ModuleUserProfileAsset;
+use open20\amos\admin\base\ConfigurationManager;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\admin\rules\ValidateUserProfileWorkflowRule;
+use open20\amos\core\forms\ActiveForm;
+use open20\amos\core\forms\CloseSaveButtonWidget;
+use open20\amos\core\forms\RequiredFieldsTipWidget;
+use open20\amos\core\forms\Tabs;
+use open20\amos\core\helpers\Html;
+use open20\amos\privileges\widgets\UserPrivilegesWidget;
 use kartik\alert\Alert;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
@@ -31,11 +31,11 @@ ModuleUserProfileAsset::register($this);
 
 /**
  * @var yii\web\View $this
- * @var lispa\amos\admin\models\UserProfile $model
- * @var lispa\amos\core\user\User $user
+ * @var open20\amos\admin\models\UserProfile $model
+ * @var open20\amos\core\user\User $user
  */
 
-/* @var \lispa\amos\cwh\AmosCwh $moduleCwh */
+/* @var \open20\amos\cwh\AmosCwh $moduleCwh */
 $moduleCwh = \Yii::$app->getModule('cwh');
 
 /** @var AmosAdmin $adminModule */
@@ -50,7 +50,7 @@ $idTabAdministration = 'tab-administration';
 
 $defaultFacilitatorId = Html::getInputId($model, 'default_facilitatore');
 
-/** @var \lispa\amos\core\user\User $loggedUser */
+/** @var \open20\amos\core\user\User $loggedUser */
 $loggedUser = Yii::$app->user->identity;
 /** @var UserProfile $loggedUserProfile */
 $loggedUserProfile = $loggedUser->getProfile();
@@ -174,7 +174,7 @@ $form = ActiveForm::begin([
 ?>
 
 <?php if ($userCanChangeWorkflow) { ?>
-    <?= \lispa\amos\workflow\widgets\WorkflowTransitionStateDescriptorWidget::widget([
+    <?= \open20\amos\workflow\widgets\WorkflowTransitionStateDescriptorWidget::widget([
         'form' => $form,
         'model' => $model,
         'workflowId' => UserProfile::USERPROFILE_WORKFLOW,
@@ -289,13 +289,13 @@ $form = ActiveForm::begin([
                     <?php else: ?>
                         <?php
                         if ($enableUserContacts && $model->validato_almeno_una_volta) {
-                            echo \lispa\amos\admin\widgets\UserContacsWidget::widget([
+                            echo \open20\amos\admin\widgets\UserContacsWidget::widget([
                                 'userId' => $model->user_id,
                                 'isUpdate' => true
                             ]);
                         }
                         if (isset($moduleCwh)) {
-                            echo \lispa\amos\cwh\widgets\UserNetworkWidget::widget([
+                            echo \open20\amos\cwh\widgets\UserNetworkWidget::widget([
                                 'userId' => $model->user_id,
                                 'isUpdate' => true
                             ]);
@@ -481,7 +481,7 @@ $form = ActiveForm::begin([
             <?php
 
             if (Yii::$app->user->can('ADMIN') || Yii::$app->user->can('AMMINISTRATORE_UTENTI') || Yii::$app->user->can(ValidateUserProfileWorkflowRule::className(), ['model' => $model])) {
-                echo \lispa\amos\workflow\widgets\WorkflowTransitionButtonsWidget::widget([
+                echo \open20\amos\workflow\widgets\WorkflowTransitionButtonsWidget::widget([
                     // parametri ereditati da verioni precedenti del widget WorkflowTransition
                     'form' => $form,
                     'model' => $model,
@@ -502,7 +502,7 @@ $form = ActiveForm::begin([
                     'draftButtons' => $draftButtons
                 ]);
             } else {
-                echo \lispa\amos\workflow\widgets\WorkflowTransitionSimplifiedButtonsWidget::widget([
+                echo \open20\amos\workflow\widgets\WorkflowTransitionSimplifiedButtonsWidget::widget([
                     'form' => $form,
                     'model' => $model,
                     'workflowId' => UserProfile::USERPROFILE_WORKFLOW,

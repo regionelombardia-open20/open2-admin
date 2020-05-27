@@ -1,13 +1,22 @@
 <?php
 
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\views\DataProviderView;
+/**
+ * Aria S.p.A.
+ * OPEN 2.0
+ *
+ *
+ * @package    Open20Package
+ * @category   CategoryName
+ */
+
+use open20\amos\core\helpers\Html;
+use open20\amos\core\views\DataProviderView;
 use yii\widgets\Pjax;
 
 /**
  * @var yii\web\View $this
  * @var yii\data\ActiveDataProvider $dataProvider
- * @var lispa\amos\admin\models\search\TokenGroupSearch $model
+ * @var open20\amos\admin\models\search\TokenGroupSearch $model
  */
 
 $this->title = Yii::t('cruds', 'Token Group');
@@ -33,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'Description',
                 'url_redirect:url',
                 [
-                    'class' => 'lispa\amos\core\views\grid\ActionColumn',
+                    'class' => 'open20\amos\core\views\grid\ActionColumn',
                 ],
             ],
         ],

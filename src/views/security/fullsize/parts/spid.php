@@ -1,21 +1,22 @@
 <?php
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  * @licence GPLv3
- * @licence https://opensource.org/proscriptions/gpl-3.0.html GNU General Public Proscription version 3
+ * @licence https://opensource.org/licenses/gpl-3.0.html GNU General Public License version 3
  *
  * @package amos-admin
  * @category CategoryName
+ * @author Lombardia Informatica S.p.A.
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\admin\assets\ModuleAdminAsset;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\core\helpers\Html;
+use open20\amos\admin\assets\ModuleAdminAsset;
 use yii\bootstrap\ActiveForm;
 use yii\helpers\ArrayHelper;
-use lispa\amos\core\icons\AmosIcons;
+use open20\amos\core\icons\AmosIcons;
 use yii\helpers\Url;
 
 ModuleAdminAsset::register(Yii::$app->view);
@@ -32,7 +33,7 @@ ModuleAdminAsset::register(Yii::$app->view);
         [
             'class' => 'btn btn-spid',
             'title' => AmosAdmin::t('amosadmin', '#fullsize_login_spid_text'),
-            'target' => '_blank'
+            //'target' => '_blank'
         ]
     )
     ?>

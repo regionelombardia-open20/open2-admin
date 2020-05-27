@@ -1,26 +1,26 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\controllers
+ * @package    open20\amos\admin\controllers
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\controllers;
+namespace open20\amos\admin\controllers;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\models\UserContact;
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\core\controllers\CrudController;
-use lispa\amos\core\forms\editors\m2mWidget\controllers\M2MWidgetControllerTrait;
-use lispa\amos\core\forms\editors\m2mWidget\M2MEventsEnum;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\icons\AmosIcons;
-use lispa\amos\core\user\User;
-use lispa\amos\core\utilities\Email;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\models\UserContact;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\core\controllers\CrudController;
+use open20\amos\core\forms\editors\m2mWidget\controllers\M2MWidgetControllerTrait;
+use open20\amos\core\forms\editors\m2mWidget\M2MEventsEnum;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\icons\AmosIcons;
+use open20\amos\core\user\User;
+use open20\amos\core\utilities\Email;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\AccessRule;
@@ -30,7 +30,7 @@ use yii\helpers\Url;
 
 /**
  * Class UserContactController
- * @package lispa\amos\admin\controllers
+ * @package open20\amos\admin\controllers
  */
 class UserContactController extends CrudController
 {
@@ -188,12 +188,10 @@ class UserContactController extends CrudController
     /**
      * @return mixed
      */
-    public function actionAssociateContacts()
+    public function actionAssociateContacts($id)
     {
         Url::remember();
-        $userId = Yii::$app->user->id;
-        
-        return $this->actionAssociaM2m($userId);
+        return $this->actionAssociaM2m($id);
     }
     
     /**
@@ -304,7 +302,7 @@ class UserContactController extends CrudController
      */
     public function sendMail($from, $tos, $subject, $text, $files = [], $bcc = [])
     {
-        /** @var \lispa\amos\emailmanager\AmosEmail $mailModule */
+        /** @var \open20\amos\emailmanager\AmosEmail $mailModule */
         $mailModule = Yii::$app->getModule("email");
         if (isset($mailModule)) {
             if (is_null($from)) {

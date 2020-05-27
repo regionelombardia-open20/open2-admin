@@ -1,19 +1,19 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\security
+ * @package    open20\amos\admin\views\security
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\admin\assets\ModuleAdminAsset;
-use lispa\amos\core\forms\ActiveForm;
-use lispa\amos\core\icons\AmosIcons;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\core\helpers\Html;
+use open20\amos\admin\assets\ModuleAdminAsset;
+use open20\amos\core\forms\ActiveForm;
+use open20\amos\core\icons\AmosIcons;
 use yii\helpers\ArrayHelper;
 
 ModuleAdminAsset::register(Yii::$app->view);
@@ -21,7 +21,7 @@ ModuleAdminAsset::register(Yii::$app->view);
 /**
  * @var yii\web\View $this
  * @var yii\bootstrap\ActiveForm $form
- * @var \lispa\amos\admin\models\RegisterForm $model
+ * @var \open20\amos\admin\models\RegisterForm $model
  */
 $text = AmosAdmin::t('amosadmin', "#register_privacy_alert_not_accepted");
 
@@ -60,12 +60,14 @@ $this->title = AmosAdmin::t('amosadmin', 'Login');
 $this->params['breadcrumbs'][] = $this->title;
 
 /**
- * @var $socialAuthModule \lispa\amos\socialauth\Module
+ * @var $socialAuthModule \open20\amos\socialauth\Module
  */
 $socialAuthModule = Yii::$app->getModule('socialauth');
 
 $socialMatch = Yii::$app->session->get('social-pending');
 $socialProfile = Yii::$app->session->get('social-profile');
+$communityId = \Yii::$app->request->get('community');
+$redirectUrl = \Yii::$app->request->get('redirectUrl');
 ?>
 
 <div id="bk-formDefaultLogin" class="loginContainerFullsize">
@@ -78,7 +80,8 @@ $socialProfile = Yii::$app->session->get('social-profile');
         <div class="social-block social-register-block col-xs-12 nop">
             <?= $this->render('parts' . DIRECTORY_SEPARATOR . 'social', [
                 'type' => 'register',
-                'communityId' => $communityId
+                'communityId' => $communityId,
+                'redirectUrl' => $redirectUrl
             ]); ?>
         </div>
     <?php endif; ?>
@@ -123,11 +126,18 @@ $socialProfile = Yii::$app->session->get('social-profile');
                     <div class="col-xs-12 recaptcha"><?= $form->field($model, 'reCaptcha')->widget(\himiklab\yii2\recaptcha\ReCaptcha::className())->label('') ?></div>
 
                     <?php
-                    $communityId = \Yii::$app->request->get('community');
                     if ($communityId) { ?>
                         <?= Html::hiddenInput('community', $communityId) ?>
+                    <?php }else if($redirectUrl){ ?>
+                        <?= Html::hiddenInput('redirectUrl', $redirectUrl) ?>
                     <?php } ?>
 
+                    <?php
+                    if ($iuid) { ?>
+                        <?= Html::hiddenInput('iuid', $iuid)?>
+                    <?php } 
+                    ?>
+                    
                 </div>
             </div>
         </div>

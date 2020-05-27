@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
@@ -9,7 +9,7 @@
  * @category   CategoryName
  */
 
-use lispa\amos\core\migration\AmosMigrationPermissions;
+use open20\amos\core\migration\AmosMigrationPermissions;
 use yii\rbac\Permission;
 
 /**
@@ -25,7 +25,7 @@ class m190314_115601_add_new_admin_widgets_users_permission extends AmosMigratio
         $prefixStr = 'Permissions for the dashboard widget ';
         return [
             [
-                'name' => \lispa\amos\admin\widgets\graphics\WidgetGraphicsUsers::className(),
+                'name' => \open20\amos\admin\widgets\graphics\WidgetGraphicsUsers::className(),
                 'type' => Permission::TYPE_PERMISSION,
                 'description' => $prefixStr . 'WidgetGraphicsUsers',
                 'parent' => ['BASIC_USER']

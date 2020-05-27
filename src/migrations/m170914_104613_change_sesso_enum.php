@@ -1,16 +1,16 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\migrations
+ * @package    open20\amos\admin\migrations
  * @category   CategoryName
  */
 
 use yii\db\Migration;
-use lispa\amos\admin\models\UserProfile;
+use open20\amos\admin\models\UserProfile;
 
 class m170914_104613_change_sesso_enum extends Migration
 {

@@ -1,8 +1,17 @@
 <?php
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\icons\AmosIcons;
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\assets\ModuleAdminAsset;
+
+/**
+ * Aria S.p.A.
+ * OPEN 2.0
+ *
+ *
+ * @package    Open20Package
+ * @category   CategoryName
+ */
+use open20\amos\core\helpers\Html;
+use open20\amos\core\icons\AmosIcons;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\assets\ModuleAdminAsset;
 
 ModuleAdminAsset::register($this);
 
@@ -186,7 +195,7 @@ $this->registerJs($js);
     'enableReplaceState' => false,
     'clientOptions' => ['data-pjax-container' => 'grid-contact-share']]);
 
-echo \lispa\amos\core\views\AmosGridView::widget([
+echo \open20\amos\core\views\AmosGridView::widget([
     'id' => 'grid-contact-share',
     'dataProvider' => $dataProvider,
     'columns' => [
@@ -200,9 +209,9 @@ echo \lispa\amos\core\views\AmosGridView::widget([
             'label' => \Yii::t('amoscore', 'Photo'),
             'format' => 'raw',
             'value' => function ($model) {
-                /** @var \lispa\amos\admin\models\UserProfile $userProfile */
+                /** @var \open20\amos\admin\models\UserProfile $userProfile */
                 $userProfile = $model->user->getProfile();
-                return \lispa\amos\admin\widgets\UserCardWidget::widget(['model' => $userProfile]);
+                return \open20\amos\admin\widgets\UserCardWidget::widget(['model' => $userProfile]);
             }
         ],
         'nomeCognome',
@@ -214,7 +223,7 @@ echo \lispa\amos\core\views\AmosGridView::widget([
                 if (!in_array($model->id, (array)$availableUserProfileIds)) {
                     return [
                         'disabled' => true,
-                        'title' => \lispa\amos\admin\AmosAdmin::t('amosadmin', "Non è possibile condividere il contenuto con questo utente. Il contenuto si trova in una community non accessibile a questo utente")
+                        'title' => \open20\amos\admin\AmosAdmin::t('amosadmin', "Non è possibile condividere il contenuto con questo utente. Il contenuto si trova in una community non accessibile a questo utente")
                     ];
                 }
                 return '';
@@ -231,12 +240,12 @@ echo \lispa\amos\core\views\AmosGridView::widget([
 \yii\widgets\Pjax::end();
 ?>
 <div class="col-xs-12 nop modal-contact-comment">
-    <label class="control-label"><?= \lispa\amos\admin\AmosAdmin::t('amosadmin', 'Comment') ?></label>
-    <?= \lispa\amos\core\helpers\Html::textarea(\lispa\amos\admin\AmosAdmin::t('amosadmin', 'Comment'),'', ['id' => 'text-share', 'class' => 'form-control']); ?>
+    <label class="control-label"><?= \open20\amos\admin\AmosAdmin::t('amosadmin', 'Comment') ?></label>
+    <?= \open20\amos\core\helpers\Html::textarea(\open20\amos\admin\AmosAdmin::t('amosadmin', 'Comment'),'', ['id' => 'text-share', 'class' => 'form-control']); ?>
 </div>
 
 
-<?php echo \lispa\amos\core\helpers\Html::button(\lispa\amos\admin\AmosAdmin::t('amosadmin','Condividi'), [
+<?php echo \open20\amos\core\helpers\Html::button(\open20\amos\admin\AmosAdmin::t('amosadmin','Condividi'), [
     'id' => 'share-to-contacts-btn',
     'class' => 'btn btn-navigation-primary pull-right'
 ]);

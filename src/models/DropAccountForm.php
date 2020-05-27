@@ -1,21 +1,21 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\models
+ * @package    open20\amos\admin\models
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\models;
+namespace open20\amos\admin\models;
 
-use lispa\amos\core\user\User;
+use open20\amos\core\user\User;
 use kartik\password\StrengthValidator;
 use Yii;
 use yii\base\Model;
-use lispa\amos\admin\AmosAdmin;
+use open20\amos\admin\AmosAdmin;
 
 
 class DropAccountForm extends Model

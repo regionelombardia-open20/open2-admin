@@ -1,18 +1,18 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\migrations
+ * @package    open20\amos\admin\migrations
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\attachments\components\FileImport;
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\core\migration\libs\common\MigrationCommon;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\attachments\components\FileImport;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\core\migration\libs\common\MigrationCommon;
 use yii\db\Migration;
 use yii\db\Query;
 

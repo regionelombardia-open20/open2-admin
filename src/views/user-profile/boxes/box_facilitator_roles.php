@@ -1,11 +1,11 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\user-profile\boxes
+ * @package    open20\amos\admin\views\user-profile\boxes
  * @category   CategoryName
  */
 
@@ -25,7 +25,7 @@ if(!$model->isNewRecord) {
 CSS
     );
 
-    $facilitatorRolesRemovesMessage = \lispa\amos\admin\AmosAdmin::t('amosadmin', '#facilitator_roles_removed');
+    $facilitatorRolesRemovesMessage = \open20\amos\admin\AmosAdmin::t('amosadmin', '#facilitator_roles_removed');
     /*
      <div id="flash-facilitator-roles-removed" class="alert-success alert fade" role="alert">
             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
@@ -77,8 +77,8 @@ JS
     );
 }
 
-$activeFacilitatorRoles = \lispa\amos\admin\utility\UserProfileUtility::getFacilitatorForModuleRoles();
-$facilitatorRolesAssignedToUser = \lispa\amos\admin\utility\UserProfileUtility::getFacilitatorRolesForUser($model->user_id, $activeFacilitatorRoles);
+$activeFacilitatorRoles = \open20\amos\admin\utility\UserProfileUtility::getFacilitatorForModuleRoles();
+$facilitatorRolesAssignedToUser = \open20\amos\admin\utility\UserProfileUtility::getFacilitatorRolesForUser($model->user_id, $activeFacilitatorRoles);
 
 if (count($activeFacilitatorRoles) == 1) {
     $this->registerJs(<<<JS
@@ -96,9 +96,9 @@ JS
     <div class="col-xs-12 nop">
         <div class="form-group">
             <label class="control-label">
-                <?= \lispa\amos\admin\AmosAdmin::t('amosadmin', 'Utente facilitatore') ?>
+                <?= \open20\amos\admin\AmosAdmin::t('amosadmin', 'Utente facilitatore') ?>
             </label>
-            <p><?php \lispa\amos\admin\AmosAdmin::t('amosadmin', '#facilitator_role_box_isnewrecord_warning'); ?></p>
+            <p><?php \open20\amos\admin\AmosAdmin::t('amosadmin', '#facilitator_role_box_isnewrecord_warning'); ?></p>
         </div>
     </div>
     <?php else : ?>
@@ -106,7 +106,7 @@ JS
 
         <div class="form-group">
             <label class="control-label">
-                <?= \lispa\amos\admin\AmosAdmin::t('amosadmin', 'Utente facilitatore') ?>
+                <?= \open20\amos\admin\AmosAdmin::t('amosadmin', 'Utente facilitatore') ?>
             </label>
 
             <?= \yii\helpers\Html::button('Abilita', [
@@ -127,17 +127,17 @@ JS
         <div id="enabled-facilitator-roles-box" class="form-group facilitator-roles-disabled">
             <?php
                     // Inserted above
-//            $activeFacilitatorRoles = \lispa\amos\admin\utility\UserProfileUtility::getFacilitatorForModuleRoles();
-//            $facilitatorRolesAssignedToUser = \lispa\amos\admin\utility\UserProfileUtility::getFacilitatorRolesForUser($model->user_id, $activeFacilitatorRoles);
+//            $activeFacilitatorRoles = \open20\amos\admin\utility\UserProfileUtility::getFacilitatorForModuleRoles();
+//            $facilitatorRolesAssignedToUser = \open20\amos\admin\utility\UserProfileUtility::getFacilitatorRolesForUser($model->user_id, $activeFacilitatorRoles);
             //pr($activeFacilitatorRoles, 'facilitator for module roles in user-profile/_form');
             //pr($facilitatorRolesAssignedToUser, 'facilitator roles assigned to user in user-profile/_form');
             ?>
 
             <label class="control-label">
-                <?= \lispa\amos\admin\AmosAdmin::t('amosadmin', 'Ruoli facilitatore abilitati') ?>
+                <?= \open20\amos\admin\AmosAdmin::t('amosadmin', 'Ruoli facilitatore abilitati') ?>
             </label>
 
-            <?= \lispa\amos\core\forms\editors\Select::widget([
+            <?= \open20\amos\core\forms\editors\Select::widget([
                 'name' => 'selectedFacilitatorRoles',
                 'data' => $activeFacilitatorRoles,
                 'value' => !empty($selectedFacilitatorRoles) ? $selectedFacilitatorRoles : $facilitatorRolesAssignedToUser,
@@ -157,7 +157,7 @@ JS
             'footer' => \yii\helpers\Html::button("Annulla", ["class" => "btn btn-secondary", "id" => 'modal-remove-facilitator-roles-cancel', 'data' => ['dismiss' => "modal"]]) . " " . \yii\helpers\Html::button("Si", ["class" => "btn btn-navigation-primary", "id" => 'modal-remove-facilitator-roles-confirm']),
         ])
     ?>
-        <h4>Stai togliendo all'utente il ruolo di facilitatore, confermi?</h4>
+        <h4><?= \open20\amos\admin\AmosAdmin::t('amosadmin', 'Stai togliendo all\'utente il ruolo di facilitatore, confermi?') ?></h4>
     <?php
         \yii\bootstrap\Modal::end();
     ?>

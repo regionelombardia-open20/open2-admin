@@ -1,20 +1,20 @@
 <?php
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\models\search
+ * @package    open20\amos\admin\models\search
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\models\search;
+namespace open20\amos\admin\models\search;
 
-use lispa\amos\admin\models\UserProfileArea;
+use open20\amos\admin\models\UserProfileArea;
 
 /**
  * Class UserProfileAreaSearch
- * @package lispa\amos\admin\models\search
+ * @package open20\amos\admin\models\search
  */
 class UserProfileAreaSearch extends UserProfileArea
 {

@@ -1,29 +1,28 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\user-profile\boxes
+ * @package    open20\amos\admin\views\user-profile\boxes
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\icons\AmosIcons;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\icons\AmosIcons;
 use kartik\alert\Alert;
 
 /**
  * @var yii\web\View $this
- * @var lispa\amos\core\forms\ActiveForm $form
- * @var lispa\amos\admin\models\UserProfile $model
- * @var lispa\amos\core\user\User $user
+ * @var open20\amos\core\forms\ActiveForm $form
+ * @var open20\amos\admin\models\UserProfile $model
+ * @var open20\amos\core\user\User $user
  */
 
-/** @var \lispa\amos\admin\models\UserProfile $facilitatorUserProfile */
-$facilitatorUserProfile = UserProfile::findOne(['user_id' => $model->facilitatore_id]);
+/** @var \open20\amos\admin\models\UserProfile $facilitatorUserProfile */
+$facilitatorUserProfile = $model->facilitatore; // Non modificare! Dev'essere usata la relazione!!!
 
 ?>
 
@@ -64,12 +63,24 @@ $facilitatorUserProfile = UserProfile::findOne(['user_id' => $model->facilitator
                             'alt' => $facilitatorUserProfile->getNomeCognome()
                         ]),
                             ['class' => 'container-round-img-sm']);
+                        $prevalentPartnershipName = '-';
+                        $prevalentPartnershipObj = $facilitatorUserProfile->prevalentPartnership;
+                        if (!is_null($prevalentPartnershipObj)) {
+                            if (strlen($prevalentPartnershipObj->getTitle()) > 60) {
+                                $stringCut = substr(strip_tags($prevalentPartnershipObj->getTitle()), 0, 70);
+                                $stringCut = $stringCut . '... ';
+                            } else {
+                                $stringCut = $prevalentPartnershipObj->getTitle();
+                            }
+                            $prevalentPartnershipName = Html::tag('span', $stringCut);
+                        }
                         ?>
+
                         <!--                        </div>-->
                         <!--                        <div class="col-sm-11 col-xs-8">-->
                         <p><?= Html::tag('span', AmosAdmin::t('amosadmin', 'Nome')) . Html::tag('span', $facilitatorUserProfile->nome); ?></p>
                         <p><?= Html::tag('span', AmosAdmin::t('amosadmin', 'Cognome')) . Html::tag('span', $facilitatorUserProfile->cognome); ?></p>
-                        <p><?= Html::tag('span', AmosAdmin::t('amosadmin', 'Prevalent partnership')) . (!is_null($facilitatorUserProfile->prevalentPartnership) ? Html::tag('span', $facilitatorUserProfile->prevalentPartnership->name) : '-') ?></p>
+                        <p><?= Html::tag('span', AmosAdmin::t('amosadmin', 'Prevalent partnership')) . $prevalentPartnershipName ?></p>
                         <p><?= Html::a(AmosAdmin::t('amosadmin', 'Change facilitator'), ['/admin/user-profile/associate-facilitator', 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true]) ?></p>
                         <!--                        </div>-->
                     <?php else: ?>

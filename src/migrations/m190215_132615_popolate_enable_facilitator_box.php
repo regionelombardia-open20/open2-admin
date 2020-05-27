@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\migrations
+ * @package    open20\amos\admin\migrations
  * @category   CategoryName
  */
 
-use lispa\amos\admin\models\UserProfileArea;
+use open20\amos\admin\models\UserProfileArea;
 use yii\db\Migration;
 
 /**
@@ -27,7 +27,7 @@ class m190215_132615_popolate_enable_facilitator_box extends Migration
     {
         $userIds = \Yii::$app->authManager->getUserIdsByRole('FACILITATOR');
         foreach ($userIds as $user_id){
-            $userProfile = \lispa\amos\admin\models\UserProfile::findOne(['user_id' => $user_id]);
+            $userProfile = \open20\amos\admin\models\UserProfile::findOne(['user_id' => $user_id]);
             $userProfile->detachBehaviors();
             $userProfile->enable_facilitator_box = true;
             $userProfile->save(false);

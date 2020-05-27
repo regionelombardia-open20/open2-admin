@@ -1,24 +1,24 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\first-access-wizard
+ * @package    open20\amos\admin\views\first-access-wizard
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\admin\utility\UserProfileUtility;
-use lispa\amos\core\forms\editors\m2mWidget\M2MWidget;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\admin\utility\UserProfileUtility;
+use open20\amos\core\forms\editors\m2mWidget\M2MWidget;
 use yii\db\ActiveQuery;
 use yii\web\View;
 
 /**
  * @var \yii\web\View $this
- * @var \lispa\amos\admin\models\UserProfile $model
+ * @var \open20\amos\admin\models\UserProfile $model
  */
 $this->title = AmosAdmin::t('amosadmin', 'Select facilitator for') . ' ' . $model->getNomeCognome();
 
@@ -97,7 +97,7 @@ $this->registerJs($js, View::POS_READY);
     'moduleClassName' => AmosAdmin::className(),
     'postName' => $formName,
     'postKey' => $postKey,
-    'listView' => '@vendor/lispa/amos-admin/src/views/user-profile/_item',
+    'listView' => '@vendor/open20/amos-admin/src/views/user-profile/_item',
     'targetFooterButtons' => M2MWidget::makeCancelButton(AmosAdmin::className(), 'first-access-wizard', $model),
     'targetUrlController' => 'first-access-wizard',
     'targetUrlParams' => [

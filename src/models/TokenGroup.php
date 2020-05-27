@@ -1,15 +1,24 @@
 <?php
 
-namespace lispa\amos\admin\models;
+/**
+ * Aria S.p.A.
+ * OPEN 2.0
+ *
+ *
+ * @package    Open20Package
+ * @category   CategoryName
+ */
 
-use lispa\amos\core\user\User;
+namespace open20\amos\admin\models;
+
+use open20\amos\core\user\User;
 use Yii;
 use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "token_group".
  */
-class TokenGroup extends \lispa\amos\admin\models\base\TokenGroup
+class TokenGroup extends \open20\amos\admin\models\base\TokenGroup
 {
     public function representingColumn()
     {
@@ -28,6 +37,7 @@ class TokenGroup extends \lispa\amos\admin\models\base\TokenGroup
      * Returns the text hint for the specified attribute.
      * @param string $attribute the attribute name
      * @return string the attribute hint
+     * @see attributeHints
      */
     public function getAttributeHint($attribute)
     {

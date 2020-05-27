@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin
+ * @package    open20\amos\admin
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin;
+namespace open20\amos\admin;
 
 use mdm\admin\Module;
 use Yii;
@@ -18,7 +18,7 @@ use yii\web\ForbiddenHttpException;
 
 /**
  * Class AmosAdmin
- * @package lispa\amos\admin
+ * @package open20\amos\admin
  */
 class RoleManager extends Module
 {

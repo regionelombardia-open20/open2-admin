@@ -1,18 +1,18 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\models\base
+ * @package    open20\amos\admin\models\base
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\models\base;
+namespace open20\amos\admin\models\base;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\core\record\AmosRecordAudit;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\core\record\AmosRecordAudit;
 use Yii;
 
 /**
@@ -28,7 +28,7 @@ use Yii;
  * @property integer $updated_by
  * @property integer $deleted_by
  *
- * @property \lispa\amos\admin\models\UserProfile[] $userProfiles
+ * @property \open20\amos\admin\models\UserProfile[] $userProfiles
  */
 class UserProfileTitoliStudio extends AmosRecordAudit
 {

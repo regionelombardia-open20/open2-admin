@@ -1,30 +1,30 @@
 <?php
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\controllers\base
+ * @package    open20\amos\admin\controllers\base
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\controllers\base;
+namespace open20\amos\admin\controllers\base;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\admin\utility\UserProfileUtility;
-use lispa\amos\core\controllers\CrudController;
-use lispa\amos\core\helpers\BreadcrumbHelper;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\icons\AmosIcons;
-use lispa\amos\core\user\User;
-use lispa\amos\core\utilities\Email;
-use lispa\amos\core\widget\WidgetAbstract;
-use lispa\amos\dashboard\controllers\TabDashboardControllerTrait;
-use lispa\amos\myactivities\basic\UserProfileToValidate;
-use lispa\amos\notificationmanager\AmosNotify;
-use lispa\amos\notificationmanager\widgets\NotifyFrequencyWidget;
-use lispa\amos\attachments\components\FileImport;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\admin\utility\UserProfileUtility;
+use open20\amos\core\controllers\CrudController;
+use open20\amos\core\helpers\BreadcrumbHelper;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\icons\AmosIcons;
+use open20\amos\core\user\User;
+use open20\amos\core\utilities\Email;
+use open20\amos\core\widget\WidgetAbstract;
+use open20\amos\dashboard\controllers\TabDashboardControllerTrait;
+use open20\amos\myactivities\basic\UserProfileToValidate;
+use open20\amos\notificationmanager\AmosNotify;
+use open20\amos\notificationmanager\widgets\NotifyFrequencyWidget;
+use open20\amos\attachments\components\FileImport;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
@@ -34,9 +34,9 @@ use yii\log\Logger;
  * Class UserProfileController
  * UserProfileController implements the CRUD actions for UserProfile model.
  *
- * @property \lispa\amos\admin\models\UserProfile $model
+ * @property \open20\amos\admin\models\UserProfile $model
  *
- * @package lispa\amos\admin\controllers\base
+ * @package open20\amos\admin\controllers\base
  */
 class UserProfileController extends CrudController
 {
@@ -45,7 +45,7 @@ class UserProfileController extends CrudController
     /**
      * @var string $layout
      */
-    public $layout = 'list';
+    public $layout      = 'list';
     // La utilizzo per settare il parametri al render anche da classi ereditate.
     // così anche loro potranno aggiungere parametri al render per le viste
     // caso di update
@@ -82,29 +82,29 @@ class UserProfileController extends CrudController
 
         $this->gridView = [
             'name' => 'grid',
-            'label' => AmosIcons::show('view-list-alt') . Html::tag('p', AmosAdmin::t('amosadmin', 'Tabella')),
+            'label' => AmosIcons::show('view-list-alt').Html::tag('p', AmosAdmin::t('amosadmin', 'Tabella')),
             'url' => '?currentView=grid'
         ];
 
         $this->iconView = [
             'name' => 'icon',
-            'label' => AmosIcons::show('grid') . Html::tag('p', AmosAdmin::t('amosadmin', 'Icone')),
+            'label' => AmosIcons::show('grid').Html::tag('p', AmosAdmin::t('amosadmin', 'Icone')),
             'url' => '?currentView=icon'
         ];
 
         $this->listView = [
             'name' => 'list',
-            'label' => AmosIcons::show('view-list') . Html::tag('p', AmosAdmin::t('amosadmin', 'Lista')),
+            'label' => AmosIcons::show('view-list').Html::tag('p', AmosAdmin::t('amosadmin', 'Lista')),
             'url' => '?currentView=list'
         ];
 
         $this->forceDefaultViewType = $this->adminModule->forceDefaultViewType;
-        $this->defaultViews = [
+        $this->defaultViews         = [
             'icon' => $this->iconView,
             'grid' => $this->gridView,
             'list' => $this->listView,
         ];
-        $availableViews = [];
+        $availableViews             = [];
         foreach ($this->adminModule->defaultListViews as $view) {
             if (isset($this->defaultViews[$view])) {
                 $availableViews[$view] = $this->defaultViews[$view];
@@ -122,7 +122,7 @@ class UserProfileController extends CrudController
     }
 
     /**
-     * Set a view param used in \lispa\amos\core\forms\CreateNewButtonWidget
+     * Set a view param used in \open20\amos\core\forms\CreateNewButtonWidget
      */
     protected function setCreateNewBtnParams()
     {
@@ -130,19 +130,20 @@ class UserProfileController extends CrudController
             'createNewBtnLabel' => AmosAdmin::t('amosadmin', 'Add new user')
         ];
 
-        if (\Yii::$app->getModule('invitations')) {
-            $widget = new \lispa\amos\invitations\widgets\icons\WidgetIconInvitations();
-            $invitations = Html::a('Invita utenti', $widget->url,
-                ['class' => 'btn btn-navigation-primary']);
+        if (\Yii::$app->getModule('invitations')
+            && (\Yii::$app->getUser()->can('INVITATIONS_BASIC_USER') || \Yii::$app->getUser()->can('INVITATIONS_ADMINISTRATOR'))) {
+            $widget                                      = new \open20\amos\invitations\widgets\icons\WidgetIconInvitations();
+            $invitations                                 = Html::a(AmosAdmin::t('amosadmin', 'Gestisci inviti'), $widget->url,
+                    ['class' => 'btn btn-navigation-primary']);
             Yii::$app->view->params['additionalButtons'] = [
                 'htmlButtons' => [$invitations]
             ];
         }
 
         $createNewBtnParams = yii\helpers\ArrayHelper::merge(Yii::$app->view->params['createNewBtnParams'],
-            [
+                [
                 'layout' => "{buttonCreateNew}"
-            ]);
+        ]);
 
         Yii::$app->view->params['createNewBtnParams'] = $createNewBtnParams;
     }
@@ -153,7 +154,7 @@ class UserProfileController extends CrudController
      */
     public function setTitleAndBreadcrumbs($pageTitle)
     {
-        Yii::$app->view->title = $pageTitle;
+        Yii::$app->view->title                 = $pageTitle;
         Yii::$app->view->params['breadcrumbs'] = [
             ['label' => $pageTitle]
         ];
@@ -165,6 +166,8 @@ class UserProfileController extends CrudController
     public function setListsViewParams()
     {
         Yii::$app->session->set('previousUrl', Url::previous());
+        Yii::$app->session->set(AmosAdmin::beginCreateNewSessionKey(), Url::previous());
+        Yii::$app->session->set(AmosAdmin::beginCreateNewSessionKeyDateTime(), date('Y-m-d H:i:s'));
     }
 
     /**
@@ -211,7 +214,8 @@ class UserProfileController extends CrudController
 
         $this->model = $this->findModel($id);
 
-        return $this->render('view',
+        return $this->render(
+            'view', 
             [
                 'model' => $this->model,
             ]
@@ -244,11 +248,13 @@ class UserProfileController extends CrudController
         if ($user->load(Yii::$app->request->post()) && $user->validate()) {
             if (!($profile->load(Yii::$app->request->post()) && $profile->validate())) {
                 // QUALCOSA è andato storto! ERRORE...
-                Yii::$app->getSession()->addFlash('danger', AmosAdmin::t('amosadmin', 'Internal error. Impossible to link user to the relative profile.'));
-                return $this->render('create', [
-                    'model' => $profile,
-                    'user' => $user,
-                    'permissionSave' => 'USERPROFILE_CREATE'
+                Yii::$app->getSession()->addFlash('danger',
+                    AmosAdmin::t('amosadmin', 'Internal error. Impossible to link user to the relative profile.'));
+                return $this->render('create',
+                        [
+                        'model' => $profile,
+                        'user' => $user,
+                        'permissionSave' => 'USERPROFILE_CREATE'
                 ]);
             }
             /** @var AmosAdmin $adminModule */
@@ -262,13 +268,13 @@ class UserProfileController extends CrudController
              * per cui schianta la query durante la creazione dell'utente,
              */
             if ($user->id == null) {
-                $user->auth_key = ' ';
-                $user->password_hash = ' ';
+                $user->auth_key      = '';
+                $user->password_hash = '';
             }
 
             // Se mi trovo qua posso salvare entrambe le entità senza avere errore
             $user->save();
-            $profile->user_id = $user->id;
+            $profile->user_id          = $user->id;
             $profile->widgets_selected = 'a:2:{s:7:"primary";a:1:{i:0;a:6:{i:0;a:2:{s:4:"code";s:12:"USER_PROFILE";s:11:"module_name";s:5:"admin";}i:1;a:2:{s:4:"code";s:5:"USERS";s:11:"module_name";s:5:"admin";}i:2;a:2:{s:4:"code";s:11:"TAG_MANAGER";s:11:"module_name";s:3:"tag";}i:3;a:2:{s:4:"code";s:4:"ENTI";s:11:"module_name";s:4:"enti";}i:4;a:2:{s:4:"code";s:9:"ENTI_TIPO";s:11:"module_name";s:4:"enti";}i:5;a:2:{s:4:"code";s:4:"SEDI";s:11:"module_name";s:4:"enti";}}}s:5:"admin";a:1:{i:0;a:2:{i:0;a:2:{s:4:"code";s:12:"USER_PROFILE";s:11:"module_name";s:5:"admin";}i:1;a:2:{s:4:"code";s:5:"USERS";s:11:"module_name";s:5:"admin";}}}}';
 
             // it's used to create a new profile in the status to validate directly
@@ -293,23 +299,21 @@ class UserProfileController extends CrudController
                     $cwhModelsEnabled = $cwhModule->modelsEnabled;
                     foreach ($cwhModelsEnabled as $contentModel) {
                         $permissionCreateArray = [
-                            'item_name' => $cwhModule->permissionPrefix . "_CREATE_" . $contentModel,
+                            'item_name' => $cwhModule->permissionPrefix."_CREATE_".$contentModel,
                             'user_id' => $profile->user_id,
-                            'cwh_nodi_id' => 'user-' . $profile->user_id
+                            'cwh_nodi_id' => 'user-'.$profile->user_id
                         ];
                         //add cwh permission to create content in 'Personal' scope
-                        $cwhAssignCreate = new \lispa\amos\cwh\models\CwhAuthAssignment($permissionCreateArray);
+                        $cwhAssignCreate       = new \open20\amos\cwh\models\CwhAuthAssignment($permissionCreateArray);
                         $cwhAssignCreate->save(false);
                     }
                 }
-                if(empty($profile->userProfileImage))
-                {
+                if (empty($profile->userProfileImage)) {
                     $adminmodule = AmosAdmin::instance();
-                    if(!is_null($adminmodule))
-                    {
+                    if (!is_null($adminmodule)) {
                         $fileImport = new FileImport();
-                        $ok = $fileImport->importFileForModel($profile, 'userProfileImage',
-                                \Yii::getAlias($adminmodule->defaultProfileImagePath));
+                        $ok         = $fileImport->importFileForModel($profile, 'userProfileImage',
+                            \Yii::getAlias($adminmodule->defaultProfileImagePath), false);
                     }
                 }
             }
@@ -318,35 +322,37 @@ class UserProfileController extends CrudController
             $notifyModule = Yii::$app->getModule('notify');
             if (!is_null($notifyModule)) {
                 /** @var AmosNotify $notifyModule */
-                $post = Yii::$app->request->post();
+                $post           = Yii::$app->request->post();
                 $emailFrequency = 0;
-                $smsFrequency = 0;
-                $atLeastOne = false;
+                $smsFrequency   = 0;
+                $atLeastOne     = false;
                 if (isset($post[NotifyFrequencyWidget::emailFrequencySelectorName()])) {
-                    $atLeastOne = true;
+                    $atLeastOne     = true;
                     $emailFrequency = Yii::$app->request->post()[NotifyFrequencyWidget::emailFrequencySelectorName()];
                 }
                 if (isset($post[NotifyFrequencyWidget::smsFrequencySelectorName()])) {
-                    $atLeastOne = true;
+                    $atLeastOne   = true;
                     $smsFrequency = Yii::$app->request->post()[NotifyFrequencyWidget::smsFrequencySelectorName()];
                 }
+
                 if ($atLeastOne) {
-                    $ok = $notifyModule->saveNotificationConf($user->id, $emailFrequency, $smsFrequency);
-                    if (!$ok) {
-                        Yii::$app->getSession()->addFlash('danger', AmosAdmin::t('amosadmin', 'Error while saving email frequency'));
-                        return $this->render('create', [
-                            'model' => $profile,
-                            'user' => $user,
-                            'permissionSave' => 'USERPROFILE_CREATE',
-                        ]);
-                    }
+                    $ok = $notifyModule->saveNotificationConf($user->id, $emailFrequency, $smsFrequency, $post);
+                } else {
+                    $ok = $notifyModule->setDefaultNotificationsConfs($user->id);
+                }
+                if (!$ok) {
+                    Yii::$app->getSession()->addFlash('danger', AmosAdmin::t('amosadmin', 'Error while saving email frequency'));
+                    return $this->render('create', [
+                        'model' => $profile,
+                        'user' => $user,
+                        'permissionSave' => 'USERPROFILE_CREATE',
+                    ]);
                 }
             }
 
             /** @var AmosAdmin $adminModule */
             $adminModule = \Yii::$app->getModule(AmosAdmin::getModuleName());
-            Yii::$app->getAuthManager()->assign(Yii::$app->getAuthManager()->getRole($adminModule->defaultUserRole),
-                $user->id);
+            Yii::$app->getAuthManager()->assign(Yii::$app->getAuthManager()->getRole($adminModule->defaultUserRole), $user->id);
             Yii::$app->getSession()->addFlash('success', AmosAdmin::t('amosadmin', 'Utente creato correttamente.'));
             //return $this->redirect(['view', 'id' => $this->model->id]);
             return $this->redirectOnCreate($profile);
@@ -407,13 +413,13 @@ class UserProfileController extends CrudController
             /**
              * Keep track of old setting of notify_from_editorial_staff
              */
-            $notify_from_editorial_staff = $this->model->notify_from_editorial_staff;
+//            $notify_from_editorial_staff = $this->model->notify_from_editorial_staff;
 
             /**
              * Check if facilitator roles are deleted for the current user
              */
             $isFacilitatorRoleRemoved = false;
-            $userProfilePost = Yii::$app->request->post('UserProfile');
+            $userProfilePost          = Yii::$app->request->post('UserProfile');
             if (!empty($userProfilePost)) {
                 if (array_key_exists('enable_facilitator_box', $userProfilePost)) {
                     if ($this->model->enable_facilitator_box == true && $userProfilePost['enable_facilitator_box'] == false) {
@@ -426,16 +432,17 @@ class UserProfileController extends CrudController
             /**
              * Load post data
              */
+            $notify_from_editorial_staff = $this->model->notify_from_editorial_staff;
             $this->model->load(Yii::$app->request->post());
-
             $this->model->user->load(Yii::$app->request->post());
             if ($this->model->validate() && $this->model->user->validate()) {
+      
                 if (empty(Yii::$app->request->post('notify_from_editorial_staff'))) {
                     $this->model->notify_from_editorial_staff = 0;
                     if ($this->model->notify_from_editorial_staff != $notify_from_editorial_staff) {
                         $sent = UserProfileUtility::sendMail($this->model,
-                            '@vendor/lispa/amos-admin/src/mail/user/notify-editorial-staff-subject',
-                            '@vendor/lispa/amos-admin/src/mail/user/notify-editorial-staff-html'
+                                '@vendor/open20/amos-admin/src/mail/user/notify-editorial-staff-subject',
+                                '@vendor/open20/amos-admin/src/mail/user/notify-editorial-staff-html'
                         );
                     }
                 } else {
@@ -459,54 +466,54 @@ class UserProfileController extends CrudController
                 if (!empty(\Yii::$app->request->post()['UserProfile']['isProfileModified'])) {
                     $isProfileModified = \Yii::$app->request->post()['UserProfile']['isProfileModified'];
                 }
-                if (($currentStatus == UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) && !empty($isProfileModified) && $isProfileModified == 1) {
+                if (($currentStatus == UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) && !empty($isProfileModified)
+                    && $isProfileModified == 1) {
                     $this->model->status = UserProfile::USERPROFILE_WORKFLOW_STATUS_TOVALIDATE;
                 }
 
                 if ($this->model->save() && $this->model->user->save()) {
                     $this->assignFacilitator($isFacilitatorRoleRemoved);
 
-                    if(empty($this->model->userProfileImage))
-                {
-                    $adminmodule = AmosAdmin::instance();
-                    if(!is_null($adminmodule))
-                    {
-                        $fileImport = new FileImport();
-                        $ok = $fileImport->importFileForModel($this->model, 'userProfileImage',
-                                \Yii::getAlias($adminmodule->defaultProfileImagePath));
+                    if (empty($this->model->userProfileImage)) {
+                        $adminmodule = AmosAdmin::instance();
+                        if (!is_null($adminmodule)) {
+                            $fileImport = new FileImport();
+                            $ok         = $fileImport->importFileForModel($this->model, 'userProfileImage',
+                                \Yii::getAlias($adminmodule->defaultProfileImagePath), false);
+                        }
                     }
-                }
 
                     // Save email and sms notify frequency
                     $notifyModule = Yii::$app->getModule('notify');
                     if (!is_null($notifyModule)) {
                         /** @var AmosNotify $notifyModule */
-                        $post = Yii::$app->request->post();
+                        $post           = Yii::$app->request->post();
                         $emailFrequency = 0;
-                        $smsFrequency = 0;
-                        $atLeastOne = false;
+                        $smsFrequency   = 0;
+                        $atLeastOne     = false;
                         if (isset($post[NotifyFrequencyWidget::emailFrequencySelectorName()])) {
-                            $atLeastOne = true;
+                            $atLeastOne     = true;
                             $emailFrequency = Yii::$app->request->post()[NotifyFrequencyWidget::emailFrequencySelectorName()];
                         }
                         if (isset($post[NotifyFrequencyWidget::smsFrequencySelectorName()])) {
-                            $atLeastOne = true;
+                            $atLeastOne   = true;
                             $smsFrequency = Yii::$app->request->post()[NotifyFrequencyWidget::smsFrequencySelectorName()];
                         }
                         if ($atLeastOne) {
                             $ok = $notifyModule->saveNotificationConf($this->model->user->id, $emailFrequency,
-                                $smsFrequency);
+                                $smsFrequency, $post);
                             if (!$ok) {
-                                Yii::$app->getSession()->addFlash('danger', AmosAdmin::t('amosadmin', 'Error while updating email frequency'));
+                                Yii::$app->getSession()->addFlash('danger',
+                                    AmosAdmin::t('amosadmin', 'Error while updating email frequency'));
                                 if ($render) {
                                     $this->updateParamsRender = ArrayHelper::merge($this->updateParamsRender,
-                                        [
+                                            [
                                             'user' => $this->model->user,
                                             'model' => $this->model,
                                             'tipologiautente' => $this->model->tipo_utente,
                                             'permissionSave' => 'USERPROFILE_UPDATE',
                                             'tabActive' => $tabActive,
-                                        ]);
+                                    ]);
                                     return $this->render('update', $this->updateParamsRender);
                                 } else {
                                     return $this->model;
@@ -515,35 +522,38 @@ class UserProfileController extends CrudController
                         }
                     }
 
-                    Yii::$app->getSession()->addFlash('success', AmosAdmin::t('amosadmin', 'Profilo utente aggiornato con successo.'));
+                    Yii::$app->getSession()->addFlash('success',
+                        AmosAdmin::t('amosadmin', 'Profilo utente aggiornato con successo.'));
                     if ($render) {
                         return $this->redirectOnUpdate($this->model, $previousStatus);
                     } else {
                         return $this->model;
                     }
                 } else {
-                    Yii::$app->getSession()->addFlash('danger', AmosAdmin::t('amosadmin', 'Si &egrave; verificato un errore durante il salvataggio'));
+                    Yii::$app->getSession()->addFlash('danger',
+                        AmosAdmin::t('amosadmin', 'Si &egrave; verificato un errore durante il salvataggio'));
                 }
             } else {
                 $selectedFacilitatorRoles = Yii::$app->request->post('selectedFacilitatorRoles');
                 if (isset($this->model->user->getErrors()['email'])) {
                     Yii::$app->getSession()->addFlash('danger', $this->model->user->getErrors()['email'][0]);
                 } else {
-                    Yii::$app->getSession()->addFlash('danger', AmosAdmin::t('amosadmin', 'Modifiche non salvate. Verifica l\'inserimento dei campi, '));
+                    Yii::$app->getSession()->addFlash('danger',
+                        AmosAdmin::t('amosadmin', 'Modifiche non salvate. Verifica l\'inserimento dei campi'));
                 }
             }
         }
 
         if ($render) {
             $this->updateParamsRender = ArrayHelper::merge($this->updateParamsRender,
-                [
+                    [
                     'user' => $this->model->user,
                     'model' => $this->model,
                     'tipologiautente' => $this->model->tipo_utente,
                     'permissionSave' => 'USERPROFILE_UPDATE',
                     'tabActive' => $tabActive,
                     'selectedFacilitatorRoles' => $selectedFacilitatorRoles,
-                ]);
+            ]);
             return $this->render('update', $this->updateParamsRender);
         } else {
             return $this->model;
@@ -562,13 +572,13 @@ class UserProfileController extends CrudController
         // List of user that needs validation by the facilitator in elimination
         if (array_key_exists('usersNeedsValidation', $resultsArray)) {
             if (!empty($resultsArray['usersNeedsValidation'])) {
-                $messageUsers = AmosAdmin::t('amosadmin', 'Users');
+                $messageUsers      = AmosAdmin::t('amosadmin', 'Users');
                 $messageToValidate = strtolower(AmosAdmin::t('amosadmin', 'To validate'));
-                $bodyText .= "<h3><strong>{$messageUsers} {$messageToValidate}</strong></h3>";
+                $bodyText          .= "<h3><strong>{$messageUsers} {$messageToValidate}</strong></h3>";
                 /** @var UserProfileToValidate $user */
                 foreach ($resultsArray['usersNeedsValidation'] as $user) {
                     $userNameSurname = $user->getNomeCognome();
-                    $bodyText .= "{$userNameSurname}<br />";
+                    $bodyText        .= "{$userNameSurname}<br />";
                 }
                 $bodyText .= "<hr />";
             }
@@ -576,11 +586,11 @@ class UserProfileController extends CrudController
 
         // Email body text construction
         if (!empty($bodyText)) {
-            $messageUserInElimination = AmosAdmin::t('amosadmin', '#user_in_elimination_had_activites_pending',
-                ['userNameSurname' => $userProfileFacilitator->getNomeCognome()]);
+            $messageUserInElimination     = AmosAdmin::t('amosadmin', '#user_in_elimination_had_activites_pending',
+                    ['userNameSurname' => $userProfileFacilitator->getNomeCognome()]);
             $messageAllActivitiesInPlugin = AmosAdmin::t('amosadmin', '#find_all_activities_pending_in_plugin');
-            $bodyText = "<br /><h3>{$messageUserInElimination}</h3><hr />" .
-                $bodyText .
+            $bodyText                     = "<br /><h3>{$messageUserInElimination}</h3><hr />".
+                $bodyText.
                 "<strong>{$messageAllActivitiesInPlugin}</strong>";
         }
 
@@ -594,7 +604,7 @@ class UserProfileController extends CrudController
         if (Yii::$app->hasModule('admin')) {
             $elementList = UserProfileToValidate::find()
                 ->andWhere(['facilitatore_id' => $userId])
-                ->andWhere(['status' => \lispa\amos\admin\models\UserProfile::USERPROFILE_WORKFLOW_STATUS_TOVALIDATE])
+                ->andWhere(['status' => \open20\amos\admin\models\UserProfile::USERPROFILE_WORKFLOW_STATUS_TOVALIDATE])
                 ->andWhere(['attivo' => 1])
                 ->all();
         } else {
@@ -645,12 +655,12 @@ class UserProfileController extends CrudController
                     if ($e === $extension) {
                         header('Content-Description: File Transfer');
                         header('Content-Type: application/octet-stream');
-                        header('Content-Disposition: attachment; filename="Allegato_utente.' . $extension . '"');
+                        header('Content-Disposition: attachment; filename="Allegato_utente.'.$extension.'"');
                         header('Content-Transfer-Encoding: binary');
                         header('Expires: 0');
                         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
                         header('Pragma: public');
-                        header('Content-Length: ' . filesize($path));
+                        header('Content-Length: '.filesize($path));
                         ob_clean();
                         flush();
                         readfile($path);
@@ -669,7 +679,7 @@ class UserProfileController extends CrudController
      */
     public function getWhiteListRoles()
     {
-        $arrayRuoli = null;
+        $arrayRuoli  = null;
         $moduleWhite = $this->module->getWhiteListRoles();
 
         foreach ($moduleWhite as $rule) {
@@ -688,7 +698,7 @@ class UserProfileController extends CrudController
 
         $passwordcas = "";
         for ($i = 0; $i < $lunghezza; $i++) {
-            $passwordcas = $passwordcas . substr($caratteri_disponibili, rand(0, strlen($caratteri_disponibili) - 1), 1);
+            $passwordcas = $passwordcas.substr($caratteri_disponibili, rand(0, strlen($caratteri_disponibili) - 1), 1);
         }
         return $passwordcas;
     }
@@ -761,7 +771,7 @@ class UserProfileController extends CrudController
              */
             if ($isFacilitatorRoleRemoved) {
                 // Get (configured) facilitator roles in the application
-                $activeFacilitatorRoles = \lispa\amos\admin\utility\UserProfileUtility::getFacilitatorForModuleRoles();
+                $activeFacilitatorRoles = \open20\amos\admin\utility\UserProfileUtility::getFacilitatorForModuleRoles();
 
                 // Remove all assigned facilitator roles to the current user
                 \Yii::$app->db
@@ -778,13 +788,12 @@ class UserProfileController extends CrudController
                     $resultsListForEmail['usersNeedsValidation'] = $usersToValidateByFacilitator;
                 }
 
-                $emailBody = $this->createFacilitatorInEliminationRecapBodyText($resultsListForEmail,
-                    $this->model);
+                $emailBody = $this->createFacilitatorInEliminationRecapBodyText($resultsListForEmail, $this->model);
 
                 if (!empty($emailBody)) {
                     // Invio email
-                    $email = new Email();
-                    $from = '';
+                    $email        = new Email();
+                    $from         = '';
                     $platformName = '';
 
                     // Ottengo nome applicazione/piattaforma per l'inserimento nel titolo della mail
@@ -799,8 +808,9 @@ class UserProfileController extends CrudController
                         $from = \Yii::$app->params['adminEmail'];
                     }
 
-                    $defaultFacilitatorsList = User::findAll(['id' => (null != $this->model->getDefaultFacilitator() ? $this->model->getDefaultFacilitator()->id : null)]);
-                    $emailTo = [];
+                    $defaultFacilitatorsList = User::findAll(['id' => (null != $this->model->getDefaultFacilitator() ? $this->model->getDefaultFacilitator()->id
+                                : null)]);
+                    $emailTo                 = [];
                     /** @var User $facilitator */
                     foreach ($defaultFacilitatorsList as $facilitator) {
                         $emailTo[] = $facilitator->email;
@@ -817,10 +827,10 @@ class UserProfileController extends CrudController
                 Yii::$app->db->createCommand()->update(
                     UserProfile::tableName(),
                     [
-                        'facilitatore_id' => (null != $this->model->getDefaultFacilitator() ? $this->model->getDefaultFacilitator()->id : null),
-                    ],
-                    [
-                        'facilitatore_id' => $this->model->id
+                    'facilitatore_id' => (null != $this->model->getDefaultFacilitator() ? $this->model->getDefaultFacilitator()->id
+                            : null),
+                    ], [
+                    'facilitatore_id' => $this->model->id
                     ]
                 )->execute();
 
@@ -833,7 +843,7 @@ class UserProfileController extends CrudController
                  */
             } else {
                 // Get (configured) facilitator roles in the application
-                $activeFacilitatorRoles = \lispa\amos\admin\utility\UserProfileUtility::getFacilitatorForModuleRoles();
+                $activeFacilitatorRoles = \open20\amos\admin\utility\UserProfileUtility::getFacilitatorForModuleRoles();
 
                 // Remove all assigned facilitator roles to the current user
                 \Yii::$app->db
@@ -844,15 +854,18 @@ class UserProfileController extends CrudController
 
                 $selectedFacilitatorRoles = Yii::$app->request->post('selectedFacilitatorRoles');
                 // Assign selected facilitator roles
-                foreach ($selectedFacilitatorRoles as $role) {
-                    Yii::$app->db
-                        ->createCommand()
-                        ->insert('auth_assignment', [
-                            'user_id' => $this->model->user_id,
-                            'item_name' => $role,
-                            'created_at' => time(),
-                        ])
-                        ->execute();
+                if(!empty($selectedFacilitatorRoles)) {
+                    foreach ($selectedFacilitatorRoles as $role) {
+                        Yii::$app->db
+                            ->createCommand()
+                            ->insert('auth_assignment',
+                                [
+                                    'user_id' => $this->model->user_id,
+                                    'item_name' => $role,
+                                    'created_at' => time(),
+                                ])
+                            ->execute();
+                    }
                 }
             }
         }

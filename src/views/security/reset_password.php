@@ -1,21 +1,21 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\basic\template
+ * @package    open20\amos\basic\template
  * @category   CategoryName
  */
 
 
 
 use yii\helpers\Html;
-use lispa\amos\core\forms\ActiveForm;
-use lispa\amos\admin\AmosAdmin;
+use open20\amos\core\forms\ActiveForm;
+use open20\amos\admin\AmosAdmin;
 //use kartik\password\PasswordInput;
-use lispa\amos\core\forms\PasswordInput;
+use open20\amos\core\forms\PasswordInput;
 
 /* @var $this yii\web\View */
 /* @var $form yii\bootstrap\ActiveForm */

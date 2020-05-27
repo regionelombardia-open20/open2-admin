@@ -1,22 +1,22 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\models\search
+ * @package    open20\amos\admin\models\search
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\models\search;
+namespace open20\amos\admin\models\search;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\core\user\User;
-use lispa\amos\core\interfaces\SearchModelInterface;
-use lispa\amos\core\record\SearchResult;
-
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\base\ConfigurationManager;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\core\user\User;
+use open20\amos\core\interfaces\SearchModelInterface;
+use open20\amos\core\record\SearchResult;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -32,7 +32,7 @@ use yii\data\Pagination;
  *
  * @property string $email
  *
- * @package lispa\amos\admin\models\search
+ * @package open20\amos\admin\models\search
  */
 class UserProfileSearch extends UserProfile implements SearchModelInterface {
 
@@ -113,7 +113,11 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface {
         /** @var AmosAdmin $adminModule */
         $adminModule = \Yii::$app->getModule('admin');
 
-        if (!is_null(Yii::$app->getModule($adminModule->getOrganizationModuleName()))) {
+        if (
+            !is_null(Yii::$app->getModule($adminModule->getOrganizationModuleName())) &&
+            $this->adminModule->confManager->isVisibleBox('box_prevalent_partnership', ConfigurationManager::VIEW_TYPE_FORM) &&
+            $this->adminModule->confManager->isVisibleField('prevalent_partnership_id', ConfigurationManager::VIEW_TYPE_FORM)
+        ) {
             $query->joinWith(['prevalentPartnership']);
         }
 
@@ -159,7 +163,12 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface {
                 ->andFilterWhere(['like', User::tableName() . '.username', $this->username])
                 ->andFilterWhere(['like', User::tableName() . '.email', $this->email]);
 
-        $this->userProfileSelectFieldsQuery($query, 'prevalent_partnership_id');
+        if (
+            $this->adminModule->confManager->isVisibleBox('box_prevalent_partnership', ConfigurationManager::VIEW_TYPE_FORM) &&
+            $this->adminModule->confManager->isVisibleField('prevalent_partnership_id', ConfigurationManager::VIEW_TYPE_FORM)
+        ) {
+            $this->userProfileSelectFieldsQuery($query, 'prevalent_partnership_id');
+        }
         $this->userProfileSelectFieldsQuery($query, 'facilitatore_id');
 
         // If value is "-1" it mean the user is searching whether the sex value is not selected.
@@ -172,7 +181,10 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface {
         }
 
         $this->userProfileRolesQuery($query, 'isFacilitator', 'FACILITATOR');
-        $this->userProfileRolesQuery($query, 'isOperatingReferent', 'OPERATING_REFERENT');
+        $organizationModuleName = $this->adminModule->getOrganizationModuleName();
+        if (($organizationModuleName == 'organizations') && !is_null(Yii::$app->getModule($organizationModuleName))) {
+            $this->userProfileRolesQuery($query, 'isOperatingReferent', 'OPERATING_REFERENT');
+        }
 
         return $query;
     }
@@ -290,7 +302,7 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface {
             $pagination->setPageSize($pageSize);
         }
 
-        
+
         if (!($this->load($params) && $this->validate())) {
           return $dataProvider;
         }
@@ -308,19 +320,27 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface {
     public function searchCommunityManagerUsers($params) {
         $communityModule = Yii::$app->getModule('community');
         if (!is_null($communityModule)) {
-            /** @var \lispa\amos\community\AmosCommunity $communityModule */
+            /** @var \open20\amos\community\AmosCommunity $communityModule */
+
+            // Query to search all platform user that are community managers in at least one not closed community.
             $queryAll = $this->baseSearch($params);
-            $queryAll->andWhere([UserProfile::tableName() . '.attivo' => 1]);
-            $communityTableName = \lispa\amos\community\models\Community::tableName();
-            $communityUserMmTableName = \lispa\amos\community\models\CommunityUserMm::tableName();
+            $queryAll->andWhere([UserProfile::tableName() . '.attivo' => UserProfile::STATUS_ACTIVE]);
+            $communityTableName = \open20\amos\community\models\Community::tableName();
+            $communityUserMmTableName = \open20\amos\community\models\CommunityUserMm::tableName();
             $loggedUserId = Yii::$app->getUser()->getId();
             $queryAll->innerJoin($communityUserMmTableName, UserProfile::tableName() . '.user_id = ' . $communityUserMmTableName . '.user_id');
+            $queryAll->innerJoin($communityTableName, $communityTableName . '.id = ' . $communityUserMmTableName . '.community_id');
             $queryAll->andWhere([
-                $communityUserMmTableName . '.status' => \lispa\amos\community\models\CommunityUserMm::STATUS_ACTIVE,
-                $communityUserMmTableName . '.role' => \lispa\amos\community\models\CommunityUserMm::ROLE_COMMUNITY_MANAGER,
+                $communityUserMmTableName . '.status' => \open20\amos\community\models\CommunityUserMm::STATUS_ACTIVE,
+                $communityUserMmTableName . '.role' => \open20\amos\community\models\CommunityUserMm::ROLE_COMMUNITY_MANAGER,
             ]);
+            $queryAll->andWhere([$communityUserMmTableName . '.deleted_at' => null]);
+            $queryAll->andWhere([$communityTableName . '.deleted_at' => null]);
+            $queryAll->andWhere(['<>', $communityTableName . '.community_type_id', \open20\amos\community\models\CommunityType::COMMUNITY_TYPE_CLOSED]);
             $queryAll->groupBy(UserProfile::tableName() . '.user_id');
             $allCommunityManagers = $queryAll->all();
+
+            // Query to retrieve community managers with community id.
             $managerQuery = new Query();
             $managerQuery->select([
                 $communityTableName . '.id',
@@ -330,9 +350,12 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface {
             ]);
             $managerQuery->from($communityTableName);
             $managerQuery->innerJoin($communityUserMmTableName, $communityTableName . '.id = ' . $communityUserMmTableName . '.community_id');
-            $managerQuery->andWhere([$communityUserMmTableName . '.status' => \lispa\amos\community\models\CommunityUserMm::STATUS_ACTIVE]);
-            $managerQuery->andWhere([$communityTableName . '.context' => \lispa\amos\community\models\Community::className()]);
+            $managerQuery->andWhere([$communityUserMmTableName . '.status' => \open20\amos\community\models\CommunityUserMm::STATUS_ACTIVE]);
+            $managerQuery->andWhere([$communityTableName . '.context' => \open20\amos\community\models\Community::className()]);
             $managerQuery->andWhere([$communityTableName . '.validated_once' => 1]);
+            $managerQuery->andWhere([$communityUserMmTableName . '.deleted_at' => null]);
+            $managerQuery->andWhere([$communityTableName . '.deleted_at' => null]);
+            $managerQuery->andWhere(['<>', $communityTableName . '.community_type_id', \open20\amos\community\models\CommunityType::COMMUNITY_TYPE_CLOSED]);
             $communityUserMms = $managerQuery->all();
 
             $managerUserIds = [];
@@ -342,9 +365,7 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface {
                 foreach ($communityUserMms as $communityUserMm) {
                     if ($communityManager->user_id == $communityUserMm['user_id']) {
                         $managerCommunityIds[] = $communityUserMm['id'];
-                        if ($communityUserMm['community_type_id'] != \lispa\amos\community\models\CommunityType::COMMUNITY_TYPE_CLOSED) {
-                            $managerUserIds[] = $communityManager->user_id;
-                        }
+                        $managerUserIds[] = $communityManager->user_id;
                     }
                 }
 
@@ -361,9 +382,9 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface {
 
             /** @var ActiveQuery $query */
             $query = AmosAdmin::instance()->createModel('UserProfile')->find()->andWhere(['user_id' => $managerUserIds]);
+            $query->andWhere([UserProfile::tableName() . '.attivo' => UserProfile::STATUS_ACTIVE]);
         } else {
             $query = $this->baseSearch($params);
-            $query->andWhere([UserProfile::tableName() . '.attivo' => 1]);
             $query->where('0');
         }
 
@@ -443,11 +464,12 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface {
         $loggedUser = Yii::$app->user->identity;
         /** @var UserProfile $loggedUserProfile */
         $loggedUserProfile = $loggedUser->getProfile();
-        
+
         $query = new Query();
-        $query->from(UserProfile::tableName())
-        ->andWhere(['>=', 'created_at', $loggedUserProfile->ultimo_logout]);
-        
+        $query
+            ->from(UserProfile::tableName())
+            ->andWhere(['>=', 'created_at', $loggedUserProfile->ultimo_logout]);
+
         return $query->count();
     }
 
@@ -482,6 +504,13 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface {
             $dataProvider->query->andWhere($orQueries);
         }
 
+        // you can't search user for tags, so if select a tag for search i don't show anything
+        $tagsValues = \Yii::$app->request->get('tagValues');
+        if (!empty($tagsValues)) {
+            $dataProvider->query->andWhere(0);
+        }
+
+
         $searchModels = [];
         foreach ($dataProvider->models as $m) {
             array_push($searchModels, $this->convertToSearchResult($m));
@@ -493,7 +522,7 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface {
 
     /**
      * @param object $model The model to convert into SearchResult
-     * @return SearchResult 
+     * @return SearchResult
      */
     public function convertToSearchResult($model) {
         $searchResult = new SearchResult();
@@ -510,10 +539,10 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface {
                 $imageUrl = "/img/defaultProfiloM.png";
             } elseif ($model->sesso == 'Femmina') {
                 $imageUrl = "/img/defaultProfiloF.png";
-            } 
+            }
             $searchResult->immagine = $imageUrl;
 		}
-		
+
         return $searchResult;
 	}
 }

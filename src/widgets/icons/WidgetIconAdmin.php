@@ -1,33 +1,37 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\widgets\icons
+ * @package    open20\amos\admin\widgets\icons
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\widgets\icons;
+namespace open20\amos\admin\widgets\icons;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\core\widget\WidgetIcon;
-use lispa\amos\core\widget\WidgetAbstract;
-use lispa\amos\core\icons\AmosIcons;
+use open20\amos\core\widget\WidgetIcon;
+use open20\amos\core\widget\WidgetAbstract;
+use open20\amos\core\icons\AmosIcons;
 
+use open20\amos\admin\AmosAdmin;
+
+use Yii;
 use yii\helpers\ArrayHelper;
 
 /**
  * Class WidgetIconAdmin
- * @package lispa\amos\admin\widgets\icons
+ * @package open20\amos\admin\widgets\icons
  */
-class WidgetIconAdmin extends WidgetIcon {
+class WidgetIconAdmin extends WidgetIcon
+{
 
     /**
      * @inheritdoc
      */
-    public function init() {
+    public function init()
+    {
         parent::init();
 
         $paramsClassSpan = [
@@ -38,7 +42,7 @@ class WidgetIconAdmin extends WidgetIcon {
         $this->setLabel(AmosAdmin::tHtml('amosadmin', 'Users'));
         $this->setDescription(AmosAdmin::t('amosadmin', 'Users'));
 
-        if (!empty(\Yii::$app->params['dashboardEngine']) && \Yii::$app->params['dashboardEngine'] == WidgetAbstract::ENGINE_ROWS) {
+        if (!empty(Yii::$app->params['dashboardEngine']) && Yii::$app->params['dashboardEngine'] == WidgetAbstract::ENGINE_ROWS) {
             $this->setIconFramework(AmosIcons::IC);
             $this->setIcon('user');
             $paramsClassSpan = [];
@@ -62,7 +66,8 @@ class WidgetIconAdmin extends WidgetIcon {
     /**
      * @inheritdoc
      */
-    public function getOptions() {
+    public function getOptions()
+    {
         return ArrayHelper::merge(
             parent::getOptions(),
             ['children' => $this->getWidgetsIcon()]
@@ -73,7 +78,8 @@ class WidgetIconAdmin extends WidgetIcon {
      * 
      * @return type
      */
-    public function getWidgetsIcon() {
+    public function getWidgetsIcon()
+    {
         $widgets = [];
 
         $MyProfile = new WidgetIconMyProfile();

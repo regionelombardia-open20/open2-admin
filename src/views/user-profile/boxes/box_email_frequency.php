@@ -1,29 +1,29 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\user-profile\boxes
+ * @package    open20\amos\admin\views\user-profile\boxes
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\core\icons\AmosIcons;
-use lispa\amos\notificationmanager\widgets\NotifyFrequencyWidget;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\core\icons\AmosIcons;
+use open20\amos\notificationmanager\widgets\NotifyFrequencyWidget;
 
 /**
  * @var yii\web\View $this
- * @var lispa\amos\core\forms\ActiveForm $form
- * @var lispa\amos\admin\models\UserProfile $model
- * @var lispa\amos\core\user\User $user
+ * @var open20\amos\core\forms\ActiveForm $form
+ * @var open20\amos\admin\models\UserProfile $model
+ * @var open20\amos\core\user\User $user
  */
 
 /** @var AmosAdmin $adminModule */
 $adminModule = Yii::$app->controller->module;
 
-\lispa\amos\core\utilities\ModalUtility::createAlertModal([
+\open20\amos\core\utilities\ModalUtility::createAlertModal([
     'id' => 'notify-uncheck',
     'modalDescriptionText' => AmosAdmin::t('amosadmin', '#notify_flag_uncheck_msg'),
 ]);
@@ -43,7 +43,7 @@ $adminModule = Yii::$app->controller->module;
         ]) ?>
     </div>
     <div class="col-xs-12 nop m-t-15">
-        <?= \lispa\amos\core\helpers\Html::activeCheckbox($model, 'notify_from_editorial_staff', [
+        <?= \open20\amos\core\helpers\Html::activeCheckbox($model, 'notify_from_editorial_staff', [
             'name' => 'notify_from_editorial_staff',
             'id' => 'notify_from_editorial_staff-1',
             'onchange' => "if(!$(this).is(':checked')){ $('#notify-uncheck').modal('show'); }"

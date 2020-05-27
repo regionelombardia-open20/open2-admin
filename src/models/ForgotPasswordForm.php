@@ -1,18 +1,18 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\models
+ * @package    open20\amos\admin\models
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\models;
+namespace open20\amos\admin\models;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\core\user\User;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\core\user\User;
 use yii\base\Model;
 
 /**
@@ -20,7 +20,7 @@ use yii\base\Model;
  *
  * Reset password form
  *
- * @package lispa\amos\admin\models
+ * @package open20\amos\admin\models
  */
 class ForgotPasswordForm extends Model
 {
@@ -52,6 +52,9 @@ class ForgotPasswordForm extends Model
             [['codice_fiscale'], 'safe'],
             [['username'], 'safe'],
             ['email', 'email'],
+            ['email', 'filter', 'filter' => function ($value) {
+                return \yii\helpers\HtmlPurifier::process($value);
+            }],
             [['email'], 'required', 'message' => AmosAdmin::t('amosadmin', "#forgot_pwd_alert")],
         ];
     }

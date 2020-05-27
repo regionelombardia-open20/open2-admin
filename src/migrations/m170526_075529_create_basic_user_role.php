@@ -1,16 +1,16 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\migrations
+ * @package    open20\amos\admin\migrations
  * @category   CategoryName
  */
 
-use lispa\amos\admin\rules\ValidatedBasicUserRule;
-use lispa\amos\core\migration\AmosMigrationPermissions;
+use open20\amos\admin\rules\ValidatedBasicUserRule;
+use open20\amos\core\migration\AmosMigrationPermissions;
 use yii\rbac\Permission;
 
 /**
@@ -37,21 +37,21 @@ class m170526_075529_create_basic_user_role extends AmosMigrationPermissions
                 'parent' => ['BASIC_USER']
             ],
             [
-                'name' => lispa\amos\admin\widgets\icons\WidgetIconMyProfile::className(),
+                'name' => open20\amos\admin\widgets\icons\WidgetIconMyProfile::className(),
                 'type' => Permission::TYPE_PERMISSION,
                 'description' => 'Permesso di visualizzazione del widget Il mio profilo.',
                 'ruleName' => null,
                 'parent' => ['BASIC_USER'],
             ],
             [
-                'name' => lispa\amos\admin\widgets\icons\WidgetIconUserProfile::className(),
+                'name' => open20\amos\admin\widgets\icons\WidgetIconUserProfile::className(),
                 'type' => Permission::TYPE_PERMISSION,
                 'description' => 'Permesso di visualizzazione del widget dei profili.',
                 'ruleName' => null,
                 'parent' => ['BASIC_USER'],
             ],
             [
-                'name' =>lispa\amos\admin\widgets\graphics\WidgetGraphicMyProfile::className(),
+                'name' =>open20\amos\admin\widgets\graphics\WidgetGraphicMyProfile::className(),
                 'type' => Permission::TYPE_PERMISSION,
                 'description' => 'Permesso di visualizzazione del widget dei profili.',
                 'ruleName' => null,

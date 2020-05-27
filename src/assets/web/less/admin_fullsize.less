@@ -1,8 +1,8 @@
 /**
 IMPORT AMOS-LAYOUT VARIABLES
  */
-@import (optional) "../../vendor/lispa/amos-layout/src/assets/resources/base/less/v2/variables.less";
-@import (optional) "../../vendor/lispa/amos-layout/src/assets/resources/base/less/v2/utility.less";
+@import (optional) "../../vendor/open20/amos-layout/src/assets/resources/base/less/v2/variables.less";
+@import (optional) "../../vendor/open20/amos-layout/src/assets/resources/base/less/v2/utility.less";
 /**
 IMPORT STYLE-CUSTOM
  */
@@ -26,6 +26,12 @@ IMPORT STYLE-CUSTOM
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+      @media (max-width: 991px) {
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
     > .container-round-img-sm {
       margin: @margin-min;
     }
@@ -350,6 +356,14 @@ IMPORT STYLE-CUSTOM
   }
 }
 
+//FIX MODAL INVIO CREDENZIALI BTN ALIGN
+.modal-footer .bootstrap-dialog-footer a.btn {
+  margin-top: 20px;
+  @media (max-width: 767px) {
+    margin-top: 5px;
+  }
+}
+
 .social-admin-section {
   .google-services {
     > div:not(:first-child) {
@@ -431,9 +445,10 @@ ADMIN CARD VIEW
 
 .card-container.admin-card-container {
   margin: 0 0 @margin-default;
-  border: solid @border-color-default 0.3px;
-  background: @white-color;
-  height: 305px;
+  border: 0;
+  background: @admin-card-background-body;
+  height: 392px;
+
   .icon-header {
     height: 150px;
     background-color: @admin-card-background-header;
@@ -495,12 +510,6 @@ ADMIN CARD VIEW
   .icon-footer {
     height: 40px;
     background-color: @admin-card-background-footer;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    > div:last-child {
-      margin-left: auto;
-    }
     .amos-tooltip, .am-google {
       margin-left: @margin-medium;
       color: contrast(@admin-card-background-body);
@@ -508,14 +517,22 @@ ADMIN CARD VIEW
     .am-google {
       font-size: 1.85em;
     }
-    .btn-connect-to-user {
-      border: none;
+
+  }
+
+  .icon-btn-action {
+    background-color: @admin-card-background-footer;
+    padding: 15px;
+
+    .btn-connect-to-user,
+    .user-to-event-widget{
+      width: 100%;
       box-shadow: none;
       text-transform: capitalize;
       font-weight: normal;
-      font-size: 1.5em;
-      padding: 0 @padding-medium;
-      margin: 0;
+      font-size: 1.2em;
+      padding: 0;
+      margin: @margin-min 0 0;
       .am {
         font-size: 1em;
         position: relative;

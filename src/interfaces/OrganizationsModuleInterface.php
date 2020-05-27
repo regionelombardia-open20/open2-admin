@@ -1,23 +1,23 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\interfaces
+ * @package    open20\amos\admin\interfaces
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\interfaces;
+namespace open20\amos\admin\interfaces;
 
 /**
- * @deprecated Use \lispa\amos\core\interfaces\OrganizationsModuleInterface
+ * @deprecated Use \open20\amos\core\interfaces\OrganizationsModuleInterface
  *
  * Interface OrganizationsModuleInterface
- * @package lispa\amos\admin\interfaces
+ * @package open20\amos\admin\interfaces
  */
-interface OrganizationsModuleInterface extends \lispa\amos\core\interfaces\OrganizationsModuleInterface
+interface OrganizationsModuleInterface extends \open20\amos\core\interfaces\OrganizationsModuleInterface
 {
 
 }

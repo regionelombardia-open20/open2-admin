@@ -1,16 +1,16 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\user-profile\help
+ * @package    open20\amos\admin\views\user-profile\help
  * @category   CategoryName
  */
 
-use lispa\amos\core\helpers\T;
-use lispa\amos\admin\AmosAdmin;
+use open20\amos\core\helpers\T;
+use open20\amos\admin\AmosAdmin;
 /*
 ?>
 <div id="info" class="bk-infoBox">

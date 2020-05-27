@@ -1,17 +1,17 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\models\base
+ * @package    open20\amos\admin\models\base
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\models\base;
+namespace open20\amos\admin\models\base;
 
-use lispa\amos\admin\AmosAdmin;
+use open20\amos\admin\AmosAdmin;
 
 /**
  * Class UserProfileAgeGroup
@@ -22,11 +22,11 @@ use lispa\amos\admin\AmosAdmin;
  * @property integer $enabled
  * @property integer $order
  *
- * @property \lispa\amos\admin\models\UserProfile[] $userProfiles
+ * @property \open20\amos\admin\models\UserProfile[] $userProfiles
  *
- * @package lispa\amos\admin\models\base
+ * @package open20\amos\admin\models\base
  */
-class UserProfileAgeGroup extends \lispa\amos\core\record\Record
+class UserProfileAgeGroup extends \open20\amos\core\record\Record
 {
     const AGE_GROUP_18_25 = 1;
     const AGE_GROUP_36_35 = 2;
@@ -73,7 +73,7 @@ class UserProfileAgeGroup extends \lispa\amos\core\record\Record
      */
     public function getUserProfiles()
     {
-        $modelClass = \lispa\amos\admin\AmosAdmin::instance()->createModel('UserProfile');
+        $modelClass = \open20\amos\admin\AmosAdmin::instance()->createModel('UserProfile');
         return $this->hasMany($modelClass::className(), ['user_profile_age_group_id' => 'id']);
     }
 }

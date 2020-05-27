@@ -1,29 +1,29 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\first-access-wizard
+ * @package    open20\amos\admin\views\first-access-wizard
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\models\UserProfileAgeGroup;
-use lispa\amos\attachments\components\AttachmentsInput;
-use lispa\amos\core\forms\ActiveForm;
-use lispa\amos\core\forms\editors\Select;
-use lispa\amos\core\forms\WizardPrevAndContinueButtonWidget;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\icons\AmosIcons;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\models\UserProfileAgeGroup;
+use open20\amos\attachments\components\AttachmentsInput;
+use open20\amos\core\forms\ActiveForm;
+use open20\amos\core\forms\editors\Select;
+use open20\amos\core\forms\WizardPrevAndContinueButtonWidget;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\icons\AmosIcons;
 use yii\helpers\ArrayHelper;
-use lispa\amos\admin\base\ConfigurationManager;
+use open20\amos\admin\base\ConfigurationManager;
 
 /**
  * @var yii\web\View $this
- * @var \lispa\amos\admin\models\UserProfile $model
- * @var \lispa\amos\admin\models\UserProfile $facilitatorUserProfile
+ * @var \open20\amos\admin\models\UserProfile $model
+ * @var \open20\amos\admin\models\UserProfile $facilitatorUserProfile
  */
 
 /** @var AmosAdmin $adminModule */
@@ -51,7 +51,7 @@ $adminModule = Yii::$app->controller->module;
                 </h2>
             </div>
         </div>
-        <div class="row">
+        <div class="row avatar presentation">
             <div class="col-md-3 col-xs-12">
                 <?= $form->field($model, 'userProfileImage')->widget(AttachmentsInput::classname(), [
                     'options' => [
@@ -81,14 +81,14 @@ $adminModule = Yii::$app->controller->module;
     </section>
     <hr>
     <section>
-        <div class="row">
+        <div class="row sex agerange">
             <div class="col-md-6 col-xs-12">
                 <?= $form->field($model, 'sesso', [
                     'template' => "{label}\n{hint}\n{beginWrapper}\n{input}\n{error}\n{endWrapper}",
                 ])->widget(Select::classname(), [
                     'options' => ['placeholder' => AmosAdmin::t('amosadmin', 'Select/Choose') . '...', 'disabled' => false],
                     'data' => [
-                        'None' => AmosAdmin::t('amosadmin', 'Non Definito'),
+                        'None' => AmosAdmin::t('amosadmin', 'Non dichiarato'),
                         'Maschio' => AmosAdmin::t('amosadmin', 'Maschio'),
                         'Femmina' => AmosAdmin::t('amosadmin', 'Femmina')
                     ]

@@ -1,25 +1,25 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\user-profile
+ * @package    open20\amos\admin\views\user-profile
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\base\ConfigurationManager;
-use lispa\amos\core\forms\AccordionWidget;
-use lispa\amos\core\forms\ContextMenuWidget;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\icons\AmosIcons;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\base\ConfigurationManager;
+use open20\amos\core\forms\AccordionWidget;
+use open20\amos\core\forms\ContextMenuWidget;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\icons\AmosIcons;
 
 
 /**
  * @var yii\web\View $this
- * @var lispa\amos\admin\models\UserProfile $model
+ * @var open20\amos\admin\models\UserProfile $model
  */
 
 
@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = ['label' => AmosAdmin::t('amosadmin', 'Utenti')
 $this->params['breadcrumbs'][] = ['label' => AmosAdmin::t('amosadmin', 'Elenco'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = '';
 
-\lispa\amos\admin\assets\AmosAsset::register($this);
+\open20\amos\admin\assets\AmosAsset::register($this);
 
 /** @var AmosAdmin $adminModule */
 $adminModule = Yii::$app->controller->module;
@@ -54,7 +54,7 @@ JS;
 
 //if($userCanChangeWorkflow) {
 //    if ($model->status != UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) {
-//        echo \lispa\amos\workflow\widgets\WorkflowTransitionStateDescriptorWidget::widget([
+//        echo \open20\amos\workflow\widgets\WorkflowTransitionStateDescriptorWidget::widget([
 //            'model' => $model,
 //            'workflowId' => UserProfile::USERPROFILE_WORKFLOW,
 //            'classDivMessage' => 'message',
@@ -113,6 +113,7 @@ JS;
                         <?php endif; ?>
                     <?php endif; ?>
 
+
                     <?php if ($model->validato_almeno_una_volta): ?>
                         <div class="container-info-icons">
                             <?php
@@ -121,13 +122,13 @@ JS;
                                 $facilitatorIcon = AmosIcons::show('account', ['class' => 'am-2', 'title' => AmosAdmin::t('amosadmin', 'Facilitator')]);
                                 echo Html::tag('div', $facilitatorIcon . AmosAdmin::t('amosadmin', 'Facilitator'), ['class' => 'facilitator']);
                             }
-                            $googleContactIcon = \lispa\amos\admin\widgets\GoogleContactWidget::widget(['model' => $model]);
+                            $googleContactIcon = \open20\amos\admin\widgets\GoogleContactWidget::widget(['model' => $model]);
                             if (!empty($googleContactIcon)) {
                                 echo Html::tag('div', $googleContactIcon . AmosAdmin::t('amosadmin', 'Google Contact'), ['class' => 'google-contact']);
                             }
 
                             $title = AmosAdmin::t('amosadmin', 'Profile Active');
-                            if ($model->status == \lispa\amos\admin\models\UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) {
+                            if ($model->status == \open20\amos\admin\models\UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) {
                                 $title = AmosAdmin::t('amosadmin', 'Profile Validated');
                             }
                             //TODO replace check-all with cockade
@@ -201,7 +202,7 @@ JS;
                                     // TODO da modificare quando ci sarà terminato il nuovo plugin organizzazioni
                                     $url = '/img/img_default.jpg';
                                     if (isset($model->prevalentPartnership) && isset($model->prevalentPartnership->logoOrganization)) {
-                                        $url = $model->prevalentPartnership->logoOrganization->getUrl('square_medium', false, true);
+                                        $url = $model->prevalentPartnership->logoOrganization->getUrl('profile_view_users', false, true);
                                     }
                                     echo Html::img($url, ['class' => 'img-responsive']);
                                     ?>
@@ -217,11 +218,28 @@ JS;
                         </div>
                     </div>
                 <?php endif; ?>
+
+                <?php
+                if(class_exists('\open20\amos\community\models\CommunityUserField')){
+                    $fields = \open20\amos\community\utilities\CommunityUserFieldUtility::getCommunityUserFieldValues();
+                    foreach ($fields as $field){
+                        $value = $field->getCommunityUserFieldVals($model->user_id)->one();
+                        if(!empty($value->value)) {
+                            ?>
+                            <div class="row">
+                                <div class="col-md-3 col-sm-4 col-xs-12 bold"><?= $field->description ?></div>
+                                <div class="col-md-9 col-sm-8 col-xs-12"><?= $value->value ?></div>
+                            </div>
+                            <?php
+                        }
+                    }
+                }
+                ?>
             </section>
             <!-- end SCHEDA -->
 
             <?php if ($enableUserContacts && Yii::$app->user->id != $model->user_id && !$hideContactsInView): ?>
-                <?= \lispa\amos\admin\widgets\ConnectToUserWidget::widget([
+                <?= \open20\amos\admin\widgets\ConnectToUserWidget::widget([
                     'model' => $model,
                     'isProfileView' => true,
                     'btnClass' => 'btn btn-primary'
@@ -240,7 +258,7 @@ JS;
 
             $moduleCwh = Yii::$app->getModule('cwh');
             if ($enableUserContacts && $model->validato_almeno_una_volta && !$hideContactsInView) {
-                $accordionUserContacts = \lispa\amos\admin\widgets\UserContacsWidget::widget([
+                $accordionUserContacts = \open20\amos\admin\widgets\UserContacsWidget::widget([
                     'userId' => $model->user_id,
                     'isUpdate' => false
                 ]);
@@ -267,13 +285,13 @@ JS;
                 ]);
             }
 
-            if (isset($moduleCwh)):
-                $accordionNetwork = \lispa\amos\cwh\widgets\UserNetworkWidget::widget([
+            if (isset($moduleCwh)) {
+                $accordionNetwork = \open20\amos\cwh\widgets\UserNetworkWidget::widget([
                     'userId' => $model->user_id,
                     'isUpdate' => false
                 ]);
-                ?>
-                <?= AccordionWidget::widget([
+            
+                echo AccordionWidget::widget([
                 'items' => [
                     [
                         'header' => AmosAdmin::t('amosadmin', '#view_accordion_network'),
@@ -293,20 +311,19 @@ JS;
                     'class' => 'sede-accordion'
                 ]
             ]);
-                ?>
-            <?php endif; ?>
+            }
+            ?>
             <!-- end NETWORK -->
 
             <!-- ADMIN - PRIVILEGES -->
-            <?php if (Yii::$app->user->can('PRIVILEGES_MANAGER')): ?>
-                <?php
+            <?php if (Yii::$app->user->can('PRIVILEGES_MANAGER')) {
                 $accordionAdmin = '';
                 $privilegesModule = Yii::$app->getModule('privileges');
-                if (!empty($privilegesModule)) :
-                    $accordionAdmin = \lispa\amos\privileges\widgets\UserPrivilegesWidget::widget(['userId' => $model->user_id]);
-                endif; ?>
-
-                <?= AccordionWidget::widget([
+                if (!empty($privilegesModule)) {
+                    $accordionAdmin = \open20\amos\privileges\widgets\UserPrivilegesWidget::widget(['userId' => $model->user_id]);
+                }
+                
+                echo AccordionWidget::widget([
                     'items' => [
                         [
                             'header' => AmosAdmin::t('amosadmin', '#view_accordion_admin'),
@@ -326,8 +343,7 @@ JS;
                         'class' => 'sede-accordion'
                     ]
                 ]);
-                ?>
-            <?php endif; ?>
+            } ?>
             <!-- end ADMIN - PRIVILEGES -->
         </div>
 
@@ -337,7 +353,7 @@ JS;
                 <div class="col-xs-12 tags-section-sidebar nop" id="section-tags">
                     <?= Html::tag('h2', AmosIcons::show('tag', [], 'dash') . AmosAdmin::t('amosadmin', '#tags_title')) ?>
                     <div class="col-xs-12">
-                        <?= \lispa\amos\core\forms\ListTagsWidget::widget([
+                        <?= \open20\amos\core\forms\ListTagsWidget::widget([
                             'userProfile' => $model->id,
                             'className' => $model->className(),
                             'viewFilesCounter' => true,

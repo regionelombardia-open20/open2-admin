@@ -1,11 +1,11 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\i18n\it-IT
+ * @package    open20\amos\admin\i18n\it-IT
  * @category   CategoryName
  */
 
@@ -309,6 +309,7 @@ return [
     '#go_to_login_title' => 'Torna al form di login',
     '#go_to_register' => 'Indietro',
     '#go_to_register_title' => 'Torna alla pagina di registrazione',
+    '#go_to_your_profile' => 'Vai al tuo profilo',
     'has been sent' => 'è stata inviata',
     'Here is the text of the request' => 'Ecco il testo della richiesta',
     'Human resources' => 'Risorse umane',
@@ -436,6 +437,7 @@ return [
     'Non ancora definito' => 'Non ancora definito',
     'Non ci sono widgets selezionati per questa dashboard' => 'Non ci sono widgets selezionati per questa dashboard',
     'Non Definito' => 'Non Definito',
+    'Non dichiarato' => 'Non dichiarato',
     'Non è possibile condividere il contenuto con questo utente. Il contenuto si trova in una community non accessibile a questo utente' => 'Non è possibile condividere il contenuto con questo utente. Il contenuto si trova in una community non accessibile a questo utente',
     'No' => 'No',
     'Non presente' => 'Non presente',
@@ -494,6 +496,7 @@ return [
     'Prevalent partnership not specified' => 'Collaborazione prevalente non indicata',
     'Prima di poter gestire la rete &egrave; necessario salvare l\'utente.' => 'Prima di poter gestire la rete è necessario salvare l\'utente.',
     'Prima di poter gestire le classi di utenza &egrave; necessario salvare l\'utente.' => 'Prima di poter gestire le classi di utenza è necessario salvare l\'utente.',
+    "Prima di poter gestire le notifiche &egrave; necessario salvare l'utente." => "Prima di poter gestire le notifiche &egrave; necessario salvare l'utente.",
     'Primo accesso' => 'Primo accesso',
     '#privacy_label' => 'Privacy',
     '#privacy_not_accept' => 'Per continuare accetta il trattamento dei dati personali',
@@ -684,7 +687,7 @@ return [
     'Unable to delete Connection' => 'Impossibile cancellare la connessione',
     'Unable to register, user creation error' => 'Impossibile iscriversi, errore di creazione dell\'utente',
     'Unable to send user mail, contact admin' => 'Impossibile inviare la mail dell\'utente, contattare l\'amministratore',
-    '#undefinded' => 'Non Definito',
+    '#undefinded' => 'Undeclared',
     '#unsubscribe_message_error' => 'Errore durante l\'aggiornamento delle tue impostazioni di notifica.',
     '#unsubscribe_message_invalid_token' => 'Token non valido.',
     '#unsubscribe_message_invalid_user' => 'Utente non valido.',
@@ -693,6 +696,7 @@ return [
     'Updated at' => 'Aggiornato il',
     'Updated by' => 'Aggiornato da',
     'upload ' => 'carica',
+    '#user_context_association_error' => 'Errore durante associazione utente a elemento',
     'User deactivated. To log in again, request reactivation of the profile.' => 'Utente disattivato. Per accedere nuovamente, richiedi la riattivazione del profilo.',
     '#userdisabled_profile_subtitle' => 'Utente disattivato. Per accedere nuovamente, richiedi la riattivazione del profilo.',
     'User ID' => 'ID Utente',
@@ -796,7 +800,7 @@ return [
     '#fullsize_social_title_login' => '<strong>ACCEDI</strong> utilizzando uno dei tuoi account social',
     '#fullsize_social_title_register' => '<strong>REGISTRATI</strong> utilizzando uno dei tuoi account social',
     '#fullsize_spid' => '<strong>ACCEDI</strong> con il Sistema Pubblico di Identità Digitale',
-    '#fullsize_login_spid_text' => 'Entra con SPID',
+    '#fullsize_login_spid_text' => 'Entra con SPID/CNS',
     '#fullsize_login_spid_text_right' => 'SPID è il sistema di accesso che consente di utilizzare, con un\'identità digitale unica, i servizi online della Pubblica Amministrazione e dei privati accreditati.<br/>Se sei già in possesso di un\'identità digitale, accedi con le credenziali del tuo gestore. Se non hai ancora un\'identità digitale, richiedila ad uno dei gestori.',
     '#fullsize_register' => '<strong>REGISTRATI</strong> inserendo i tuoi dati',
     '#fullsize_field_name' => 'NOME',
@@ -815,8 +819,13 @@ return [
     '#fullsize_field_reset_pwd_1' => 'inserisci la nuova password',
     '#fullsize_field_reset_pwd_2' => 'ripeti la nuova password',
     '#view-all-profile' => 'visualizza profilo',
-
-
-
+    'Gestisci inviti' => 'Gestisci inviti',
+    '#subject_notification_accepted_request' => 'Invito ad accedere alla piattaforma',
+    '#text_notification_accepted_request' => 'ha accettato la tua richiesta di invito a registrarsi alla piattaforma.',
+    'Cognome e nome' => 'Cognome e nome',
+    'Notifications' => 'Notifiche',
+    'Configure notifications' => 'Configura notifiche',
+    '#facilitator_assigned' => 'sono il tuo facilitatore, accetta l\'invito per poter usufluire subito del sistema di messaggistica privato',
+    '#yours_validated_users' => '',
 
 ];

@@ -1,18 +1,18 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\security
+ * @package    open20\amos\admin\views\security
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\admin\assets\ModuleAdminAsset;
-use lispa\amos\core\forms\ActiveForm;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\core\helpers\Html;
+use open20\amos\admin\assets\ModuleAdminAsset;
+use open20\amos\core\forms\ActiveForm;
 
 $this->title = AmosAdmin::t('amosadmin', 'Password dimenticata');
 $this->params['breadcrumbs'][] = $this->title;
@@ -21,7 +21,6 @@ $referrer = \Yii::$app->request->referrer;
 if(strpos($referrer, 'javascript') !== false){
     $referrer = null;
 }
-
 ModuleAdminAsset::register(Yii::$app->view);
 ?>
 

@@ -1,16 +1,16 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\migrations
+ * @package    open20\amos\admin\migrations
  * @category   CategoryName
  */
 
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\core\migration\AmosMigrationPermissions;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\core\migration\AmosMigrationPermissions;
 use yii\rbac\Permission;
 
 /**
@@ -41,14 +41,14 @@ class m181003_133917_create_admin_role_amministratore_utenti extends AmosMigrati
                     UserProfile::USERPROFILE_WORKFLOW_STATUS_TOVALIDATE,
                     UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED,
                     UserProfile::USERPROFILE_WORKFLOW_STATUS_NOTVALIDATED,
-                    \lispa\amos\admin\widgets\graphics\WidgetGraphicMyProfile::className(),
-                    \lispa\amos\admin\widgets\icons\WidgetIconMyProfile::className(),
-                    \lispa\amos\admin\widgets\icons\WidgetIconAdmin::className(),
-                    \lispa\amos\admin\widgets\icons\WidgetIconUserProfile::className(),
-                    \lispa\amos\admin\widgets\icons\WidgetIconValidatedUserProfiles::className(),
-                    \lispa\amos\admin\widgets\icons\WidgetIconFacilitatorUserProfiles::className(),
-                    \lispa\amos\admin\widgets\icons\WidgetIconCommunityManagerUserProfiles::className(),
-                    \lispa\amos\admin\widgets\icons\WidgetIconInactiveUserProfiles::className()
+                    \open20\amos\admin\widgets\graphics\WidgetGraphicMyProfile::className(),
+                    \open20\amos\admin\widgets\icons\WidgetIconMyProfile::className(),
+                    \open20\amos\admin\widgets\icons\WidgetIconAdmin::className(),
+                    \open20\amos\admin\widgets\icons\WidgetIconUserProfile::className(),
+                    \open20\amos\admin\widgets\icons\WidgetIconValidatedUserProfiles::className(),
+                    \open20\amos\admin\widgets\icons\WidgetIconFacilitatorUserProfiles::className(),
+                    \open20\amos\admin\widgets\icons\WidgetIconCommunityManagerUserProfiles::className(),
+                    \open20\amos\admin\widgets\icons\WidgetIconInactiveUserProfiles::className()
                 ]
             ]
         ];

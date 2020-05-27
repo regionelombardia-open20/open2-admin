@@ -1,16 +1,16 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\migrations
+ * @package    open20\amos\admin\migrations
  * @category   CategoryName
  */
 
-use lispa\amos\admin\rules\ShowCommunityManagerWidgetRule;
-use lispa\amos\core\migration\AmosMigrationPermissions;
+use open20\amos\admin\rules\ShowCommunityManagerWidgetRule;
+use open20\amos\core\migration\AmosMigrationPermissions;
 
 /**
  * Class m170710_082659_show_admin_community_manager_widget_rule
@@ -24,7 +24,7 @@ class m170710_082659_show_admin_community_manager_widget_rule extends AmosMigrat
     {
         return [
             [
-                'name' => \lispa\amos\admin\widgets\icons\WidgetIconCommunityManagerUserProfiles::className(),
+                'name' => \open20\amos\admin\widgets\icons\WidgetIconCommunityManagerUserProfiles::className(),
                 'update' => true,
                 'newValues' => [
                     'ruleName' => ShowCommunityManagerWidgetRule::className()

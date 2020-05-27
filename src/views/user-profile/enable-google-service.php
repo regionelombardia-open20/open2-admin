@@ -1,11 +1,11 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\user-profile
+ * @package    open20\amos\admin\views\user-profile
  * @category   CategoryName
  */
 
@@ -13,7 +13,7 @@ $js = <<<JS
 window.close();
 JS;
 
-$this->title = \lispa\amos\admin\AmosAdmin::t('amosadmin', 'Enable Google Service');
+$this->title = \open20\amos\admin\AmosAdmin::t('amosadmin', 'Enable Google Service');
 
 //$this->registerJs($js, \yii\web\View::POS_LOAD);
 

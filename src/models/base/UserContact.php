@@ -1,24 +1,24 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\models\base
+ * @package    open20\amos\admin\models\base
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\models\base;
+namespace open20\amos\admin\models\base;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\core\record\AmosRecordAudit;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\core\record\AmosRecordAudit;
 
 /**
  * Class UserContact
  *
  * This is the base-model class for table "user_contact".
- * @package lispa\amos\admin\models\base
+ * @package open20\amos\admin\models\base
  *
  * @property integer $id
  * @property integer $user_id
@@ -34,8 +34,8 @@ use lispa\amos\core\record\AmosRecordAudit;
  * @property integer $updated_by
  * @property integer $deleted_by
  *
- * @property \lispa\amos\admin\models\UserProfile $userProfile
- * @property \lispa\amos\admin\models\UserProfile $contactUserProfile
+ * @property \open20\amos\admin\models\UserProfile $userProfile
+ * @property \open20\amos\admin\models\UserProfile $contactUserProfile
  */
 class UserContact extends AmosRecordAudit
 {
@@ -86,7 +86,7 @@ class UserContact extends AmosRecordAudit
      */
     public function getUser()
     {
-        return $this->hasOne(\lispa\amos\core\user\User::className(), ['id' => 'user_id']);
+        return $this->hasOne(\open20\amos\core\user\User::className(), ['id' => 'user_id']);
     }
 
     /**
@@ -94,7 +94,7 @@ class UserContact extends AmosRecordAudit
      */
     public function getUserProfile()
     {
-        return $this->hasOne(\lispa\amos\admin\models\UserProfile::className(), ['user_id' => 'user_id']);
+        return $this->hasOne(\open20\amos\admin\models\UserProfile::className(), ['user_id' => 'user_id']);
     }
 
     /**
@@ -102,6 +102,6 @@ class UserContact extends AmosRecordAudit
      */
     public function getContactUserProfile()
     {
-        return $this->hasOne(\lispa\amos\admin\models\UserProfile::className(), ['user_id' => 'contact_id']);
+        return $this->hasOne(\open20\amos\admin\models\UserProfile::className(), ['user_id' => 'contact_id']);
     }
 }

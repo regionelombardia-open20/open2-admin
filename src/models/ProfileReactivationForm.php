@@ -1,25 +1,25 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\models
+ * @package    open20\amos\admin\models
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\models;
+namespace open20\amos\admin\models;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\core\user\User;
-use lispa\amos\core\utilities\Email;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\core\user\User;
+use open20\amos\core\utilities\Email;
 use Yii;
 use yii\base\Model;
 
 /**
  * Class ProfileReactivationForm
- * @package lispa\amos\admin\models
+ * @package open20\amos\admin\models
  */
 class ProfileReactivationForm extends Model
 {

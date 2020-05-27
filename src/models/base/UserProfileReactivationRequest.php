@@ -1,6 +1,15 @@
 <?php
 
-namespace lispa\amos\admin\models\base;
+/**
+ * Aria S.p.A.
+ * OPEN 2.0
+ *
+ *
+ * @package    Open20Package
+ * @category   CategoryName
+ */
+
+namespace open20\amos\admin\models\base;
 
 use Yii;
 
@@ -17,9 +26,9 @@ use Yii;
  * @property integer $updated_by
  * @property integer $deleted_by
  *
- * @property \lispa\amos\admin\models\UserProfile $userProfile
+ * @property \open20\amos\admin\models\UserProfile $userProfile
  */
-class UserProfileReactivationRequest extends \lispa\amos\core\record\Record
+class UserProfileReactivationRequest extends \open20\amos\core\record\Record
 {
 
 
@@ -68,6 +77,6 @@ class UserProfileReactivationRequest extends \lispa\amos\core\record\Record
      */
     public function getUserProfile()
     {
-        return $this->hasOne(\lispa\amos\admin\models\UserProfile::className(), ['id' => 'user_profile_id']);
+        return $this->hasOne(\open20\amos\admin\models\UserProfile::className(), ['id' => 'user_profile_id']);
     }
 }

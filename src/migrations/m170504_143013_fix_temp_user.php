@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\migrations
+ * @package    open20\amos\admin\migrations
  * @category   CategoryName
  */
 
-use lispa\amos\core\user\User;
+use open20\amos\core\user\User;
 use yii\db\Migration;
 
 class m170504_143013_fix_temp_user extends Migration
@@ -64,7 +64,7 @@ class m170504_143013_fix_temp_user extends Migration
                 continue;
             }
             $user2upd->detachBehaviors();
-            /** @var \lispa\amos\core\user\User $user */
+            /** @var \open20\amos\core\user\User $user */
             $user2upd->created_at = date('Y-m-d H:i:s', $user['created_at_int']);
             $user2upd->updated_at = date('Y-m-d H:i:s', $user['updated_at_int']);
             $user2upd->created_by = 1;
@@ -124,7 +124,7 @@ class m170504_143013_fix_temp_user extends Migration
             $user2upd->detachBehaviors();
             $created_at_dt = new DateTime($user['created_at_dt']);
             $updated_at_dt = new DateTime($user['updated_at_dt']);
-            /** @var \lispa\amos\core\user\User $user */
+            /** @var \open20\amos\core\user\User $user */
             $user2upd->created_at = $created_at_dt->getTimestamp();
             $user2upd->updated_at = $updated_at_dt->getTimestamp();
             if (!$user2upd->save(false)) {

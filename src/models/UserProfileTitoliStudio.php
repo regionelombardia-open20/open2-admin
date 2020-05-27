@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\models
+ * @package    open20\amos\admin\models
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\models;
+namespace open20\amos\admin\models;
 
 //use backend\modules\cwh\behaviors\CwhNetworkBehaviors;
 //use backend\modules\eventi\models\query\EventiQuery;
@@ -18,7 +18,7 @@ namespace lispa\amos\admin\models;
 /**
  * This is the model class for table "user_profile_titoli_studio".
  */
-class UserProfileTitoliStudio extends \lispa\amos\admin\models\base\UserProfileTitoliStudio
+class UserProfileTitoliStudio extends \open20\amos\admin\models\base\UserProfileTitoliStudio
 {
     //public $regola_pubblicazione;
     //public $destinatari;

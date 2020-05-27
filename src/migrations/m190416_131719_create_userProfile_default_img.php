@@ -1,8 +1,17 @@
 <?php
 
+/**
+ * Aria S.p.A.
+ * OPEN 2.0
+ *
+ *
+ * @package    Open20Package
+ * @category   CategoryName
+ */
+
 use yii\db\Migration;
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\attachments\components\FileImport;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\attachments\components\FileImport;
 
 /**
  * Class m190416_131719_create_userProfile_default_img
@@ -74,7 +83,7 @@ class m190416_131719_create_userProfile_default_img extends Migration {
     private function migrateFile($document, $attribute, $filePath) {
         $fileImport = new FileImport();
         $ok = $fileImport->importFileForModel($document, $attribute,
-                $filePath,false);
+                $filePath, false);
         return $ok;
     }
 

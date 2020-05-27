@@ -1,18 +1,18 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\bootstrap
+ * @package    open20\amos\admin\bootstrap
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\bootstrap;
+namespace open20\amos\admin\bootstrap;
 
-use lispa\amos\admin\components\FirstAccessWizardComponent;
-use lispa\amos\admin\models\UserProfile;
+use open20\amos\admin\components\FirstAccessWizardComponent;
+use open20\amos\admin\models\UserProfile;
 use yii\base\BootstrapInterface;
 use yii\base\Controller;
 use yii\base\Event;

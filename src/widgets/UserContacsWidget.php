@@ -1,22 +1,23 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\widgets
+ * @package    open20\amos\admin\widgets
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\widgets;
+namespace open20\amos\admin\widgets;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\models\UserContact;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\icons\AmosIcons;
-use lispa\amos\core\user\User;
-use lispa\amos\core\utilities\JsUtility;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\models\UserContact;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\icons\AmosIcons;
+use open20\amos\core\user\User;
+use open20\amos\core\utilities\JsUtility;
 use Yii;
 use yii\base\Widget;
 use yii\web\View;
@@ -24,7 +25,7 @@ use yii\widgets\PjaxAsset;
 
 /**
  * Class UserContacsWidget
- * @package lispa\amos\admin\widgets
+ * @package open20\amos\admin\widgets
  */
 class UserContacsWidget extends Widget
 {
@@ -45,15 +46,23 @@ class UserContacsWidget extends Widget
     public $gridId = 'user-contanct-grid';
 
     /**
+     * @var
+     */
+    private $userProfile;
+
+    /**
      * widget initialization
      */
     public function init()
     {
         parent::init();
 
+
         if (is_null($this->userId)) {
             throw new \Exception(AmosAdmin::t('amosadmin', 'Missing user id'));
         }
+
+        $this->userProfile = UserProfile::find()->andWhere(['user_id' => $this->userId])->one();
     }
 
     /**
@@ -67,7 +76,7 @@ class UserContacsWidget extends Widget
         $gridId = $this->gridId;
         $url = \Yii::$app->urlManager->createUrl([
             '/admin/user-profile/contacts',
-            'id' => $this->userId,
+            'id' => $this->userProfile->id,
             'isUpdate' => $this->isUpdate
             ]);
         $searchPostName = 'searchContactsName';
@@ -105,6 +114,7 @@ class UserContacsWidget extends Widget
                     'headers' => AmosAdmin::t('amosadmin', 'Name'),
                 ],
                 'label' => AmosAdmin::t('amosadmin', 'Name'),
+                'format' => 'raw',
                 'value' => function ($model) use ($confirm) {
                     /** @var UserContact $model */
                     if($this->userId == $model->user_id) {
@@ -118,9 +128,7 @@ class UserContacsWidget extends Widget
                         'title' => AmosAdmin::t('amoscommunity', 'Apri il profilo di {nome_profilo}', ['nome_profilo' => $name]),
                         'data' => $confirm
                     ]);
-                },
-
-                'format' => 'html'
+                }
             ],
             'status' => [
                 'attribute' => 'status',
@@ -188,7 +196,7 @@ class UserContacsWidget extends Widget
         $loggedUserId = Yii::$app->getUser()->id;
         $this->isUpdate = $this->isUpdate && ($loggedUserId == $model->user_id) && $canAssociateContact;
 
-        $widget = \lispa\amos\core\forms\editors\m2mWidget\M2MWidget::widget([
+        $widget = \open20\amos\core\forms\editors\m2mWidget\M2MWidget::widget([
             'model' => $model,
             'modelId' => $model->id,
             'modelData' => $contacts,
@@ -203,6 +211,7 @@ class UserContacsWidget extends Widget
             'pageParam' => 'page-contacts',
             'disableCreateButton' => true,
             'createAssociaButtonsEnabled' => $this->isUpdate,
+            'btnAssociaId' => 'user-contacts-widget-associa-btn-id',
             'btnAssociaLabel' => AmosAdmin::t('amosadmin', 'Add new contacts'),
             'actionColumnsTemplate' => $this->isUpdate ? '{googleContact}{connect}{deleteRelation}' : '{googleContact}',
             'targetUrl' => '/admin/user-contact/associate-contacts',
@@ -270,7 +279,7 @@ class UserContacsWidget extends Widget
         $controller = Yii::$app->controller;
         $isActionUpdate = ($controller->action->id == 'update');
         $confirm = $isActionUpdate ? [
-            'confirm' => \lispa\amos\core\module\BaseAmosModule::t('amoscore', '#confirm_exit_without_saving')
+            'confirm' => \open20\amos\core\module\BaseAmosModule::t('amoscore', '#confirm_exit_without_saving')
         ] : null;
         return $confirm;
     }

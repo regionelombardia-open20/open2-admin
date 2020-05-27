@@ -1,19 +1,19 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\exceptions
+ * @package    open20\amos\admin\exceptions
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\exceptions;
+namespace open20\amos\admin\exceptions;
 
 /**
  * Class AdminException
- * @package lispa\amos\admin\exceptions
+ * @package open20\amos\admin\exceptions
  */
 class AdminException extends \Exception
 {

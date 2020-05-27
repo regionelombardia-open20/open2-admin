@@ -1,26 +1,23 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\models
+ * @package    open20\amos\admin\models
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\models;
+namespace open20\amos\admin\models;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\core\user\User;
-use Yii;
+use open20\amos\admin\AmosAdmin;
 use yii\base\Model;
-use lispa\amos\admin\models\UserLockout;
 use yii\helpers\ArrayHelper;
 
 /**
  * Class LoginForm
- * @package lispa\amos\admin\models
+ * @package open20\amos\admin\models
  */
 class RegisterForm extends Model
 {
@@ -51,16 +48,15 @@ class RegisterForm extends Model
             [['reCaptcha'], \himiklab\yii2\recaptcha\ReCaptchaValidator::className(), 'message' => AmosAdmin::t('amosadmin', "#register_recaptcha_alert")]
         ];
     }
-    
+
     /**
-     * 
-     * @return type
+     * @inheritdoc
      */
     public function attributeLabels()
     {
         return ArrayHelper::merge(parent::attributeLabels(), [
-             'nome' => AmosAdmin::t('amosadmin', 'Nome'),
-             'cognome' => AmosAdmin::t('amosadmin', 'Cognome'),
+            'nome' => AmosAdmin::t('amosadmin', 'Nome'),
+            'cognome' => AmosAdmin::t('amosadmin', 'Cognome'),
         ]);
     }
 }

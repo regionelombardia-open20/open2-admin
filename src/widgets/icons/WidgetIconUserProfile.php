@@ -1,36 +1,39 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\widgets\icons
+ * @package    open20\amos\admin\widgets\icons
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\widgets\icons;
+namespace open20\amos\admin\widgets\icons;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\models\search\UserProfileSearch;
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\core\widget\WidgetIcon;
-use lispa\amos\core\widget\WidgetAbstract;
-use lispa\amos\core\icons\AmosIcons;
+use open20\amos\core\widget\WidgetIcon;
+use open20\amos\core\widget\WidgetAbstract;
+use open20\amos\core\icons\AmosIcons;
+
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\models\UserProfile;
 
 use Yii;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 
 /**
  * Class WidgetIconUserProfile
- * @package lispa\amos\admin\widgets\icons
+ * @package open20\amos\admin\widgets\icons
  */
-class WidgetIconUserProfile extends WidgetIcon {
+class WidgetIconUserProfile extends WidgetIcon
+{
 
     /**
      * @inheritdoc
      */
-    public function init() {
+    public function init()
+    {
         parent::init();
 
         $paramsClassSpan = [
@@ -40,8 +43,8 @@ class WidgetIconUserProfile extends WidgetIcon {
 
         $this->setLabel(AmosAdmin::tHtml('amosadmin', 'All users'));
         $this->setDescription(AmosAdmin::t('amosadmin', 'List of all platform users'));
-        
-        if (!empty(\Yii::$app->params['dashboardEngine']) && \Yii::$app->params['dashboardEngine'] == WidgetAbstract::ENGINE_ROWS) {
+
+        if (!empty(Yii::$app->params['dashboardEngine']) && Yii::$app->params['dashboardEngine'] == WidgetAbstract::ENGINE_ROWS) {
             $this->setIconFramework(AmosIcons::IC);
             $this->setIcon('user');
             $paramsClassSpan = [];
@@ -61,23 +64,23 @@ class WidgetIconUserProfile extends WidgetIcon {
             )
         );
 
+        $query = new Query();
+        $query
+            ->select([UserProfile::tableName().'.id', UserProfile::tableName().'.attivo', UserProfile::tableName().'.deleted_at'])
+            ->from(UserProfile::tableName())
+            ->andWhere([
+                '>=', 
+                UserProfile::tableName().'.created_at',
+                Yii::$app->getUser()->getIdentity()->getProfile()->ultimo_logout
+            ]);
+        
         $this->setBulletCount(
-            $this->makeBulletCounter(null)
+            $this->makeBulletCounter(
+                Yii::$app->getUser()->getId(),
+                UserProfile::className(),
+                $query
+            )
         );
-    }
-
-    /**
-     * 
-     * @param type $user_id
-     * @return type
-     */
-    public function makeBulletCounter($user_id = null) {
-        return 0;
-        
-        $query = new UserProfileSearch();
-        
-        return $query->getNewProfilesCount();
-
     }
 
 }

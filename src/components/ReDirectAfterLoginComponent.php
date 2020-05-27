@@ -1,25 +1,25 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\components
+ * @package    open20\amos\admin\components
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\components;
+namespace open20\amos\admin\components;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\models\UserProfile;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\models\UserProfile;
 //use yii\base\BootstrapInterface;
 use yii\base\Component;
 //use yii\base\Event;
 
 /**
  * Class FirstAccessWizardComponent
- * @package lispa\amos\admin\components
+ * @package open20\amos\admin\components
  */
 class ReDirectAfterLoginComponent extends Component /*implements BootstrapInterface*/
 {

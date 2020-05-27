@@ -1,18 +1,18 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\layouts
+ * @package    open20\amos\admin\views\layouts
  * @category   CategoryName
  */
 
 /**@var $this \yii\web\View */
 /**@var $content string */
 
-use lispa\amos\core\helpers\Html;
+use open20\amos\core\helpers\Html;
 use yii\widgets\Breadcrumbs;
 
 AmosRapidAsset::register($this);

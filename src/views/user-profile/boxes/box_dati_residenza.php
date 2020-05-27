@@ -1,19 +1,20 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\user-profile\boxes
+ * @package    open20\amos\admin\views\user-profile\boxes
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\base\ConfigurationManager;
-use lispa\amos\comuni\models\IstatNazioni;
-use lispa\amos\comuni\models\IstatProvince;
-use lispa\amos\core\icons\AmosIcons;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\base\ConfigurationManager;
+use open20\amos\comuni\models\IstatNazioni;
+use open20\amos\comuni\models\IstatProvince;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\icons\AmosIcons;
 use kartik\depdrop\DepDrop;
 use kartik\widgets\Select2;
 use yii\helpers\ArrayHelper;
@@ -21,9 +22,9 @@ use yii\helpers\Url;
 
 /**
  * @var yii\web\View $this
- * @var lispa\amos\core\forms\ActiveForm $form
- * @var lispa\amos\admin\models\UserProfile $model
- * @var lispa\amos\core\user\User $user
+ * @var open20\amos\core\forms\ActiveForm $form
+ * @var open20\amos\admin\models\UserProfile $model
+ * @var open20\amos\core\user\User $user
  */
 
 /** @var AmosAdmin $adminModule */
@@ -46,6 +47,8 @@ $adminModule = Yii::$app->controller->module;
                     ]); ?>
                 </div>
             </div>
+        <?php else: ?>
+            <?= Html::hiddenInput('residenza_nazione_id', 1, ['id' => 'residenza_nazione_id']) ?> <!-- 1 = ID dell'Italia -->
         <?php endif; ?>
         <?php if ($adminModule->confManager->isVisibleField('provincia_residenza_id', ConfigurationManager::VIEW_TYPE_FORM)): ?>
             <div class="col-lg-4 col-sm-4">

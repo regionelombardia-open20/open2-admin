@@ -1,11 +1,11 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\migrations
+ * @package    open20\amos\admin\migrations
  * @category   CategoryName
  */
 
@@ -27,20 +27,20 @@ class m170502_143958_remove_widget_icon_admin extends Migration
         $this->delete(
             '{{%amos_user_dashboards_widget_mm}}',
             [
-                'amos_widgets_classname' => \lispa\amos\admin\widgets\icons\WidgetIconAdmin::className()
+                'amos_widgets_classname' => \open20\amos\admin\widgets\icons\WidgetIconAdmin::className()
             ]
         );
         $this->delete(
             '{{%auth_item_child}}',
             [
-                'child' => \lispa\amos\admin\widgets\icons\WidgetIconAdmin::className()
+                'child' => \open20\amos\admin\widgets\icons\WidgetIconAdmin::className()
             ]
         );
 
         $this->delete(
             '{{%auth_item}}',
             [
-                'name' => \lispa\amos\admin\widgets\icons\WidgetIconAdmin::className()
+                'name' => \open20\amos\admin\widgets\icons\WidgetIconAdmin::className()
             ]
         );
 
@@ -50,7 +50,7 @@ class m170502_143958_remove_widget_icon_admin extends Migration
                 'child_of' => null
             ],
             [
-                'classname' => \lispa\amos\admin\widgets\graphics\WidgetGraphicMyProfile::className()
+                'classname' => \open20\amos\admin\widgets\graphics\WidgetGraphicMyProfile::className()
             ]
         );
         $this->update(
@@ -59,7 +59,7 @@ class m170502_143958_remove_widget_icon_admin extends Migration
                 'child_of' => null
             ],
             [
-                'classname' =>  \lispa\amos\admin\widgets\icons\WidgetIconMyProfile::className()
+                'classname' =>  \open20\amos\admin\widgets\icons\WidgetIconMyProfile::className()
             ]
         );
         $this->update(
@@ -68,13 +68,13 @@ class m170502_143958_remove_widget_icon_admin extends Migration
                 'child_of' => null
             ],
             [
-                'classname' =>  \lispa\amos\admin\widgets\icons\WidgetIconUserProfile::className()
+                'classname' =>  \open20\amos\admin\widgets\icons\WidgetIconUserProfile::className()
             ]
         );
         $this->delete(
             '{{%amos_widgets}}',
             [
-                'classname' =>  \lispa\amos\admin\widgets\icons\WidgetIconAdmin::className()
+                'classname' =>  \open20\amos\admin\widgets\icons\WidgetIconAdmin::className()
             ]
         );
     }
@@ -82,7 +82,7 @@ class m170502_143958_remove_widget_icon_admin extends Migration
     public function safeDown()
     {
         $singlePerm = array(
-            'name' => \lispa\amos\admin\widgets\icons\WidgetIconAdmin::className(),
+            'name' => \open20\amos\admin\widgets\icons\WidgetIconAdmin::className(),
             'type' => '2',
             'description' => 'Permesso di visualizzazione del widget Amministrazione',
         );
@@ -98,7 +98,7 @@ class m170502_143958_remove_widget_icon_admin extends Migration
         }
         $this->batchInsert('{{%auth_item_child}}',['parent', 'child'], [
             [
-                'ADMIN', \lispa\amos\admin\widgets\icons\WidgetIconAdmin::className()
+                'ADMIN', \open20\amos\admin\widgets\icons\WidgetIconAdmin::className()
             ]
         ]);
 
@@ -109,7 +109,7 @@ class m170502_143958_remove_widget_icon_admin extends Migration
         $userId = 1;
         $this->batchInsert('{{%amos_widgets}}',['classname', 'type', 'module', 'status', 'child_of', 'created_by', 'created_at', 'updated_by', 'updated_at'], [
             [
-                \lispa\amos\admin\widgets\icons\WidgetIconAdmin::className(),
+                \open20\amos\admin\widgets\icons\WidgetIconAdmin::className(),
                 'ICON',
                 $module,
                 $status,
@@ -124,20 +124,20 @@ class m170502_143958_remove_widget_icon_admin extends Migration
         $this->update(
             '{{%amos_widgets}}',
             [
-                'child_of' => \lispa\amos\admin\widgets\icons\WidgetIconAdmin::className()
+                'child_of' => \open20\amos\admin\widgets\icons\WidgetIconAdmin::className()
             ],
             [
-                'classname' =>  \lispa\amos\admin\widgets\icons\WidgetIconMyProfile::className()
+                'classname' =>  \open20\amos\admin\widgets\icons\WidgetIconMyProfile::className()
             ]
         );
 
         $this->update(
             '{{%amos_widgets}}',
             [
-                'child_of' => \lispa\amos\admin\widgets\icons\WidgetIconAdmin::className()
+                'child_of' => \open20\amos\admin\widgets\icons\WidgetIconAdmin::className()
             ],
             [
-                'classname' =>  \lispa\amos\admin\widgets\icons\WidgetIconUserProfile::className()
+                'classname' =>  \open20\amos\admin\widgets\icons\WidgetIconUserProfile::className()
             ]
         );
     }

@@ -1,26 +1,27 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\user-profile
+ * @package    open20\amos\admin\views\user-profile
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\base\ConfigurationManager;
-use lispa\amos\admin\utility\UserProfileUtility;
-use lispa\amos\core\forms\ContextMenuWidget;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\icons\AmosIcons;
-use lispa\amos\core\interfaces\OrganizationsModuleInterface;
-use lispa\amos\core\user\User;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\base\ConfigurationManager;
+use open20\amos\admin\utility\UserProfileUtility;
+use open20\amos\core\forms\ContextMenuWidget;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\icons\AmosIcons;
+use open20\amos\core\interfaces\OrganizationsModuleInterface;
+use open20\amos\core\user\User;
+use open20\amos\core\utilities\ModalUtility;
 
 /**
  * @var yii\web\View $this
- * @var \lispa\amos\admin\models\UserProfile $model
+ * @var \open20\amos\admin\models\UserProfile $model
  */
 
 /** @var AmosAdmin $adminModule */
@@ -32,7 +33,6 @@ $organizationsModule = Yii::$app->getModule($adminModule->getOrganizationModuleN
 if ($model instanceof User) {
     $model = $model->getProfile();
 }
-
 $nomeCognome = '';
 if ($adminModule->confManager->isVisibleBox('box_informazioni_base', ConfigurationManager::VIEW_TYPE_VIEW)) {
     if ($adminModule->confManager->isVisibleField('nome', ConfigurationManager::VIEW_TYPE_VIEW)) {
@@ -52,12 +52,15 @@ $confirmText = AmosAdmin::t('amosadmin', 'You have selected') . " " . $model->ge
 
 $isAssociateFacilitator = (Yii::$app->controller->action->id == 'associate-facilitator');
 if ($isAssociateFacilitator) {
-    \lispa\amos\core\utilities\ModalUtility::createConfirmModal([
+    ModalUtility::createConfirmModal([
         'id' => 'confirmPopup' . $model->id,
         'modalDescriptionText' => $confirmText,
-        'confirmBtnOptions' => ['class' => 'btn btn-primary confirmBtn', 'data' => ['model_id' => $model->user_id]],
+        'confirmBtnOptions' => ['class' => 'btn btn-primary confirmBtn', 'data' => ['model_id' => $model->id]],
     ]);
 }
+
+$modelFullViewUrl = $model->getFullViewUrl();
+
 ?>
 
 <div class="list-horizontal-element col-xs-12 nop">
@@ -80,7 +83,7 @@ if ($isAssociateFacilitator) {
                 <?php if ($isAssociateFacilitator): ?>
                     <?= $logo ?>
                 <?php else: ?>
-                    <?= Html::a($logo, ['/admin/user-profile/view', 'id' => $model->id]); ?>
+                    <?= Html::a($logo, $modelFullViewUrl); ?>
                 <?php endif; ?>
             </div>
         <?php endif; ?>
@@ -104,7 +107,7 @@ if ($isAssociateFacilitator) {
                     <?php if ($isAssociateFacilitator): ?>
                         <?= $nomeCognome ?>
                     <?php else: ?>
-                        <?= Html::a($nomeCognome, ['/admin/user-profile/view', 'id' => $model->id], ['title' => AmosAdmin::t('amosadmin', '#icon_name_title_link') . ' ' . $model->getNomeCognome(), 'data-test' => 'list-view-profiles']); ?>
+                        <?= Html::a($nomeCognome, $modelFullViewUrl, ['title' => AmosAdmin::t('amosadmin', '#icon_name_title_link') . ' ' . $model->getNomeCognome(), 'data-test' => 'list-view-profiles']); ?>
                     <?php endif; ?>
                 </h3>
             <?php endif; ?>
@@ -144,33 +147,36 @@ if ($isAssociateFacilitator) {
                         <?= $organizationsCardWidgetClassName::widget(['model' => $model->prevalentPartnership]); ?>
                     </p>
                 <?php endif; ?>
-                <?php if ($isAssociateFacilitator): ?>
-                    <?= Html::a(
-                        AmosIcons::show('square-check', ['class' => 'm-r-5'], 'dash') . AmosAdmin::t('amosadmin', 'Set as facilitator'),
-                        null,
-                        [
-                            'class' => 'btn btn-navigation-primary set-facilitator-btn',
-                            'data-model_id' => $model->id, //TODO check if it was user_id instead...
-                            'data-model_name' => $model->nome,
-                            'data-model_surname' => $model->cognome,
-                            'data-target' => '#confirmPopup' . $model->id,
-                            'data-toggle' => 'modal',
+            <?php endif; ?>
+            <?php if ($adminModule->confManager->isVisibleBox('box_facilitatori', ConfigurationManager::VIEW_TYPE_FORM) &&
+                $adminModule->confManager->isVisibleField('facilitatore_id', ConfigurationManager::VIEW_TYPE_FORM) &&
+                $isAssociateFacilitator
+            ): ?>
+                <?= Html::a(
+                    AmosIcons::show('square-check', ['class' => 'm-r-5'], 'dash') . AmosAdmin::t('amosadmin', 'Set as facilitator'),
+                    null,
+                    [
+                        'class' => 'btn btn-navigation-primary set-facilitator-btn',
+                        'data-model_id' => $model->id,
+                        'data-model_name' => $model->nome,
+                        'data-model_surname' => $model->cognome,
+                        'data-target' => '#confirmPopup' . $model->id,
+                        'data-toggle' => 'modal',
 //                            'data-confirm' => $confirmText,
 //                            'data-pjax' => 0
-                        ]
-                    ); ?>
-                <?php endif; ?>
+                    ]
+                ); ?>
             <?php endif; ?>
             <?php $communityModule = Yii::$app->getModule('community'); ?>
             <?php if (!is_null($communityModule) && (Yii::$app->controller->action->id == 'community-manager-users')): ?>
-                <?php /** @var \lispa\amos\community\AmosCommunity $communityModule */ ?>
+                <?php /** @var \open20\amos\community\AmosCommunity $communityModule */ ?>
                 <?php $userCommunities = UserProfileUtility::getCommunitiesForManagers($communityModule, $model->user_id); ?>
                 <?php if (count($userCommunities)): ?>
                     <br>
                     <div>
                         <span class="text-uppercase bold"><?= AmosAdmin::t('amosadmin', 'Community manager for') . ':' ?></span>
                         <?php foreach ($userCommunities as $userCommunity): ?>
-                            <?php /** @var \lispa\amos\community\models\Community $userCommunity */ ?>
+                            <?php /** @var \open20\amos\community\models\Community $userCommunity */ ?>
                             <div><?= $userCommunity->name ?></div>
                         <?php endforeach; ?>
                     </div>

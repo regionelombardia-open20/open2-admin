@@ -1,17 +1,26 @@
 <?php
 
-namespace lispa\amos\admin\controllers\base;
+/**
+ * Aria S.p.A.
+ * OPEN 2.0
+ *
+ *
+ * @package    Open20Package
+ * @category   CategoryName
+ */
+
+namespace open20\amos\admin\controllers\base;
 
 use Yii;
-use lispa\amos\admin\models\TokenGroup;
-use lispa\amos\admin\models\search\TokenGroupSearch;
-use lispa\amos\core\controllers\CrudController;
+use open20\amos\admin\models\TokenGroup;
+use open20\amos\admin\models\search\TokenGroupSearch;
+use open20\amos\core\controllers\CrudController;
 use yii\data\ActiveDataProvider;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use lispa\amos\core\icons\AmosIcons;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\helpers\T;
+use open20\amos\core\icons\AmosIcons;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\helpers\T;
 use yii\helpers\Url;
 
 /**
@@ -101,7 +110,7 @@ class TokenGroupController extends CrudController
      */
     public function actionCreate()
     {
-        $this->layout = "@vendor/lispa/amos-core/views/layouts/form";
+        $this->layout = "@vendor/open20/amos-core/views/layouts/form";
         $model = new TokenGroup;
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
@@ -129,7 +138,7 @@ class TokenGroupController extends CrudController
      */
     public function actionUpdate($id)
     {
-        $this->layout = "@vendor/lispa/amos-core/views/layouts/form";
+        $this->layout = "@vendor/open20/amos-core/views/layouts/form";
         /** @var  $model TokenGroup */
         $model = $this->findModel($id);
         $dataProvider = new ActiveDataProvider([

@@ -1,28 +1,30 @@
 <?php
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\controllers
+ * @package    open20\amos\admin\controllers
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\controllers;
+namespace open20\amos\admin\controllers;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\models\ForgotPasswordForm;
-use lispa\amos\admin\models\LoginForm;
-use lispa\amos\admin\models\ProfileReactivationForm;
-use lispa\amos\admin\models\RegisterForm;
-use lispa\amos\admin\models\TokenUsers;
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\admin\models\UserProfileReactivationRequest;
-use lispa\amos\admin\utility\UserProfileUtility;
-use lispa\amos\core\controllers\BackendController;
-use lispa\amos\core\forms\FirstAccessForm;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\user\User;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\models\ForgotPasswordForm;
+use open20\amos\admin\models\LoginForm;
+use open20\amos\admin\models\ProfileReactivationForm;
+use open20\amos\admin\models\RegisterForm;
+use open20\amos\admin\models\TokenUsers;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\admin\models\UserProfileReactivationRequest;
+use open20\amos\admin\utility\UserProfileUtility;
+use open20\amos\core\controllers\BackendController;
+use open20\amos\core\forms\FirstAccessForm;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\interfaces\InvitationExternalInterface;
+use open20\amos\core\module\AmosModule;
+use open20\amos\core\user\User;
 use Yii;
 use yii\db\Expression;
 use yii\filters\AccessControl;
@@ -33,7 +35,7 @@ use yii\web\Response;
 
 /**
  * Class SecurityController
- * @package lispa\amos\admin\controllers
+ * @package open20\amos\admin\controllers
  */
 class SecurityController extends BackendController
 {
@@ -45,7 +47,7 @@ class SecurityController extends BackendController
     /**
      * @var AmosAdmin $adminModule
      */
-    private $adminModule;
+    protected $adminModule;
 
     /**
      * @inheritdoc
@@ -155,7 +157,8 @@ class SecurityController extends BackendController
     {
         $this->setUpLayout('login');
 
-        $model = new LoginForm();
+        /** @var LoginForm $model */
+        $model = $this->adminModule->createModel('LoginForm');
         $token = \Yii::$app->request->get('token');
 
 
@@ -167,8 +170,6 @@ class SecurityController extends BackendController
         if (!empty($token)) {
             $this->loginByToken($model, $token);
         }
-
-
 
         if ($model->load(Yii::$app->request->post())) {
 
@@ -273,20 +274,16 @@ class SecurityController extends BackendController
      * @return string|Response
      * @throws \Exception
      */
-    public function login($usernameOrEmail, $password, $community_id = null, $postLoginUrl = null,
-                          $isFirstAccess = false)
+    public function login($usernameOrEmail, $password, $community_id = null, $postLoginUrl = null, $isFirstAccess = false)
     {
+        /** @var LoginForm $model */
+        $model = $this->adminModule->createModel('LoginForm');
+        $model->password = $password;
         if ($this->adminModule->allowLoginWithEmailOrUsername) {
-            $model = new LoginForm([
-                "usernameOrEmail" => $usernameOrEmail,
-                "password" => $password
-            ]);
+            $model->usernameOrEmail = $usernameOrEmail;
             $user  = User::findByUsernameOrEmail($model->usernameOrEmail);
         } else {
-            $model = new LoginForm([
-                "username" => $usernameOrEmail,
-                "password" => $password
-            ]);
+            $model->username = $usernameOrEmail;
             $user  = User::findByUsername($model->username);
         }
 
@@ -350,15 +347,15 @@ class SecurityController extends BackendController
      * Logout action.
      * @return string
      */
-    public function actionLogout($goToFrontPage = false)
+    public function actionLogout($goToFrontPage = false, $backTo = null)
     {
         Yii::$app->user->logout();
         if (isset(\Yii::$app->params['template-amos']) && \Yii::$app->params['template-amos']) {
             $idUtente = Yii::$app->getUser()->getId();
-            $ids      = \lispa\amos\dashboard\models\AmosUserDashboards::find()->andWhere(['user_id' => $idUtente])->select('id');
-            \lispa\amos\dashboard\models\AmosUserDashboardsWidgetMm::deleteAll(['IN', 'amos_user_dashboards_id',
+            $ids      = \open20\amos\dashboard\models\AmosUserDashboards::find()->andWhere(['user_id' => $idUtente])->select('id');
+            \open20\amos\dashboard\models\AmosUserDashboardsWidgetMm::deleteAll(['IN', 'amos_user_dashboards_id',
                 $ids]);
-            \lispa\amos\dashboard\models\AmosUserDashboards::deleteAll(['user_id' => $idUtente]);
+            \open20\amos\dashboard\models\AmosUserDashboards::deleteAll(['user_id' => $idUtente]);
         }
         if($goToFrontPage) {
             if(array_key_exists("platform", Yii::$app->params)) {
@@ -366,9 +363,17 @@ class SecurityController extends BackendController
                     return $this->redirect(Yii::$app->params['platform']['frontendUrl']);
                 }
             }
-            return $this->goHome();
+            if (!$backTo) {
+                return $this->goHome();
+            } else {
+                return $this->redirect($backTo);
+            }
         } else {
-            return $this->goHome();
+            if (!$backTo) {
+                return $this->goHome();
+            } else {
+                return $this->redirect($backTo);
+            }
         }
     }
 
@@ -384,7 +389,8 @@ class SecurityController extends BackendController
             return $this->goHome();
         }
 
-        $model = new ProfileReactivationForm();
+        /** @var ProfileReactivationForm $model */
+        $model = $this->adminModule->createModel('ProfileReactivationForm');
 
         /**
          * If $userId is false the user is not created
@@ -429,6 +435,23 @@ class SecurityController extends BackendController
     }
 
     /**
+     * @param RegisterForm $model
+     */
+    protected function beforeRegisterNewUser($model)
+    {
+
+    }
+
+    /**
+     * @param RegisterForm $model
+     * @param UserProfile $userProfile
+     */
+    protected function afterRegisterNewUser($model, $userProfile)
+    {
+
+    }
+
+    /**
      * @return bool|\yii\web\Response
      */
     public function actionRegister()
@@ -463,7 +486,8 @@ class SecurityController extends BackendController
          *
          * return $this->goHome();
          * } */
-        $model = new RegisterForm();
+        /** @var RegisterForm $model */
+        $model = $this->adminModule->createModel('RegisterForm');
 
         //pre-compile form datas from get params
         $getParams = \Yii::$app->request->get();
@@ -487,13 +511,17 @@ class SecurityController extends BackendController
             $model->cognome = $spidData['cognome'];
             $model->email   = $spidData['emailAddress'];
         }
+        
+        // Invitation User id
+        $iuid = isset($getParams['iuid']) ? $getParams['iuid'] : null;
 
         if ($model->load(Yii::$app->request->post())) {
+            $this->beforeRegisterNewUser($model);
             /**
              * @var $newUser integer False or UserId
              */
-            $newUser = AmosAdmin::getInstance()->createNewAccount(
-                $model->nome, $model->cognome, $model->email, $model->privacy
+            $newUser = $this->adminModule->createNewAccount(
+                $model->nome, $model->cognome, $model->email, $model->privacy, false, null, \Yii::$app->request->post('redirectUrl')
             );
 
             /**
@@ -527,10 +555,12 @@ class SecurityController extends BackendController
 
             $userId = $newUser['user']->id;
 
+            /** @var UserProfile $userProfileModel */
+            $userProfileModel = $this->adminModule->createModel('UserProfile');
             /**
              * @var $newUserProfile UserProfile
              */
-            $newUserProfile = UserProfile::findOne(['user_id' => $userId]);
+            $newUserProfile = $userProfileModel::findOne(['user_id' => $userId]);
 
             /**
              * If $newUser is false the user is not created
@@ -547,6 +577,7 @@ class SecurityController extends BackendController
 
                 //return $this->goHome();
             }
+            $this->afterRegisterNewUser($model, $newUserProfile);
 
             //Social Auth trigger
             $socialModule = Yii::$app->getModule('socialauth');
@@ -562,10 +593,23 @@ class SecurityController extends BackendController
                 }
             }
 
+            $iuid = \Yii::$app->request->post('iuid');
+            
             $communityId = \Yii::$app->request->post('community');
             $community = null;
             if(\Yii::$app->getModule('community')){
-                $community = \lispa\amos\community\models\Community::findOne($communityId);
+                $community = \open20\amos\community\models\Community::findOne($communityId);
+            }
+
+            if (!empty($getParams['moduleName']) && !empty($getParams['contextModelId'])) {
+                /** @var AmosModule $module */
+                $module = Yii::$app->getModule($getParams['moduleName']);
+                if (!is_null($module) && ($module instanceof InvitationExternalInterface)) {
+                    $okUserContextAssociation = $module->addUserContextAssociation($userId, $getParams['contextModelId']);
+                    if (!$okUserContextAssociation) {
+                        Yii::$app->getSession()->addFlash('danger', AmosAdmin::t('amosadmin', '#user_context_association_error'));
+                    }
+                }
             }
 
             $sent = UserProfileUtility::sendCredentialsMail($newUserProfile, $community);
@@ -579,6 +623,12 @@ class SecurityController extends BackendController
                 ]);
             } else {
                 //Yii::$app->session->addFlash('success', AmosAdmin::t('amosadmin', 'An email has been sent to') . ' ' . $model->email);
+                
+                // Sent notification email to invitation user
+                if ($iuid != null) {
+                    $sent = UserProfileUtility::sendUserAcceptRegistrationRequestMail($newUserProfile, $community, $iuid);
+                }
+                
                 return $this->render('security-message',
                         [
                         'title_message' => AmosAdmin::t('amosadmin', '#msg_complete_registration_title'),
@@ -591,13 +641,21 @@ class SecurityController extends BackendController
             }
 
             //return $this->goHome();
-        } else {
-            return $this->render('register', [
-                    'model' => $model,
-            ]);
+            
         }
+            
+        return $this->render(
+            'register', 
+            [
+                'model' => $model,
+                'iuid' => $iuid
+            ]);
     }
 
+    /**
+     * 
+     * @return type
+     */
     public function actionSecurityMessage()
     {
         $this->setUpLayout('login');
@@ -618,8 +676,9 @@ class SecurityController extends BackendController
             return $this->goHome();
         }
 
-        $model = new ForgotPasswordForm();
-        if ($model->load(Yii::$app->request->post())) {
+        /** @var ForgotPasswordForm $userProfileModel */
+        $model = $this->adminModule->createModel('ForgotPasswordForm');
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             if ($model->email != NULL) {
                 $dati_utente = $model->verifyEmail($model->email);
                 if ($dati_utente) {
@@ -658,10 +717,11 @@ class SecurityController extends BackendController
      * @param string $urlCurrent The previous link to use in mail.
      * @return mixed
      */
-    public function actionSpedisciCredenziali($id, $isForgotPasswordView = false, $isForgotPasswordRequest = false,
-                                              $urlCurrent = null)
+    public function actionSpedisciCredenziali($id, $isForgotPasswordView = false, $isForgotPasswordRequest = false, $urlCurrent = null)
     {
-        $model = UserProfile::findOne($id);
+        /** @var UserProfile $userProfileModel */
+        $userProfileModel = $this->adminModule->createModel('UserProfile');
+        $model = $userProfileModel::findOne($id);
         if ($model && $model->user && $model->user->email) {
             $model->user->generatePasswordResetToken();
             $model->user->save(false);
@@ -768,8 +828,7 @@ class SecurityController extends BackendController
             $user                 = User::findByPasswordResetToken($password_reset_token);
             if ($user) {
                 $username      = $user->username;
-                $isFirstAccess = (empty($user->password_hash) && empty($user->password_old)) || (empty($user->password_hash)
-                    && !$user->userProfile->privacy);
+                $isFirstAccess = (empty($user->password_hash) && !$user->userProfile->privacy);
             }
         }
 
@@ -959,9 +1018,9 @@ class SecurityController extends BackendController
             if ($md5Username == $token) {
                 $notifyModule = Yii::$app->getModule('notify');
                 if (!is_null($notifyModule)) {
-                    /** @var \lispa\amos\notificationmanager\AmosNotify $notifyModule */
+                    /** @var \open20\amos\notificationmanager\AmosNotify $notifyModule */
                     $ok = $notifyModule->saveNotificationConf($id,
-                        \lispa\amos\notificationmanager\models\NotificationsConfOpt::EMAIL_OFF);
+                        \open20\amos\notificationmanager\models\NotificationsConfOpt::EMAIL_OFF);
                     if ($ok) {
                         $message = AmosAdmin::t('amosadmin', '#unsubscribe_message_success');
                     } else {
@@ -998,7 +1057,7 @@ class SecurityController extends BackendController
             ]);
         }
         if (\Yii::$app->request->isPost) {
-            /** @var \lispa\amos\notificationmanager\AmosNotify $notifyModule */
+            /** @var \open20\amos\notificationmanager\AmosNotify $notifyModule */
             $notifyModule = \Yii::$app->getModule('notify');
             if (!empty($notifyModule)) {
                 /** @var  $userProfile UserProfile */
@@ -1006,7 +1065,7 @@ class SecurityController extends BackendController
                 $userProfile->notify_from_editorial_staff = 0;
                 $userProfile->save(false);
                 $ok                                       = $notifyModule->saveNotificationConf($user->id,
-                    \lispa\amos\notificationmanager\models\NotificationsConfOpt::EMAIL_OFF);
+                    \open20\amos\notificationmanager\models\NotificationsConfOpt::EMAIL_OFF);
                 if ($ok) {
                     $result_message = AmosAdmin::t('amosadmin', '#disable_notification_message_success');
                     $titleMessage   = AmosAdmin::t('amosadmin', '#disable_notification_title_success');
@@ -1060,9 +1119,9 @@ class SecurityController extends BackendController
     {
         try {
             /**
-             * @var $socialUser \lispa\amos\socialauth\models\SocialAuthUsers
+             * @var $socialUser \open20\amos\socialauth\models\SocialAuthUsers
              */
-            $socialUser = new \lispa\amos\socialauth\models\SocialAuthUsers();
+            $socialUser = new \open20\amos\socialauth\models\SocialAuthUsers();
 
             /**
              * @var $socialProfileArray array User profile from provider

@@ -1,25 +1,25 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\user-profile\boxes
+ * @package    open20\amos\admin\views\user-profile\boxes
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\interfaces\OrganizationsModuleInterface;
-use lispa\amos\core\utilities\ModalUtility;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\interfaces\OrganizationsModuleInterface;
+use open20\amos\core\utilities\ModalUtility;
 use kartik\alert\Alert;
 
 /**
  * @var yii\web\View $this
- * @var lispa\amos\core\forms\ActiveForm $form
- * @var lispa\amos\admin\models\UserProfile $model
- * @var lispa\amos\core\user\User $user
+ * @var open20\amos\core\forms\ActiveForm $form
+ * @var open20\amos\admin\models\UserProfile $model
+ * @var open20\amos\core\user\User $user
  */
 
 /** @var AmosAdmin $adminModule */

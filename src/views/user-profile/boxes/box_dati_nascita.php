@@ -1,17 +1,16 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\user-profile\boxes
+ * @package    open20\amos\admin\views\user-profile\boxes
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\base\ConfigurationManager;
-use lispa\amos\core\icons\AmosIcons;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\base\ConfigurationManager;
 use kartik\datecontrol\DateControl;
 use kartik\depdrop\DepDrop;
 use kartik\widgets\Select2;
@@ -20,9 +19,9 @@ use yii\helpers\Url;
 
 /**
  * @var yii\web\View $this
- * @var lispa\amos\core\forms\ActiveForm $form
- * @var lispa\amos\admin\models\UserProfile $model
- * @var lispa\amos\core\user\User $user
+ * @var open20\amos\core\forms\ActiveForm $form
+ * @var open20\amos\admin\models\UserProfile $model
+ * @var open20\amos\core\user\User $user
  */
 
 /** @var AmosAdmin $adminModule */
@@ -30,10 +29,10 @@ $adminModule = Yii::$app->controller->module;
 
 ?>
 <section>
-<!--    <h2>-->
-<!--        < ?= AmosIcons::show('cake'); ?>-->
-<!--        < ?= AmosAdmin::tHtml('amosadmin', 'Dati di Nascita') ?>-->
-<!--    </h2>-->
+    <!--    <h2>-->
+    <!--        < ?= AmosIcons::show('cake'); ?>-->
+    <!--        < ?= AmosAdmin::tHtml('amosadmin', 'Dati di Nascita') ?>-->
+    <!--    </h2>-->
     <div class="row">
         <?php if ($adminModule->confManager->isVisibleField('nascita_nazioni_id', ConfigurationManager::VIEW_TYPE_FORM)): ?>
             <div class="col-lg-6 col-sm-6">
@@ -89,15 +88,18 @@ $adminModule = Yii::$app->controller->module;
         <?php if ($adminModule->confManager->isVisibleField('nascita_data', ConfigurationManager::VIEW_TYPE_FORM)): ?>
             <div class="col-lg-6 col-sm-6">
                 <?= $form->field($model, 'nascita_data')->widget(DateControl::classname(), [
+                    'type' => DateControl::FORMAT_DATE,
                     'options' => [
                         'disabled' => false,
-                        'id' => 'nascita_data',
                     ],
                     'autoWidget' => false,
                     'saveOptions' => [
                         'type' => 'text',
                         'class' => 'sr-only',
                         'label' => '<label for="nascita_data-disp" class="sr-only">' . AmosAdmin::t('amosadmin', 'Born Date') . '</label>'
+                    ],
+                    'widgetOptions' => [
+                        'mask' => '99-99-9999',
                     ]
                 ]) ?>
             </div>

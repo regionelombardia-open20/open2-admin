@@ -1,16 +1,16 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\migrations
+ * @package    open20\amos\admin\migrations
  * @category   CategoryName
  */
 
-use lispa\amos\core\migration\AmosMigrationWidgets;
-use lispa\amos\dashboard\models\AmosWidgets;
+use open20\amos\core\migration\AmosMigrationWidgets;
+use open20\amos\dashboard\models\AmosWidgets;
 
 /**
  * Class m190402_100208_restore_widget_graphic_my_profile
@@ -26,7 +26,7 @@ class m190402_100208_restore_widget_graphic_my_profile extends AmosMigrationWidg
     {
         $this->widgets = [
             [
-                'classname' => \lispa\amos\admin\widgets\graphics\WidgetGraphicMyProfile::className(),
+                'classname' => \open20\amos\admin\widgets\graphics\WidgetGraphicMyProfile::className(),
                 'update' => true,
                 'status' => AmosWidgets::STATUS_ENABLED,
             ]
@@ -40,7 +40,7 @@ class m190402_100208_restore_widget_graphic_my_profile extends AmosMigrationWidg
     {
         $this->widgets = [
             [
-                'classname' => \lispa\amos\admin\widgets\graphics\WidgetGraphicMyProfile::className(),
+                'classname' => \open20\amos\admin\widgets\graphics\WidgetGraphicMyProfile::className(),
                 'update' => true,
                 'status' => AmosWidgets::STATUS_DISABLED,
             ]

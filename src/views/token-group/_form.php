@@ -1,18 +1,27 @@
 <?php
 
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\forms\ActiveForm;
+/**
+ * Aria S.p.A.
+ * OPEN 2.0
+ *
+ *
+ * @package    Open20Package
+ * @category   CategoryName
+ */
+
+use open20\amos\core\helpers\Html;
+use open20\amos\core\forms\ActiveForm;
 use kartik\builder\Form;
 use kartik\datecontrol\DateControl;
-use lispa\amos\core\forms\Tabs;
-use lispa\amos\core\forms\CloseSaveButtonWidget;
+use open20\amos\core\forms\Tabs;
+use open20\amos\core\forms\CloseSaveButtonWidget;
 use yii\helpers\Url;
 use kartik\select2\Select2;
 use yii\helpers\ArrayHelper;
 
 /**
  * @var yii\web\View $this
- * @var lispa\amos\admin\models\TokenGroup $model
+ * @var open20\amos\admin\models\TokenGroup $model
  * @var yii\widgets\ActiveForm $form
  */
 
@@ -63,7 +72,7 @@ use yii\helpers\ArrayHelper;
 
     <?php if(!$model->isNewRecord){ ?>
         <div class="col-lg-12 col-sm-12">
-            <?= \lispa\amos\core\views\AmosGridView::widget([
+            <?= \open20\amos\core\views\AmosGridView::widget([
                     'dataProvider' => $dataProvider,
                 'columns' => [
                         'user.userProfile.nomeCognome',

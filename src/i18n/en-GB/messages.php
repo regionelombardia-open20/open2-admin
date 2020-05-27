@@ -1,11 +1,11 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\i18n\en-GB
+ * @package    open20\amos\admin\i18n\en-GB
  * @category   CategoryName
  */
 
@@ -309,6 +309,7 @@ return [
     '#go_to_login_title' => 'Back to login form',
     '#go_to_register' => 'Back',
     '#go_to_register_title' => 'Back to registration form',
+    '#go_to_your_profile' => 'Go to your profile',
     'has been sent' => 'has been sent',
     'Here is the text of the request' => 'Here is the text of the request',
     'Human resources' => 'Human resources',
@@ -437,6 +438,7 @@ return [
     'Non ancora definito' => 'Not yet defined',
     'Non ci sono widgets selezionati per questa dashboard' => 'No selected widget for this dashboard',
     'Non Definito' => 'Not Defined',
+    'Non dichiarato' => 'Undeclared',
     'Non è possibile condividere il contenuto con questo utente. Il contenuto si trova in una community non accessibile a questo utente' => 'It\'s not possibile to share the content with this user. The content is in a Community not accessible by the selected user.',
     'No' => 'No',
     'Non presente' => 'Not present',
@@ -495,6 +497,7 @@ return [
     'Prevalent Partnership' => 'Prevalent Partnership',
     'Prima di poter gestire la rete &egrave; necessario salvare l\'utente.' => 'Save user before manage network.',
     'Prima di poter gestire le classi di utenza &egrave; necessario salvare l\'utente.' => 'Before you can manage user classes, you need to save the user.',
+    "Prima di poter gestire le notifiche &egrave; necessario salvare l'utente." => "Before you can manage user notifications, you need to save the user.",
     'Primo accesso' => 'First access',
     '#privacy_label' => 'Privacy',
     '#privacy_not_accept' => 'To proceed you must accept the privacy policy',
@@ -683,7 +686,7 @@ return [
     'Unable to delete Connection' => 'Unable to delete Connection',
     'Unable to register, user creation error' => 'Unable to register, user creation error',
     'Unable to send user mail, contact admin' => 'Unable to send user mail, contact admin',
-    '#undefinded' => 'Not defined',
+    '#undefinded' => 'Undeclared',
     '#unsubscribe_message_error' => 'Error while updating your notification settings.',
     '#unsubscribe_message_invalid_token' => 'Not valid token.',
     '#unsubscribe_message_invalid_user' => 'Not valid user.',
@@ -693,6 +696,7 @@ return [
     'Updated at' => 'Updated at',
     'Updated by' => 'Updated by',
     'upload ' => 'upload',
+    '#user_context_association_error' => 'Error while associating user to element',
     'User deactivated. To log in again, request reactivation of the profile.' => 'User deactivated. To log in again, request reactivation of the profile.',
     '#userdisabled_profile_subtitle' => 'User deactivated. To log in again, request reactivation of the profile',
     'User ID' => 'User ID',
@@ -794,7 +798,7 @@ return [
     '#fullsize_social_title_login' => '<strong>ENTER</strong> with your social account',
     '#fullsize_social_title_register' => '<strong>REGISTER</strong> with your social account',
     '#fullsize_spid' => '<strong>ENTER</strong> with Sistema Pubblico di Identità Digitale',
-    '#fullsize_login_spid_text' => 'Enter with SPID',
+    '#fullsize_login_spid_text' => 'Enter with SPID/CNS',
     '#fullsize_login_spid_text_right' => 'SPID is the access system that allows you to use, with a unique digital identity, the online services of the Public Administration and accredited individuals. <br/> If you already have a digital identity, log in with your credentials manager. If you don\'t have a digital identity yet, ask one of the managers for it.',
     '#fullsize_register' => '<strong>REGISTER</strong> with your data',
     '#fullsize_field_name' => 'name',
@@ -814,4 +818,11 @@ return [
     '#fullsize_field_reset_pwd_2' => 'repeat the new password',
     '#view-all-profile' => 'view profile',
     'Gestisci inviti' => 'Manage invitations',
+    
+    '#subject_notification_accepted_request' => 'Invitation to access the platform',
+    '#text_notification_accepted_request' => 'has accepted your request to register on the platform.',
+    'Cognome e nome' => 'Surname and name',
+    '#facilitator_assigned' => 'i am your facilitator, accept the invitation to be able to immediately use the private messaging system',
+    '#yours_validated_users' => '',
+
 ];

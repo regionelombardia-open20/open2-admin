@@ -1,21 +1,21 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\mail\user
+ * @package    open20\amos\admin\mail\user
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
+use open20\amos\admin\AmosAdmin;
 use yii\helpers\Html;
 
 /**
  * @var yii\web\View $this
- * @var \lispa\amos\core\user\User $user
- * @var \lispa\amos\admin\models\UserProfile $profile
+ * @var \open20\amos\core\user\User $user
+ * @var \open20\amos\admin\models\UserProfile $profile
  */
 
 $appLink = Yii::$app->urlManager->createAbsoluteUrl(['/']);

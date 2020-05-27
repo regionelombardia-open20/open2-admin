@@ -1,22 +1,22 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\widgets\graphics\views
+ * @package    open20\amos\admin\widgets\graphics\views
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\widgets\graphics\WidgetGraphicMyProfile;
-use lispa\amos\core\helpers\Html;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\widgets\graphics\WidgetGraphicMyProfile;
+use open20\amos\core\helpers\Html;
 
 /**
  * @var \yii\web\View $this
  * @var WidgetGraphicMyProfile $widget
- * @var \lispa\amos\admin\models\UserProfile $userProfile
+ * @var \open20\amos\admin\models\UserProfile $userProfile
  */
 
 ?>
@@ -34,8 +34,8 @@ use lispa\amos\core\helpers\Html;
                             <span class="pull-left">
                                 <?= Html::a(
                                     $widget->getUserProfileRoundImage(),
-                                    $userProfile->getFullViewUrl(),
-                                    ['title' => AmosAdmin::t('amosadmin', 'va al mio profilo'), 'class' => 'container-square-img-sm']
+                                    ['/admin/user-profile/update', 'id' => $userProfile->id],
+                                    ['title' => AmosAdmin::t('amosadmin', '#go_to_your_profile'), 'class' => 'container-square-img-sm']
                                 ) ?>
                             </span>
                         </div>

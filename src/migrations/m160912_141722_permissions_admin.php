@@ -1,17 +1,17 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\migrations
+ * @package    open20\amos\admin\migrations
  * @category   CategoryName
  */
 
 use yii\db\Migration;
 use mdm\admin\models\AuthItem;
-use lispa\amos\admin\rbac\UpdateOwnUserProfile;
+use open20\amos\admin\rbac\UpdateOwnUserProfile;
 
 class m160912_141722_permissions_admin extends Migration
 {
@@ -99,22 +99,22 @@ class m160912_141722_permissions_admin extends Migration
                 'description' => 'Permesso di UPDATE sul model UserProfile',
             ),
             array(
-                'name' => \lispa\amos\admin\widgets\graphics\WidgetGraphicMyProfile::className(),
+                'name' => \open20\amos\admin\widgets\graphics\WidgetGraphicMyProfile::className(),
                 'type' => '2',
                 'description' => 'Permesso di visualizzazione del widget Il mio profilo (grafico)',
             ),
             array(
-                'name' => \lispa\amos\admin\widgets\icons\WidgetIconAdmin::className(),
+                'name' => \open20\amos\admin\widgets\icons\WidgetIconAdmin::className(),
                 'type' => '2',
                 'description' => 'Permesso di visualizzazione del widget Amministrazione',
             ),
             array(
-                'name' => \lispa\amos\admin\widgets\icons\WidgetIconMyProfile::className(),
+                'name' => \open20\amos\admin\widgets\icons\WidgetIconMyProfile::className(),
                 'type' => '2',
                 'description' => 'Permesso di visualizzazione del widget Il mio profilo',
             ),
             array(
-                'name' => \lispa\amos\admin\widgets\icons\WidgetIconUserProfile::className(),
+                'name' => \open20\amos\admin\widgets\icons\WidgetIconUserProfile::className(),
                 'type' => '2',
                 'description' => 'Permesso di visualizzazione del widget Gestione utenti',
             )
@@ -160,10 +160,10 @@ class m160912_141722_permissions_admin extends Migration
         ]);
 
         $this->batchInsert('{{%auth_item_child}}',['parent', 'child'], [
-            ['ADMIN', \lispa\amos\admin\widgets\graphics\WidgetGraphicMyProfile::className()],
-            ['ADMIN', \lispa\amos\admin\widgets\icons\WidgetIconAdmin::className()],
-            ['ADMIN', \lispa\amos\admin\widgets\icons\WidgetIconMyProfile::className()],
-            ['ADMIN', \lispa\amos\admin\widgets\icons\WidgetIconUserProfile::className()],
+            ['ADMIN', \open20\amos\admin\widgets\graphics\WidgetGraphicMyProfile::className()],
+            ['ADMIN', \open20\amos\admin\widgets\icons\WidgetIconAdmin::className()],
+            ['ADMIN', \open20\amos\admin\widgets\icons\WidgetIconMyProfile::className()],
+            ['ADMIN', \open20\amos\admin\widgets\icons\WidgetIconUserProfile::className()],
             ['ADMIN', 'GESTIONE_UTENTI'],
             ['ADMIN', 'USERPROFILE_READ'],
             ['ADMIN', 'USERPROFILE_CREATE'],
@@ -186,18 +186,18 @@ class m160912_141722_permissions_admin extends Migration
         $userId = 1;
         $this->batchInsert('{{%amos_widgets}}',['classname', 'type', 'module', 'status', 'child_of', 'created_by', 'created_at', 'updated_by', 'updated_at'], [
             [
-                \lispa\amos\admin\widgets\graphics\WidgetGraphicMyProfile::className(),
+                \open20\amos\admin\widgets\graphics\WidgetGraphicMyProfile::className(),
                 'GRAPHIC',
                 $module,
                 $status,
-                \lispa\amos\admin\widgets\icons\WidgetIconAdmin::className(),
+                \open20\amos\admin\widgets\icons\WidgetIconAdmin::className(),
                 $userId,
                 $now,
                 $userId,
                 $now
             ],
             [
-                \lispa\amos\admin\widgets\icons\WidgetIconAdmin::className(),
+                \open20\amos\admin\widgets\icons\WidgetIconAdmin::className(),
                 'ICON',
                 $module,
                 $status,
@@ -208,22 +208,22 @@ class m160912_141722_permissions_admin extends Migration
                 $now
             ],
             [
-                \lispa\amos\admin\widgets\icons\WidgetIconMyProfile::className(),
+                \open20\amos\admin\widgets\icons\WidgetIconMyProfile::className(),
                 'ICON',
                 $module,
                 $status,
-                \lispa\amos\admin\widgets\icons\WidgetIconAdmin::className(),
+                \open20\amos\admin\widgets\icons\WidgetIconAdmin::className(),
                 $userId,
                 $now,
                 $userId,
                 $now
             ],
             [
-                \lispa\amos\admin\widgets\icons\WidgetIconUserProfile::className(),
+                \open20\amos\admin\widgets\icons\WidgetIconUserProfile::className(),
                 'ICON',
                 $module,
                 $status,
-                \lispa\amos\admin\widgets\icons\WidgetIconAdmin::className(),
+                \open20\amos\admin\widgets\icons\WidgetIconAdmin::className(),
                 $userId,
                 $now,
                 $userId,

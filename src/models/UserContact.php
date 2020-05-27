@@ -1,21 +1,21 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\models
+ * @package    open20\amos\admin\models
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\models;
+namespace open20\amos\admin\models;
 
-use lispa\amos\admin\models\base\UserContact as BaseUserContact;
+use open20\amos\admin\models\base\UserContact as BaseUserContact;
 
 /**
  * Class UserContact
- * @package lispa\amos\admin\models
+ * @package open20\amos\admin\models
  */
 class UserContact extends BaseUserContact
 {

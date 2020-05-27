@@ -1,12 +1,21 @@
 <?php
-namespace lispa\amos\admin\events;
+
+/**
+ * Aria S.p.A.
+ * OPEN 2.0
+ *
+ *
+ * @package    Open20Package
+ * @category   CategoryName
+ */
+namespace open20\amos\admin\events;
 
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\models\UserContact;
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\chat\models\Message;
-use lispa\amos\core\utilities\Email;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\models\UserContact;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\chat\models\Message;
+use open20\amos\core\utilities\Email;
 use Yii;
 use yii\base\Event;
 use yii\base\Exception;

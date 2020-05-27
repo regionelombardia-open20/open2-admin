@@ -1,27 +1,28 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\user-contact
+ * @package    open20\amos\admin\views\user-contact
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\core\helpers\Html;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\core\forms\editors\m2mWidget\M2MWidget;
+use open20\amos\core\helpers\Html;
 
 /**
- * @var \lispa\amos\admin\models\UserProfile $model
+ * @var \open20\amos\admin\models\UserProfile $model
  */
-
 
 $this->title = AmosAdmin::t('amosadmin', 'Add contacts');
 $this->params['breadcrumbs'][] = AmosAdmin::t('amosadmin', 'Add contacts');
 
-$userId = Yii::$app->request->get("id");
+$userProfileId = Yii::$app->request->get("id");
+$model = UserProfile::findOne($userProfileId);
 
 /**
  * @var \yii\db\ActiveQuery $query UserProfiles to invite or with pending invitation
@@ -45,7 +46,7 @@ if (isset($post['genericSearch'])) {
 }
 
 ?>
-<?= \lispa\amos\core\forms\editors\m2mWidget\M2MWidget::widget([
+<?= M2MWidget::widget([
     'model' => $model,
     'modelId' => $model->id,
     'modelData' => $query,
@@ -54,18 +55,18 @@ if (isset($post['genericSearch'])) {
         'to' => 'id'
     ],
     'modelTargetSearch' => [
-        'class' => \lispa\amos\admin\models\UserProfile::className(),
+        'class' => \open20\amos\admin\models\UserProfile::className(),
         'query' => $query,
     ],
     'targetFooterButtons' => Html::a(AmosAdmin::t('amosadmin', 'Close'), Yii::$app->urlManager->createUrl([
         '/admin/user-contact/annulla-m2m',
-        'id' => $userId
+        'id' => $userProfileId
     ]), ['class' => 'btn btn-secondary', 'AmosAdmin' => Yii::t('amosadmin', 'Close')]),
     'renderTargetCheckbox' => false,
     'viewSearch' => (isset($viewM2MWidgetGenericSearch) ? $viewM2MWidgetGenericSearch : false),
     'targetUrlController' => 'user-contact',
     'targetActionColumnsTemplate' => '{googleContact}{connect}',
-    'moduleClassName' => \lispa\amos\admin\AmosAdmin::className(),
+    'moduleClassName' => \open20\amos\admin\AmosAdmin::className(),
     'postName' => 'UserContact',
     'postKey' => 'user-contact',
     'targetColumnsToView' => [
@@ -79,7 +80,8 @@ if (isset($post['genericSearch'])) {
             'label' => AmosAdmin::t('amosadmin', 'Photo'),
             'format' => 'raw',
             'value' => function ($model) {
-                return \lispa\amos\admin\widgets\UserCardWidget::widget(['model' => $model, 'onlyAvatar'=> true]);
+                /** @var UserProfile $model */
+                return \open20\amos\admin\widgets\UserCardWidget::widget(['model' => $model, 'onlyAvatar'=> true]);
             }
         ],
         'name' => [
@@ -92,6 +94,7 @@ if (isset($post['genericSearch'])) {
             ],
             'label' => AmosAdmin::t('amosadmin', 'Name'),
             'value' => function($model){
+                /** @var UserProfile $model */
                 return Html::a($model->surnameName, ['/admin/user-profile/view', 'id' => $model->id ], [
                     'title' => AmosAdmin::t('amosnews', 'Apri il profilo di {nome_profilo}', ['nome_profilo' => $model->surnameName])
                 ]);
@@ -99,15 +102,16 @@ if (isset($post['genericSearch'])) {
             'format' => 'html'
         ],
         [
-            'class' => 'lispa\amos\core\views\grid\ActionColumn',
+            'class' => 'open20\amos\core\views\grid\ActionColumn',
             'template' => '{googleContact}{connect}',
             'buttons' => [
                 'googleContact' => function($url, $model){
                     /** @var UserProfile $model */
-                    return \lispa\amos\admin\widgets\GoogleContactWidget::widget(['model' => $model]).'&nbsp;';
+                    return \open20\amos\admin\widgets\GoogleContactWidget::widget(['model' => $model]).'&nbsp;';
                 },
                 'connect' =>  function ($url, $model) {
-                    return \lispa\amos\admin\widgets\ConnectToUserWidget::widget([ 'model' => $model, 'isGridView' => true ]);
+                    /** @var UserProfile $model */
+                    return \open20\amos\admin\widgets\ConnectToUserWidget::widget([ 'model' => $model, 'isGridView' => true ]);
                 }
             ]
         ]

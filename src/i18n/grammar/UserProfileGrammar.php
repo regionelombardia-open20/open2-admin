@@ -1,22 +1,22 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\i18n\grammar
+ * @package    open20\amos\admin\i18n\grammar
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\i18n\grammar;
+namespace open20\amos\admin\i18n\grammar;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\core\interfaces\ModelGrammarInterface;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\core\interfaces\ModelGrammarInterface;
 
 /**
  * Class UserProfileGrammar
- * @package lispa\amos\admin\i18n\grammar
+ * @package open20\amos\admin\i18n\grammar
  */
 class UserProfileGrammar implements ModelGrammarInterface
 {

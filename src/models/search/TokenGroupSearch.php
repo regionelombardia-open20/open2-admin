@@ -1,14 +1,23 @@
 <?php
 
-namespace lispa\amos\admin\models\search;
+/**
+ * Aria S.p.A.
+ * OPEN 2.0
+ *
+ *
+ * @package    Open20Package
+ * @category   CategoryName
+ */
+
+namespace open20\amos\admin\models\search;
 
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use lispa\amos\admin\models\TokenGroup;
+use open20\amos\admin\models\TokenGroup;
 
 /**
-* TokenGroupSearch represents the model behind the search form about `lispa\amos\admin\models\TokenGroup`.
+* TokenGroupSearch represents the model behind the search form about `open20\amos\admin\models\TokenGroup`.
 */
 class TokenGroupSearch extends TokenGroup
 {

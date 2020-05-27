@@ -1,25 +1,25 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\components
+ * @package    open20\amos\admin\components
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\components;
+namespace open20\amos\admin\components;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\models\UserProfile;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\models\UserProfile;
 //use yii\base\BootstrapInterface;
 use yii\base\Component;
 //use yii\base\Event;
 
 /**
  * Class FirstAccessWizardComponent
- * @package lispa\amos\admin\components
+ * @package open20\amos\admin\components
  */
 class FirstAccessWizardComponent extends Component /*implements BootstrapInterface*/
 {
@@ -28,15 +28,15 @@ class FirstAccessWizardComponent extends Component /*implements BootstrapInterfa
      */
     public function showWizard($moduleClassName = null)
     {
-        /** @var \lispa\amos\core\user\User $loggedUser */
+        /** @var \open20\amos\core\user\User $loggedUser */
         $loggedUser = \Yii::$app->getUser()->identity;
-        /** @var \lispa\amos\admin\models\UserProfile $loggedUserProfile */
+        /** @var \open20\amos\admin\models\UserProfile $loggedUserProfile */
         $loggedUserProfile = $loggedUser->getProfile();
         if (!$loggedUserProfile->validato_almeno_una_volta && ($loggedUserProfile->status == UserProfile::USERPROFILE_WORKFLOW_STATUS_DRAFT)) {
             if (is_null($moduleClassName)) {
                 $moduleClassName = AmosAdmin::className();
             }
-            /** @var \lispa\amos\core\module\AmosModule $moduleClassName */
+            /** @var \open20\amos\core\module\AmosModule $moduleClassName */
             return \Yii::$app->controller->redirect(['/' . $moduleClassName::getModuleName() . '/first-access-wizard/introduction', 'id' => $loggedUser->profile->id]);
         }
         return null;
@@ -48,7 +48,7 @@ class FirstAccessWizardComponent extends Component /*implements BootstrapInterfa
      * @return \yii\web\Response
      */
     public function redirectToUrl($url){
-        return \Yii::$app->controller->redirect([$url]);
+        return \Yii::$app->controller->redirect($url);
 
     }
 //    /**

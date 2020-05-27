@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
@@ -9,12 +9,12 @@
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\core\icons\AmosIcons;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\core\icons\AmosIcons;
 
 /**
- * @var \lispa\amos\admin\models\UserProfile $model
- * @var \lispa\amos\socialauth\models\SocialAuthUsers[] $socialAuthUsers
+ * @var \open20\amos\admin\models\UserProfile $model
+ * @var \open20\amos\socialauth\models\SocialAuthUsers[] $socialAuthUsers
  * @var array $enableServices
  */
 
@@ -27,7 +27,7 @@ $serviceContactActive = in_array('contacts', $enableServices);
 
 if ($serviceCalendarActive || $serviceContactActive) {
 
-    /** @var \lispa\amos\socialauth\models\SocialAuthUsers $socialAuthUser */
+    /** @var \open20\amos\socialauth\models\SocialAuthUsers $socialAuthUser */
     if ($socialAuthUser) {
         $isEnabledCalendar = $serviceCalendarActive && $socialAuthUser->getServices()->andWhere(['service' => 'calendar'])->count();
         $isEnabledContacts = $serviceContactActive && $socialAuthUser->getServices()->andWhere(['service' => 'contacts'])->count();
@@ -60,7 +60,7 @@ JS;
                 if ($serviceCalendarActive){
                 ?>
                 <span id="manage-calendar">
-                <?= \lispa\amos\core\helpers\Html::a(
+                <?= \open20\amos\core\helpers\Html::a(
                     AmosIcons::show('calendar', [], 'dash'),
                     '/admin/user-profile/enable-google-service?id=' . $model->id . '&serviceName=calendar',
                     [
@@ -69,7 +69,7 @@ JS;
                         'title' => AmosAdmin::t('amosadmin', 'Enable') . ' ' . AmosAdmin::t('amosadmin', '#calendar'),
                         'onclick' => "window.open(this.href, 'enableCalendar', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;"
                     ]) ?>
-                <?= \lispa\amos\core\helpers\Html::a(
+                <?= \open20\amos\core\helpers\Html::a(
                     AmosIcons::show('calendar', [], 'dash') . '&nbsp;' . AmosAdmin::t('amosadmin', 'Disconnect'),
                     '/admin/user-profile/disable-google-service?id=' . $model->id . '&serviceName=calendar',
                     [
@@ -89,7 +89,7 @@ JS;
                 if ($serviceContactActive) {
                     ?>
                     <span id="manage-contacts">
-            <?= \lispa\amos\core\helpers\Html::a(
+            <?= \open20\amos\core\helpers\Html::a(
                 AmosIcons::show('account'),
                 '/admin/user-profile/enable-google-service?id=' . $model->id . '&serviceName=contacts',
                 [
@@ -98,7 +98,7 @@ JS;
                     'title' => AmosAdmin::t('amosadmin', 'Enable') . ' ' . AmosAdmin::t('amosadmin', '#contacts'),
                     'onclick' => "window.open(this.href, 'enableContacts', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;"
                 ]) ?>
-            <?= \lispa\amos\core\helpers\Html::a(
+            <?= \open20\amos\core\helpers\Html::a(
                 AmosIcons::show('account') . '&nbsp;' . AmosAdmin::t('amosadmin', 'Disconnect'),
                 '/admin/user-profile/disable-google-service?id=' . $model->id . '&serviceName=contacts',
                 [

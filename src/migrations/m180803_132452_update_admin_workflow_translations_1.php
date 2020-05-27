@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\migrations
+ * @package    open20\amos\admin\migrations
  * @category   CategoryName
  */
 
-use lispa\amos\core\migration\AmosMigrationTranslations;
+use open20\amos\core\migration\AmosMigrationTranslations;
 
 /**
  * Class m180803_132452_update_admin_workflow_translations_1

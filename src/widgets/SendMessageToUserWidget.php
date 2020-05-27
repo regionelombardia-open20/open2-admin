@@ -1,20 +1,20 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\widgets
+ * @package    open20\amos\admin\widgets
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\widgets;
+namespace open20\amos\admin\widgets;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\user\User;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\user\User;
 use Yii;
 use yii\base\Widget;
 use yii\bootstrap\Modal;
@@ -23,7 +23,7 @@ use yii\redactor\widgets\Redactor;
 
 /**
  * Class SendMessageToUserWidget
- * @package lispa\amos\admin\widgets
+ * @package open20\amos\admin\widgets
  */
 class SendMessageToUserWidget extends Widget
 {
@@ -109,6 +109,7 @@ class SendMessageToUserWidget extends Widget
     public function run()
     {
         // Check if chat module is present. In other case return empty string now.
+        /** @var \open20\amos\chat\AmosChat $chatModule */
         $chatModule = Yii::$app->getModule('chat');
         if (is_null($chatModule)) {
             return '';
@@ -175,7 +176,7 @@ JS;
                         ],
                         'clientOptions' => [
                             'focus' => true,
-                            'buttons' => ['image'],
+                            'buttons' => $chatModule->formRedactorButtons,
                             'lang' => substr(Yii::$app->language, 0, 2)
                         ]
                     ]);

@@ -1,71 +1,73 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\widgets\icons
+ * @package    open20\amos\admin\widgets\icons
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\widgets\icons;
+namespace open20\amos\admin\widgets\icons;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\core\widget\WidgetIcon;
-use lispa\amos\core\widget\WidgetAbstract;
-use lispa\amos\core\icons\AmosIcons;
+use open20\amos\core\icons\AmosIcons;
+use open20\amos\core\widget\WidgetAbstract;
+use open20\amos\core\widget\WidgetIcon;
+
+use open20\amos\admin\AmosAdmin;
 
 use Yii;
 use yii\helpers\ArrayHelper;
 
 /**
  * Class WidgetIconMyProfile
- * @package lispa\amos\admin\widgets\icons
+ * @package open20\amos\admin\widgets\icons
  */
-class WidgetIconMyProfile extends WidgetIcon {
+class WidgetIconMyProfile extends WidgetIcon
+{
+    /**
+     * @inheritdoc
+     */
+    public function init()
+    {
+        parent::init();
 
-  /**
-   * @inheritdoc
-   */
-  public function init() {
-    parent::init();
-    
-    $paramsClassSpan = [
-      'bk-backgroundIcon',
-      'color-darkGrey'
-    ];
+        $paramsClassSpan = [
+            'bk-backgroundIcon',
+            'color-darkGrey'
+        ];
 
-    $this->setLabel(AmosAdmin::tHtml('amosadmin', 'Il mio profilo'));
-    $this->setDescription(AmosAdmin::t('amosadmin', 'Consente all\'utente di modificare il proprio profilo'));
+        $this->setLabel(AmosAdmin::tHtml('amosadmin', 'Il mio profilo'));
+        $this->setDescription(AmosAdmin::t('amosadmin', 'Consente all\'utente di modificare il proprio profilo'));
 
-    if (!empty(\Yii::$app->params['dashboardEngine']) && \Yii::$app->params['dashboardEngine'] == WidgetAbstract::ENGINE_ROWS) {
-      $this->setIconFramework(AmosIcons::IC);
-      $this->setIcon('user');
-      $paramsClassSpan = [];
-    } else {
-      $this->setIcon('users');
+        if (!empty(Yii::$app->params['dashboardEngine']) && Yii::$app->params['dashboardEngine'] == WidgetAbstract::ENGINE_ROWS) {
+            $this->setIconFramework(AmosIcons::IC);
+            $this->setIcon('user');
+            $paramsClassSpan = [];
+        } else {
+            $this->setIcon('users');
+        }
+
+        if (!Yii::$app->user->isGuest) {
+            $this->setUrl(
+                [
+                    '/admin/user-profile/update',
+                    'id' => Yii::$app->getUser()->id
+                ]
+            );
+        }
+
+        $this->setCode('USER_PROFILE');
+        $this->setModuleName(AmosAdmin::getModuleName());
+        $this->setNamespace(__CLASS__);
+
+        $this->setClassSpan(
+            ArrayHelper::merge(
+                $this->getClassSpan(),
+                $paramsClassSpan
+            )
+        );
     }
-
-    if (!Yii::$app->user->isGuest) {
-      $this->setUrl(
-        [
-          '/admin/user-profile/update', 
-          'id' => Yii::$app->getUser()->id
-        ]
-      );
-    }
-
-    $this->setCode('USER_PROFILE');
-    $this->setModuleName(AmosAdmin::getModuleName());
-    $this->setNamespace(__CLASS__);
-
-    $this->setClassSpan(
-        ArrayHelper::merge(
-            $this->getClassSpan(),
-            $paramsClassSpan
-        )
-    );
-  }
 
 }

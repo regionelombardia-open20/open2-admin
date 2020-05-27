@@ -1,34 +1,35 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\models
+ * @package    open20\amos\admin\models
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\models;
+namespace open20\amos\admin\models;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\base\ConfigurationManager;
-use lispa\amos\admin\events\AdminWorkflowEvent;
-use lispa\amos\admin\i18n\grammar\UserProfileGrammar;
-use lispa\amos\admin\models\base\UserProfile as BaseUserProfile;
-use lispa\amos\admin\utility\UserProfileUtility;
-use lispa\amos\admin\widgets\icons\WidgetIconUserProfile;
-use lispa\amos\attachments\behaviors\FileBehavior;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\helpers\T;
-use lispa\amos\core\interfaces\ContentModelInterface;
-use lispa\amos\core\interfaces\FacilitatorInterface;
-use lispa\amos\core\interfaces\ViewModelInterface;
-use lispa\amos\core\interfaces\WorkflowModelInterface;
-use lispa\amos\core\record\CachedActiveQuery;
-use lispa\amos\core\user\User;
-use lispa\amos\admin\events\AssociateTutorToUserEvent;
-use lispa\amos\workflow\behaviors\WorkflowLogFunctionsBehavior;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\base\ConfigurationManager;
+use open20\amos\admin\events\AdminWorkflowEvent;
+use open20\amos\admin\events\AssociateTutorToUserEvent;
+use open20\amos\admin\i18n\grammar\UserProfileGrammar;
+use open20\amos\admin\models\base\UserProfile as BaseUserProfile;
+use open20\amos\admin\utility\UserProfileUtility;
+use open20\amos\admin\widgets\icons\WidgetIconUserProfile;
+use open20\amos\attachments\behaviors\FileBehavior;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\helpers\T;
+use open20\amos\core\interfaces\ContentModelInterface;
+use open20\amos\core\interfaces\FacilitatorInterface;
+use open20\amos\core\interfaces\ViewModelInterface;
+use open20\amos\core\interfaces\WorkflowModelInterface;
+use open20\amos\core\record\CachedActiveQuery;
+use open20\amos\core\user\User;
+use open20\amos\core\utilities\Email;
+use open20\amos\workflow\behaviors\WorkflowLogFunctionsBehavior;
 use Exception;
 use raoul2000\workflow\base\SimpleWorkflowBehavior;
 use Yii;
@@ -44,17 +45,18 @@ use yii\helpers\Url;
  *
  * This is the model class for table "user_profile".
  *
- * @property \lispa\amos\core\user\User $user
- * @property \lispa\amos\comuni\models\IstatComuni $residenzaComune
- * @property \lispa\amos\comuni\models\IstatProvince $residenzaProvincia
- * @property \lispa\amos\core\interfaces\OrganizationsModelInterface $userOrganization
+ * @property \open20\amos\core\user\User $user
+ * @property \open20\amos\comuni\models\IstatComuni $residenzaComune
+ * @property \open20\amos\comuni\models\IstatProvince $residenzaProvincia
+ * @property \open20\amos\core\interfaces\OrganizationsModelInterface $userOrganization
  * @property string $nomeCognome
+ * @property string $language
  *
  * @method \cornernote\workflow\manager\components\WorkflowDbSource getWorkflowSource()
  * @method \yii\db\ActiveQuery hasOneFile($attribute = 'file', $sort = 'id')
  * @method \yii\db\ActiveQuery hasMultipleFiles($attribute = 'file', $sort = 'id')
  *
- * @package lispa\amos\admin\models
+ * @package open20\amos\admin\models
  */
 class UserProfile extends BaseUserProfile implements ContentModelInterface, ViewModelInterface, FacilitatorInterface
 {
@@ -74,7 +76,7 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
     public $isProfileModified;
 
     /**
-     * @var \lispa\amos\attachments\models\File $userProfileImage
+     * @var \open20\amos\attachments\models\File $userProfileImage
      */
     private $userProfileImage;
 
@@ -134,10 +136,8 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
      */
     public function rules()
     {
-        /** @var AmosAdmin $adminModule */
-        $adminModule = Yii::$app->getModule(AmosAdmin::getModuleName());
         return ArrayHelper::merge(parent::rules(), [
-            [['userProfileImage'], 'file', 'extensions' => $adminModule->whiteListProfileImageExts],
+            [['userProfileImage'], 'file', 'extensions' => $this->adminModule->whiteListProfileImageExts],
             ['codice_fiscale', 'string', 'length' => 16],
             ['codice_fiscale', 'checkCodiceFiscale'],
             [['avatar_id', 'listaRuoli', 'listaProgetti'], 'safe'],
@@ -192,7 +192,7 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
         $tagModule = Yii::$app->getModule('tag');
         if (isset($cwhModule) && isset($tagModule)) {
             $cwhTaggable = ['interestingTaggable' => [
-                'class' => \lispa\amos\cwh\behaviors\TaggableInterestingBehavior::className(),
+                'class' => \open20\amos\cwh\behaviors\TaggableInterestingBehavior::className(),
                 // 'tagValuesAsArray' => false,
                 // 'tagRelation' => 'tags',
                 'tagValueAttribute' => 'id',
@@ -220,30 +220,28 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
             $this->status = $this->getWorkflowSource()->getWorkflow(self::USERPROFILE_WORKFLOW)->getInitialStatusId();
         }
 
-        $adminModule = AmosAdmin::instance();
-        if (!$adminModule->confManager->isVisibleBox('box_prevalent_partnership', ConfigurationManager::VIEW_TYPE_FORM) ||
-            !$adminModule->confManager->isVisibleField('prevalent_partnership_id', ConfigurationManager::VIEW_TYPE_FORM)) {
-            if (isset($adminModule->params['orderParams']['user-profile']['fields'])) {
-                $orderField = $adminModule->params['orderParams']['user-profile']['fields'];
+        if (!$this->adminModule->confManager->isVisibleBox('box_prevalent_partnership', ConfigurationManager::VIEW_TYPE_FORM) ||
+            !$this->adminModule->confManager->isVisibleField('prevalent_partnership_id', ConfigurationManager::VIEW_TYPE_FORM)) {
+            if (isset($this->adminModule->params['orderParams']['user-profile']['fields'])) {
+                $orderField = $this->adminModule->params['orderParams']['user-profile']['fields'];
                 if (in_array('prevalentPartnership', $orderField)) {
-                    unset($adminModule->params['orderParams']['user-profile']['fields'][array_search('prevalentPartnership', $orderField)]);
+                    unset($this->adminModule->params['orderParams']['user-profile']['fields'][array_search('prevalentPartnership', $orderField)]);
 
                 }
             }
         }
-        if(!empty($adminModule) && !empty($adminModule->associateTutor)){
+        if(!empty($this->adminModule) && !empty($this->adminModule->associateTutor)){
             $this->on(self::EVENT_AFTER_INSERT, [new AssociateTutorToUserEvent(), 'afterCreateUser'], $this);
         }
     }
 
     /**
+    /**
      * @inheritdoc
      */
     public function beforeValidate()
     {
-        /** @var AmosAdmin $adminModule */
-        $adminModule = AmosAdmin::instance();
-        if (!$adminModule->dontCheckOneTagPresent && !\Yii::$app->user->can('ADMIN')) {
+        if (!$this->adminModule->dontCheckOneTagPresent && !\Yii::$app->user->can('ADMIN')) {
             if (!$this->checkOneTagPresent()) {
                 return false;
             }
@@ -278,6 +276,7 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
                 }
             }
             if ($empty) {
+                \Yii::$app->session->addFlash('danger', AmosAdmin::t('amosadmin', "It's necessary to indicate at least one tag."));
                 $this->addError('interestTagValues', AmosAdmin::t('amosadmin', "It's necessary to indicate at least one tag."));
                 return false;
             }
@@ -356,7 +355,7 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
                         $GeoCoderParams = urlencode("$Comune->nome $Provincia->sigla, Italy");
                     }
 
-                    //$UrlGeocoder = "http://utility.lispa.it/geo/geo/getcoords?indirizzo=$GeoCoderParams";
+                    //$UrlGeocoder = "http://utility.open20.it/geo/geo/getcoords?indirizzo=$GeoCoderParams";
                     $UrlGeocoder = "https://maps.googleapis.com/maps/api/geocode/json?address=$GeoCoderParams&key=$googleMapsKey";
                     $ResulGeocoding = Json::decode(file_get_contents($UrlGeocoder));
                     if ($ResulGeocoding && isset($ResulGeocoding['status'])) {
@@ -395,7 +394,16 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
             $this->validato_almeno_una_volta = 1;
         }
 
-        return parent::beforeSave($insert);
+        /**
+         * TBD - FRANZ workaround to catch Expception for no transition 
+         * difference from before & after status
+         */
+        try {
+            return parent::beforeSave($insert);
+        } catch (Exception $exception) {
+            Yii::getLogger()->log($exception->getMessage(), \yii\log\Logger::LEVEL_WARNING);
+            return true;
+        }
     }
 
 //    public function getTuttiRuoli()
@@ -573,7 +581,7 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
 
     /**
      * @param string $dimension
-     * @return bool|\lispa\amos\attachments\models\File|null|string
+     * @return bool|\open20\amos\attachments\models\File|null|string
      */
     public function getAvatar($dimension = 'original')
     {
@@ -1283,7 +1291,7 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
     /**
      * This method return the facilitator profile of this user profile. If not present,
      * it return the default facilitator profile. If not present it return null.
-     * @return \lispa\amos\admin\models\UserProfile|null
+     * @return UserProfile|null
      */
     public function getFacilitatorOrDefFacilitator()
     {
@@ -1297,7 +1305,7 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
 
     /**
      * This method returns the default facilitator profile. If not present it returns null.
-     * @return \lispa\amos\admin\models\UserProfile|null
+     * @return UserProfile|null
      * @throws \yii\base\InvalidConfigException
      */
     public function getDefaultFacilitator()
@@ -1377,7 +1385,6 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
     public function getUserNetworkQuery()
     {
         $loggedUserId = Yii::$app->user->id;
-        $adminModule = AmosAdmin::getInstance();
 
         $queryUserContactInvited = UserContact::find()
             ->andWhere(['contact_id' => $loggedUserId])
@@ -1398,9 +1405,9 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
             ->andWhere(['user_profile.validato_almeno_una_volta' => 1])
             ->andWhere(['user_profile.attivo' => 1]);
 
-        if ($adminModule->cached) {
+        if ($this->adminModule->cached) {
             $query = CachedActiveQuery::instance($queryContacts);
-            $query->cache($adminModule->cacheDuration);
+            $query->cache($this->adminModule->cacheDuration);
         } else {
             $query = $queryContacts;
         }
@@ -1417,7 +1424,6 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
     public function getUserNetworkAssociationQuery()
     {
         $loggedUserId = Yii::$app->user->id;
-        $adminModule = AmosAdmin::getInstance();
 
         $queryUserContactInvited = UserContact::find()
             ->andWhere(['contact_id' => $loggedUserId])
@@ -1438,9 +1444,9 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
             ->andWhere(['user_profile.validato_almeno_una_volta' => 1])
             ->andWhere(['user_profile.attivo' => 1]);
 
-        if ($adminModule->cached) {
+        if ($this->adminModule->cached) {
             $query = CachedActiveQuery::instance($queryContacts);
-            $query->cache($adminModule->cacheDuration);
+            $query->cache($this->adminModule->cacheDuration);
         } else {
             $query = $queryContacts;
         }
@@ -1557,9 +1563,7 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
      */
     public function sendNotification()
     {
-        /** @var AmosAdmin $adminModule */
-        $adminModule = Yii::$app->getModule(AmosAdmin::getModuleName());
-        return $adminModule->enableWorkflowChangeStatusMails;
+        return $this->adminModule->enableWorkflowChangeStatusMails;
     }
 
     /**
@@ -1600,10 +1604,8 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
     }
 
     public function getUserOrganization() {
-        /** @var AmosAdmin $admin */
-        $admin =  AmosAdmin::getInstance();
         /** @var  $organizationsModule OrganizationsModuleInterface*/
-        $organizationsModule = \Yii::$app->getModule($admin->getOrganizationModuleName());
+        $organizationsModule = \Yii::$app->getModule($this->adminModule->getOrganizationModuleName());
 
         if(is_null($organizationsModule)) {
             return null;
@@ -1617,4 +1619,95 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
 
         return reset($organizations);
     }
+
+    public function getLanguage() {
+        $userLanguage = \Yii::$app->language;
+
+        if(Yii::$app->hasModule('translation')) {
+            /**
+             * @var $translationModule AmosTranslation
+             */
+            $translationModule = Yii::$app->getModule('translation');
+
+            //Set the choosed language
+            $userLanguage = $translationModule->getUserLanguage($this->user_id);
+        }
+
+        return $userLanguage;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function afterSave($insert, $changedAttributes) {
+        parent::afterSave($insert, $changedAttributes);
+
+        $facilitatore = $this->facilitatore;
+        if ($this->adminModule->confManager->isVisibleBox('box_facilitatori', ConfigurationManager::VIEW_TYPE_FORM) && $this->adminModule->confManager->isVisibleField('facilitatore_id', ConfigurationManager::VIEW_TYPE_FORM) && !is_null($facilitatore) && $facilitatore->user_id != $this->user_id) {
+
+            //check if a connection request is already present
+            $userContact = UserContact::findOne(['user_id' => $facilitatore->user_id, 'contact_id' => $this->user_id]);
+
+            if (empty($userContact)) {
+                $userContact = UserContact::findOne(['user_id' => $this->user_id, 'contact_id' => $facilitatore->user_id]);
+                if (empty($userContact)) {
+                    //if there is no connection between $userId and $contactId create a new userContact
+                    $userContact = new UserContact();
+                    $userContact->user_id = $facilitatore->user_id;
+                    $userContact->contact_id = $this->user_id;
+                    $userContact->status = UserContact::STATUS_INVITED;
+                    $userContact->created_by = $facilitatore->user_id;
+                    if($userContact->save()) {
+                        $this->sendEmailImyourFacilitator($facilitatore);
+                    }
+                }
+            }
+
+
+        }
+    }
+
+    /**
+     * @param $facilitatore
+     */
+    public function sendEmailImyourFacilitator($facilitatore){
+        $tos = [$this->user->email];
+        $contactProfile = $facilitatore;
+        $message = AmosAdmin::t('amosadmin', "#facilitator_assigned");
+        $messageLink = AmosAdmin::t('amosadmin', 'to accept or refuse the invitation');
+        $moduleMyActivities = Yii::$app->getModule('myactivities');
+        if (isset($moduleMyActivities)) {
+            $url = Yii::$app->urlManager->createAbsoluteUrl('myactivities/my-activities/index');
+        }
+
+        $url = Yii::$app->urlManager->createAbsoluteUrl('dashboard');
+
+        $subject = $contactProfile->getNomeCognome() . " " . $message;
+        $text = Email::renderMailPartial('@vendor/open20/amos-admin/src/views/user-profile/email', [
+            'contactProfile' => $contactProfile,
+            'message' => $message,
+            'url' => $url,
+            'messageLink' => $messageLink
+        ]);
+
+        /** @var \open20\amos\emailmanager\AmosEmail $mailModule */
+        $from = null;
+        // controllo se esiste il controller per che quando crea i ltimestamp del login il controller non esiste
+        if(!empty(\Yii::$app->controller)) {
+            $mailModule = Yii::$app->getModule("email");
+            if (isset($mailModule)) {
+                if (is_null($from)) {
+                    if (isset(Yii::$app->params['email-assistenza'])) {
+                        //use default platform email assistance
+                        $from = Yii::$app->params['email-assistenza'];
+                    } else {
+                        $from = 'assistenza@open20.it';
+                    }
+                }
+                return Email::sendMail($from, $tos, $subject, $text, [], [], [], 0, false);
+            }
+        }
+        return false;
+    }
+
 }

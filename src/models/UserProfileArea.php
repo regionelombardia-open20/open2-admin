@@ -1,22 +1,22 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\models
+ * @package    open20\amos\admin\models
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\models;
+namespace open20\amos\admin\models;
 
 /**
  * Class UserProfileArea
  * This is the model class for table "user_profile_area".
- * @package lispa\amos\admin\models
+ * @package open20\amos\admin\models
  */
-class UserProfileArea extends \lispa\amos\admin\models\base\UserProfileArea
+class UserProfileArea extends \open20\amos\admin\models\base\UserProfileArea
 {
 
 }

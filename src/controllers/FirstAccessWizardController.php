@@ -1,29 +1,29 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\controllers
+ * @package    open20\amos\admin\controllers
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\controllers;
+namespace open20\amos\admin\controllers;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\assets\ModuleAdminAsset;
-use lispa\amos\admin\components\FirstAccessWizardParts;
-use lispa\amos\admin\interfaces\OrganizationsModuleInterface;
-use lispa\amos\admin\models\search\UserProfileAreaSearch;
-use lispa\amos\admin\models\search\UserProfileRoleSearch;
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\core\controllers\CrudController;
-use lispa\amos\core\forms\editors\m2mWidget\controllers\M2MWidgetControllerTrait;
-use lispa\amos\core\forms\editors\m2mWidget\M2MEventsEnum;
-use lispa\amos\core\utilities\ArrayUtility;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\assets\ModuleAdminAsset;
+use open20\amos\admin\components\FirstAccessWizardParts;
+use open20\amos\admin\interfaces\OrganizationsModuleInterface;
+use open20\amos\admin\models\search\UserProfileAreaSearch;
+use open20\amos\admin\models\search\UserProfileRoleSearch;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\core\controllers\CrudController;
+use open20\amos\core\forms\editors\m2mWidget\controllers\M2MWidgetControllerTrait;
+use open20\amos\core\forms\editors\m2mWidget\M2MEventsEnum;
+use open20\amos\core\utilities\ArrayUtility;
 use Yii;
-use yii\base\Exception;
+use yii\base\Event;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
@@ -33,11 +33,12 @@ use yii\helpers\Url;
 /**
  * Class FirstAccessWizardController
  *
- * @property \lispa\amos\admin\models\UserProfile $model
+ * @property \open20\amos\admin\models\UserProfile $model
  *
- * @package lispa\amos\admin\controllers
+ * @package open20\amos\admin\controllers
  */
-class FirstAccessWizardController extends CrudController {
+class FirstAccessWizardController extends CrudController
+{
 
     /**
      * @var string $layout
@@ -55,9 +56,15 @@ class FirstAccessWizardController extends CrudController {
     protected $userProfileId;
 
     /**
+     * @var AmosAdmin $adminModule
+     */
+    protected $adminModule;
+
+    /**
      * @inheritdoc
      */
-    public function init() {
+    public function init()
+    {
         $this->setModelObj(AmosAdmin::instance()->createModel('UserProfile'));
         $this->setModelSearch(AmosAdmin::instance()->createModel('UserProfileSearch'));
         $this->setAvailableViews([]);
@@ -79,15 +86,18 @@ class FirstAccessWizardController extends CrudController {
 
         //Set current user id
         $this->userProfileId = Yii::$app->getUser()->identity->profile->id;
+
+        $this->adminModule = AmosAdmin::instance();
     }
 
     /**
      *
      * @return array
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         $behaviors = ArrayHelper::merge(
-            parent::behaviors(), 
+            parent::behaviors(),
             [
                 'access' => [
                     'class' => AccessControl::className(),
@@ -117,7 +127,7 @@ class FirstAccessWizardController extends CrudController {
                 ]
             ]
         );
-        
+
         return $behaviors;
     }
 
@@ -125,7 +135,8 @@ class FirstAccessWizardController extends CrudController {
      * Used for set page title and breadcrumbs.
      * @param string $pageTitle
      */
-    public function setTitleAndBreadcrumbs($pageTitle) {
+    public function setTitleAndBreadcrumbs($pageTitle)
+    {
         Yii::$app->view->title = $pageTitle;
         Yii::$app->view->params['breadcrumbs'] = [
             ['label' => $pageTitle]
@@ -135,7 +146,8 @@ class FirstAccessWizardController extends CrudController {
     /**
      * Set view params for the event creation wizard.
      */
-    private function setParamsForView() {
+    private function setParamsForView()
+    {
         $parts = new FirstAccessWizardParts(['model' => $this->model]);
         Yii::$app->view->title = $parts->active['index'] . '. ' . $parts->active['label'];
         Yii::$app->view->params['model'] = $this->model;
@@ -147,53 +159,56 @@ class FirstAccessWizardController extends CrudController {
     }
 
     /**
-     * 
-     * @return type
+     * @return \yii\web\Response
      */
-    public function goToNextPart() {
+    public function goToNextPart()
+    {
         $parts = new FirstAccessWizardParts(['model' => $this->model]);
-        
+
         return $this->redirect([$parts->getNext()]);
     }
 
     /**
      * @param \yii\base\Event $event
      */
-    public function beforeAssociateOneToMany($event) {
+    public function beforeAssociateOneToMany($event)
+    {
         $this->setUpLayout('main');
     }
 
     /**
      * @param \yii\base\Event $event
      */
-    public function beforeRenderOneToMany($event) {
+    public function beforeRenderOneToMany($event)
+    {
         $this->setParamsForView();
     }
 
     /**
      * @param $event
      */
-    public function afterAssociateOneToMany($event) {
+    public function afterAssociateOneToMany($event)
+    {
         try {
-            $userprofile_class = AmosAdmin::getInstance()->model('UserProfile');
+            $userprofile_class = $this->adminModule->model('UserProfile');
 
             if (!empty($event->sender) && is_object($event->sender) && $event->sender instanceof $userprofile_class) {
                 if (!empty($event->sender->prevalent_partnership_id)) {
-                    $admin = AmosAdmin::getInstance();
                     /** @var  $organizationsModule OrganizationsModuleInterface */
-                    $organizationsModule = \Yii::$app->getModule($admin->getOrganizationModuleName());
+                    $organizationsModule = \Yii::$app->getModule($this->adminModule->getOrganizationModuleName());
                     $organizationsModule->saveOrganizationUserMm(Yii::$app->user->id, $event->sender->prevalent_partnership_id);
                 }
             }
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             Yii::getLogger()->log($ex->getMessage(), \yii\log\Logger::LEVEL_ERROR);
         }
     }
 
     /**
-     * @param $event
+     * @param Event $event
      */
-    public function beforeCancelAssociateM2m($event) {
+    public function beforeCancelAssociateM2m($event)
+    {
         $get = Yii::$app->getRequest()->get();
         if (isset($get['action'])) {
             switch ($get['action']) {
@@ -208,33 +223,33 @@ class FirstAccessWizardController extends CrudController {
     }
 
     /**
-     * 
-     * @return type
+     * @return string
      */
-    public function actionAssociateFacilitator() {
+    public function actionAssociateFacilitator()
+    {
         $this->setMmTargetKey('facilitatore_id');
         $this->setRedirectAction('introducing-myself');
         $this->setTargetUrl('associate-facilitator');
-        
         return $this->actionAssociateOneToMany($this->userProfileId);
     }
 
     /**
-     * 
-     * @return type
+     * @return string
      */
-    public function actionAssociatePrevalentPartnership() {
+    public function actionAssociatePrevalentPartnership()
+    {
         $this->setMmTargetKey('prevalent_partnership_id');
         $this->setRedirectAction('partnership');
         $this->setTargetUrl('associate-prevalent-partnership');
-        
         return $this->actionAssociateOneToMany($this->userProfileId);
     }
 
     /**
      * @return string|\yii\web\Response
+     * @throws \yii\web\NotFoundHttpException
      */
-    public function actionIntroduction() {
+    public function actionIntroduction()
+    {
         Url::remember();
 
         $this->model = $this->findModel($this->userProfileId);
@@ -259,9 +274,9 @@ class FirstAccessWizardController extends CrudController {
         $this->setAccessFirstTime(FirstAccessWizardParts::PART_INTRODUCTION);
 
         $this->setParamsForView();
-        
+
         return $this->render(
-            'introduction', 
+            'introduction',
             [
                 'model' => $this->model
             ]
@@ -271,7 +286,8 @@ class FirstAccessWizardController extends CrudController {
     /**
      * @return string|\yii\web\Response
      */
-    public function actionIntroducingMyself() {
+    public function actionIntroducingMyself()
+    {
         Url::remember();
 
         $this->model = $this->findModel($this->userProfileId);
@@ -290,9 +306,9 @@ class FirstAccessWizardController extends CrudController {
         $this->setAccessFirstTime(FirstAccessWizardParts::PART_INTRODUCING_MYSELF);
 
         $this->setParamsForView();
-        
+
         return $this->render(
-            'introducing_myself', 
+            'introducing_myself',
             [
                 'model' => $this->model,
                 'facilitatorUserProfile' => $this->model->facilitatore
@@ -303,7 +319,8 @@ class FirstAccessWizardController extends CrudController {
     /**
      * @return string|\yii\web\Response
      */
-    public function actionRoleAndArea() {
+    public function actionRoleAndArea()
+    {
         Url::remember();
 
         $this->model = $this->findModel($this->userProfileId);
@@ -319,9 +336,9 @@ class FirstAccessWizardController extends CrudController {
 
         $this->setParamsForView();
         $this->model->setScenario(UserProfile::SCENARIO_ROLE_AND_AREA);
-        
+
         return $this->render(
-            'role_and_area', 
+            'role_and_area',
             [
                 'model' => $this->model
             ]
@@ -331,7 +348,8 @@ class FirstAccessWizardController extends CrudController {
     /**
      * @return string|\yii\web\Response
      */
-    public function actionInterests() {
+    public function actionInterests()
+    {
         Url::remember();
 
         $this->model = $this->findModel($this->userProfileId);
@@ -355,9 +373,9 @@ class FirstAccessWizardController extends CrudController {
 
         $this->setParamsForView();
         $this->model->setScenario(UserProfile::SCENARIO_INTERESTS);
-        
+
         return $this->render(
-            'interests', 
+            'interests',
             [
                 'model' => $this->model
             ]
@@ -367,26 +385,16 @@ class FirstAccessWizardController extends CrudController {
     /**
      * @return string|\yii\web\Response
      */
-    public function actionPartnership() {
+    public function actionPartnership()
+    {
         Url::remember();
 
         $this->model = $this->findModel($this->userProfileId);
 
         if (Yii::$app->getRequest()->post()) {
             $this->model->setScenario(UserProfile::SCENARIO_PARTNERSHIP);
-            $this->model->status = UserProfile::USERPROFILE_WORKFLOW_STATUS_TOVALIDATE;
             if ($this->model->load(Yii::$app->getRequest()->post()) && $this->model->save()) {
-                /** @var AmosAdmin $adminModule */
-                $adminModule = Yii::$app->getModule(AmosAdmin::getModuleName());
-                if ($adminModule->bypassWorkflow) {
-                    $this->model->status = UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED;
-                    $ok = $this->model->save();
-                    if ($ok) {
-                        return $this->goToNextPart();
-                    }
-                } else {
-                    return $this->goToNextPart();
-                }
+                return $this->goToNextPart();
             }
         }
 
@@ -394,9 +402,9 @@ class FirstAccessWizardController extends CrudController {
 
         $this->setParamsForView();
         $this->model->setScenario(UserProfile::SCENARIO_PARTNERSHIP);
-        
+
         return $this->render(
-            'partnership', 
+            'partnership',
             [
                 'model' => $this->model
             ]
@@ -407,16 +415,22 @@ class FirstAccessWizardController extends CrudController {
      * @param int $id The user profile id.
      * @return string|\yii\web\Response
      */
-    public function actionFinish() {
+    public function actionFinish()
+    {
         Url::remember();
         $this->model = $this->findModel($this->userProfileId);
+
+        $this->model->status = ($this->adminModule->bypassWorkflow ?
+            UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED :
+            UserProfile::USERPROFILE_WORKFLOW_STATUS_TOVALIDATE);
+        $this->model->save(false);
 
         $this->setAccessFirstTime(FirstAccessWizardParts::PART_FINISH);
 
         $this->setParamsForView();
-        
+
         return $this->render(
-            'finish', 
+            'finish',
             [
                 'model' => $this->model
             ]
@@ -427,21 +441,22 @@ class FirstAccessWizardController extends CrudController {
      * This method return all enabled professional roles translated.
      * @return array
      */
-    public function getRoles() {
+    public function getRoles()
+    {
         $roles = ArrayUtility::translateArrayValues(
             ArrayHelper::map(UserProfileRoleSearch::find()->andWhere('name!="Other"')->asArray()->all(), 'id', 'name'),
             'amosadmin',
             AmosAdmin::className()
         );
-        
+
         asort($roles);
-        
+
         $other = ArrayUtility::translateArrayValues(
             ArrayHelper::map(UserProfileRoleSearch::find()->andWhere('name="Other"')->asArray()->all(), 'id', 'name'),
             'amosadmin',
             AmosAdmin::className()
         );
-        
+
         return $roles + $other;
     }
 
@@ -449,21 +464,22 @@ class FirstAccessWizardController extends CrudController {
      * This method return all enabled professional areas translated.
      * @return array
      */
-    public function getAreas() {
+    public function getAreas()
+    {
         $areas = ArrayUtility::translateArrayValues(
             ArrayHelper::map(UserProfileAreaSearch::find()->andWhere('name!="Other"')->asArray()->all(), 'id', 'name'),
             'amosadmin',
             AmosAdmin::className()
         );
-        
+
         asort($areas);
-        
+
         $other = ArrayUtility::translateArrayValues(
             ArrayHelper::map(UserProfileAreaSearch::find()->andWhere('name="Other"')->asArray()->all(), 'id', 'name'),
             'amosadmin',
             AmosAdmin::className()
         );
-        
+
         return $areas + $other;
     }
 
@@ -471,20 +487,21 @@ class FirstAccessWizardController extends CrudController {
      * @param null $layout
      * @return bool
      */
-    public function setUpLayout($layout = null) {
+    public function setUpLayout($layout = null)
+    {
         if ($layout === false) {
             $this->layout = false;
             return true;
         }
-        
+
         $this->layout = (!empty($layout)) ? $layout : $this->layout;
         $module = \Yii::$app->getModule('layout');
         if (empty($module)) {
             if (strpos($this->layout, '@') === false) {
-                $this->layout = '@vendor/lispa/amos-core/views/layouts/' . (!empty($layout) ? $layout : $this->layout);
+                $this->layout = '@vendor/open20/amos-core/views/layouts/' . (!empty($layout) ? $layout : $this->layout);
             }
         }
-        
+
         return true;
     }
 
@@ -492,7 +509,8 @@ class FirstAccessWizardController extends CrudController {
      * Sets in the user_profile table an accessed step for the first time
      * @param string $step
      */
-    public function setAccessFirstTime($step) {
+    public function setAccessFirstTime($step)
+    {
         if ($this->model->first_access_wizard_steps_accessed != null && $this->model->first_access_wizard_steps_accessed != '') {
             $stepsAccessed = Json::decode($this->model->first_access_wizard_steps_accessed);
             if (!$stepsAccessed[$step]) {

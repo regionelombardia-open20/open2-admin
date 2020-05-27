@@ -1,22 +1,22 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\widgets\graphics\views
+ * @package    open20\amos\admin\widgets\graphics\views
  * @category   CategoryName
  */
 
-use lispa\amos\core\helpers\Html;
-use lispa\amos\admin\utility\UserProfileUtility;
-use lispa\amos\admin\widgets\graphics\WidgetGraphicsUsers;
-use lispa\amos\organizzazioni\models\ProfiloUserMm;
+use open20\amos\core\helpers\Html;
+use open20\amos\admin\utility\UserProfileUtility;
+use open20\amos\admin\widgets\graphics\WidgetGraphicsUsers;
+use open20\amos\organizzazioni\models\ProfiloUserMm;
 
 /**
  * @var yii\web\View $this
- * @var \lispa\amos\admin\models\UserProfile $model
+ * @var \open20\amos\admin\models\UserProfile $model
  */
 ?>
 

@@ -1,33 +1,33 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin
+ * @package    open20\amos\admin
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin;
+namespace open20\amos\admin;
 
-use lispa\amos\admin\base\ConfigurationManager;
-use lispa\amos\admin\exceptions\AdminException;
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\admin\utility\UserProfileUtility;
-use lispa\amos\admin\widgets\graphics\WidgetGraphicMyProfile;
-use lispa\amos\admin\widgets\graphics\WidgetGraphicsUsers;
-use lispa\amos\admin\widgets\icons\WidgetIconMyProfile;
-use lispa\amos\admin\widgets\icons\WidgetIconUserProfile;
-use lispa\amos\core\interfaces\SearchModuleInterface;
-use lispa\amos\core\module\AmosModule;
-use lispa\amos\core\user\User;
+use open20\amos\admin\base\ConfigurationManager;
+use open20\amos\admin\exceptions\AdminException;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\admin\utility\UserProfileUtility;
+use open20\amos\admin\widgets\graphics\WidgetGraphicMyProfile;
+use open20\amos\admin\widgets\graphics\WidgetGraphicsUsers;
+use open20\amos\admin\widgets\icons\WidgetIconMyProfile;
+use open20\amos\admin\widgets\icons\WidgetIconUserProfile;
+use open20\amos\core\interfaces\SearchModuleInterface;
+use open20\amos\core\module\AmosModule;
+use open20\amos\core\user\User;
 use Yii;
 use yii\helpers\ArrayHelper;
 
 /**
  * Class AmosAdmin
- * @package lispa\amos\admin
+ * @package open20\amos\admin
  */
 class AmosAdmin extends AmosModule implements SearchModuleInterface
 {
@@ -38,7 +38,8 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
     const GOOGLE_CONTACTS_PLATFORM = 'contacts_platform';
     const GOOGLE_CONTACTS_NOT_PLATFORM = 'contacts_not_platform';
 
-    public $controllerNamespace = 'lispa\amos\admin\controllers';
+    
+    public $controllerNamespace = 'open20\amos\admin\controllers';
     public $whiteListRoles = [];
     public $name = 'Utenti';
     public $searchListFields = [];
@@ -105,24 +106,36 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
 
     /**
      * This is the html used to render the subject of the e-mail. In the view is available the variable $profile
-     * that is an instance of 'lispa\amos\admin\models\UserProfile'
+     * that is an instance of 'open20\amos\admin\models\UserProfile'
      * @var string
      */
-    public $htmlMailSubject = '@vendor/lispa/amos-admin/src/mail/user/credenziali-subject';
+    public $htmlMailSubject = '@vendor/open20/amos-admin/src/mail/user/credenziali-subject';
 
     /**
      * This is the html used to render the message of the e-mail. In the view is available the variable $profile
-     * that is an instance of 'lispa\amos\admin\models\UserProfile'
+     * that is an instance of 'open20\amos\admin\models\UserProfile'
      * @var string
      */
-    public $htmlMailContent = '@vendor/lispa/amos-admin/src/mail/user/credenziali-html';
+    public $htmlMailContent = '@vendor/open20/amos-admin/src/mail/user/credenziali-html';
 
     /**
      * This is the text used to render the message of the e-mail. In the view is available the variable $profile
-     * that is an instance of 'lispa\amos\admin\models\UserProfile'
+     * that is an instance of 'open20\amos\admin\models\UserProfile'
      * @var string
      */
-    public $textMailContent = '@vendor/lispa/amos-admin/src/mail/user/credenziali-text';
+    public $textMailContent = '@vendor/open20/amos-admin/src/mail/user/credenziali-text';
+
+    /**
+     * This is the html content used to render the message of the e-mail send to user that had invited someone
+     * @var string
+     */
+    public $htmlMailNotifyAcceptedRegistrationRequestContent = '@vendor/open20/amos-admin/src/mail/user/notify-accepted-registration-request-html';
+
+    /**
+     * This is the html subject used to render the message of the e-mail send to user that had invited someone
+     * @var string
+     */
+    public $htmltMailNotifyAcceptedRegistrationRequestSubject = '@vendor/open20/amos-admin/src/mail/user/notify-accepted-registration-request-subject';
 
     /**
      * @var array $fieldsConfigurations This array contains all configurations for boxes and fields.
@@ -162,7 +175,7 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
 
     /**
      * This is the module name (you used as array key in modules configuration of your platform) referring to a module
-     * extending lispa\amos\core\interfaces\OrganizationsModuleInterface
+     * extending open20\amos\core\interfaces\OrganizationsModuleInterface
      * It is used to give the possibility to customize the entity type used to set user profile prevalent partnership, for example.
      *
      * @var string $organizationModuleName
@@ -258,16 +271,21 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
     public $enableMultiUsersSameCF = false;
 
     /**
+     * @var bool $bypassRequiredForAdmin If true the required fields for logged user admin is only name and surname when update another user.
+     */
+    public $bypassRequiredForAdmin = true;
+
+    /**
      * @inheritdoc
      */
     public $db_fields_translation = [
         [
-            'namespace' => 'lispa\amos\admin\models\UserProfileArea',
+            'namespace' => 'open20\amos\admin\models\UserProfileArea',
             'attributes' => ['name'],
             'category' => 'amosadmin'
         ],
         [
-            'namespace' => 'lispa\amos\admin\models\UserProfileRole',
+            'namespace' => 'open20\amos\admin\models\UserProfileRole',
             'attributes' => ['name'],
             'category' => 'amosadmin'
         ],
@@ -285,6 +303,18 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
     
     public $defaultProfileImagePath = "@webroot/img/defaultProfilo.png";
 
+    /**
+     * @var bool $enableInviteUserToEvent If true enable a link on single user useful to invite a user to a published event with an event community.
+     */
+    public $enableInviteUserToEvent = false;
+
+    /**
+     * Is set true the validate basic user can create contents only in his/her own Communities
+     * 
+     * @var bool $createContentInMyOwnCommunityOnly
+     */
+    public $createContentInMyOwnCommunityOnly = false;
+    
     /**
      * @return string
      */
@@ -336,7 +366,7 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
     {
         parent::init();
 
-        \Yii::setAlias('@lispa/amos/' . static::getModuleName() . '/controllers', __DIR__ . '/controllers/');
+        \Yii::setAlias('@open20/amos/' . static::getModuleName() . '/controllers', __DIR__ . '/controllers/');
         // initialize the module with the configuration loaded from config.php
         \Yii::configure($this, require(__DIR__ . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php'));
 
@@ -352,7 +382,7 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
             }
             \Yii::$app->set('reCaptcha', $this->reCaptcha);
         }
-
+        $this->profileRequiredFields = array_unique($this->profileRequiredFields);
     }
 
     /**
@@ -410,11 +440,15 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
             'UserContact' => __NAMESPACE__ . '\\' . 'models\UserContact',
             'UserProfileStatiCivili' => __NAMESPACE__ . '\\' . 'models\UserProfileStatiCivili',
             'UserProfileTitoliStudio' => __NAMESPACE__ . '\\' . 'models\UserProfileTitoliStudio',
-            'User' => 'lispa\amos\core\user\User',
-            'IstatComuni' => 'lispa\amos\comuni\models\IstatComuni',
-            'IstatProvince' => 'lispa\amos\comuni\models\IstatProvince',
-            'IstatRegioni' => 'lispa\amos\comuni\models\IstatRegioni',
-            'IstatNazioni' => 'lispa\amos\comuni\models\IstatNazioni',
+            'User' => 'open20\amos\core\user\User',
+            'IstatComuni' => 'open20\amos\comuni\models\IstatComuni',
+            'IstatProvince' => 'open20\amos\comuni\models\IstatProvince',
+            'IstatRegioni' => 'open20\amos\comuni\models\IstatRegioni',
+            'IstatNazioni' => 'open20\amos\comuni\models\IstatNazioni',
+            'ForgotPasswordForm' => __NAMESPACE__ . '\\' . 'models\ForgotPasswordForm',
+            'LoginForm' => __NAMESPACE__ . '\\' . 'models\LoginForm',
+            'ProfileReactivationForm' => __NAMESPACE__ . '\\' . 'models\ProfileReactivationForm',
+            'RegisterForm' => __NAMESPACE__ . '\\' . 'models\RegisterForm',
             'Ruoli' => 'common\models\Ruoli',
             'UserProfileSearch' => __NAMESPACE__ . '\\' . 'models\search\UserProfileSearch',
             'UserContactSearch' => __NAMESPACE__ . '\\' . 'models\search\UserContactSearch',
@@ -429,13 +463,13 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
      * @param string $name
      * @param string $surname
      * @param string $email
-     * @param \lispa\amos\community\models\Community $community
+     * @param \open20\amos\community\models\Community $community
      * @param bool|false $sendCredentials if credential mail must be sent to the newly created user
      * @return array
      */
-    public function createNewAccount($name, $surname, $email, $privacy, $sendCredentials = false, $community = null)
+    public function createNewAccount($name, $surname, $email, $privacy, $sendCredentials = false, $community = null, $urlFirstAccessRedirectUrl = null)
     {
-        return UserProfileUtility::createNewAccount($name, $surname, $email, $privacy, $sendCredentials, $community);
+        return UserProfileUtility::createNewAccount($name, $surname, $email, $privacy, $sendCredentials, $community, $urlFirstAccessRedirectUrl);
     }
 
     /**

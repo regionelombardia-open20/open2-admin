@@ -1,24 +1,24 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\rbac
+ * @package    open20\amos\admin\rbac
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\rbac;
+namespace open20\amos\admin\rbac;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\models\UserProfile;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\models\UserProfile;
 use yii\rbac\Item;
 use yii\rbac\Rule;
 
 /**
  * Class UpdateOwnUserProfile
- * @package lispa\amos\admin\rbac
+ * @package open20\amos\admin\rbac
  */
 class UpdateOwnUserProfile extends Rule
 {

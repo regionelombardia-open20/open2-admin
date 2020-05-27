@@ -1,24 +1,24 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\user-profile
+ * @package    open20\amos\admin\views\user-profile
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\base\ConfigurationManager;
-use lispa\amos\admin\widgets\UserCardWidget;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\icons\AmosIcons;
-use lispa\amos\core\views\DataProviderView;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\base\ConfigurationManager;
+use open20\amos\admin\widgets\UserCardWidget;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\icons\AmosIcons;
+use open20\amos\core\views\DataProviderView;
 
 /**
  * @var yii\web\View $this
- * @var \lispa\amos\admin\models\UserProfile $model
+ * @var \open20\amos\admin\models\UserProfile $model
  * @var yii\data\ActiveDataProvider $dataProvider
  * @var string $currentView
  * @var string $fromAction
@@ -26,7 +26,7 @@ use lispa\amos\core\views\DataProviderView;
 
 $fromAction = (isset($fromAction) ? $fromAction : 'index');
 
-/** @var \lispa\amos\admin\controllers\UserProfileController $appController */
+/** @var \open20\amos\admin\controllers\UserProfileController $appController */
 $appController = Yii::$app->controller;
 $adminModule = AmosAdmin::instance();
 ?>
@@ -46,9 +46,9 @@ $adminModule = AmosAdmin::instance();
         'label' => $model->getAttributeLabel('userProfileImage'),
         'format' => 'raw',
         'value' => function ($model) {
-            /** @var \lispa\amos\admin\models\UserProfile $model */
+            /** @var \open20\amos\admin\models\UserProfile $model */
 
-            return UserCardWidget::widget(['model' => $model]);
+            return UserCardWidget::widget(['model' => $model, 'avatarDimension' => 'table_small']);
         }
     ];
     $columns[] = 'nome';
@@ -72,7 +72,7 @@ $adminModule = AmosAdmin::instance();
             $columns[] = [
                 'attribute' => 'updated_at',
                 'value' => function ($model) {
-                    /** @var \lispa\amos\admin\models\UserProfile $model */
+                    /** @var \open20\amos\admin\models\UserProfile $model */
                     return Yii::$app->formatter->asDatetime($model->updated_at);
                 }
             ];
@@ -102,7 +102,7 @@ $adminModule = AmosAdmin::instance();
                 $columns[] = [
                     'attribute' => 'status',
                     'value' => function ($model) {
-                        /** @var \lispa\amos\admin\models\UserProfile $model */
+                        /** @var \open20\amos\admin\models\UserProfile $model */
                         return $model->hasWorkflowStatus() ? AmosAdmin::t('amosadmin', $model->getWorkflowStatus()->getLabel()) : '-';
                     }
                 ];
@@ -111,11 +111,11 @@ $adminModule = AmosAdmin::instance();
     }
 
     $columns[] = [
-        'class' => 'lispa\amos\core\views\grid\ActionColumn',
+        'class' => 'open20\amos\core\views\grid\ActionColumn',
         'template' => '{view} {update} {registra}',
         'buttons' => [
             'registra' => function ($url, $model) {
-                /** @var \lispa\amos\admin\models\UserProfile $model */
+                /** @var \open20\amos\admin\models\UserProfile $model */
                 $utente = Yii::$app->getUser();
                 if ($utente->can('REGISTRAZIONE_ACCESSI')) {
                     return Html::a(AmosIcons::show(

@@ -1,28 +1,29 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\controllers
+ * @package    open20\amos\admin\controllers
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\controllers;
+namespace open20\amos\admin\controllers;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\models\UserContact;
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\core\record\Record;
-use lispa\amos\core\user\User;
-use lispa\amos\core\utilities\Email;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\models\UserContact;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\admin\utility\UserProfileUtility;
+use open20\amos\core\record\Record;
+use open20\amos\core\user\User;
+use open20\amos\core\utilities\Email;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\web\Controller;
 
 /**
- * @package lispa\amos\admin\controllers
+ * @package open20\amos\admin\controllers
  */
 class UserDropController extends Controller
 {
@@ -171,7 +172,7 @@ class UserDropController extends Controller
      * @throws \yii\base\InvalidConfigException
      */
     public function dropMessages($userRecord) {
-        $q = \lispa\amos\chat\models\Message::find();
+        $q = \open20\amos\chat\models\Message::find();
         $q->where(['sender_id' => $userRecord->id]);
         $q->orWhere(['receiver_id' => $userRecord->id]);
 
@@ -261,15 +262,15 @@ class UserDropController extends Controller
      * @return mixed
      */
     public function maskUserData($user){
-        $blackList = ['id', 'nome', 'cognome', 'user_id', 'attivo', 'status', 'created_at', 'updated_at', 'deleted_at', 'created_by','updated_by', 'deleted_by'];
+        $blackList = ['id', 'nome', 'cognome', 'user_id', 'attivo', 'status', 'created_at', 'updated_at', 'deleted_at', 'created_by','updated_by', 'deleted_by', 'default_facilitatore'];
         $profile = $user->userProfile;
-        $user->username = '#deleted_'.$user->id;
-        $user->auth_key = ' ';
-        $user->password_hash = ' ';
-        $user->email = 'deleted_'.$user->id.'@deleted.it';
+        $user->username = UserProfileUtility::DELETED_ACCOUNT_USERNAME_PREFIX . $user->id;
+        $user->auth_key = '';
+        $user->password_hash = '';
+        $user->email = UserProfileUtility::makeDeletedUserEmail($user->id);
 
-        $profile->nome = '########';
-        $profile->cognome = '########';
+        $profile->nome = UserProfileUtility::DELETED_ACCOUNT_NAME;
+        $profile->cognome = UserProfileUtility::DELETED_ACCOUNT_SURNAME;
         $profileAtributes = $profile->attributes;
         foreach ($profileAtributes as $attribute => $value){
             if(!in_array($attribute, $blackList)){
@@ -299,16 +300,16 @@ class UserDropController extends Controller
             $newCommManagerId = $adminIds[0];
         }
         if($moduleCommunity){
-            $communityUsers = \lispa\amos\community\models\CommunityUserMm::find()->andWhere(['user_id' => $user->id])->all();
-            /** @var  $communityUser \lispa\amos\community\models\CommunityUserMm */
+            $communityUsers = \open20\amos\community\models\CommunityUserMm::find()->andWhere(['user_id' => $user->id])->all();
+            /** @var  $communityUser \open20\amos\community\models\CommunityUserMm */
             foreach ($communityUsers as $communityUser){
                 if(!$this->hasCommunityManagers($communityUser->community_id, $user)){
 
                     if($this->isAdminCommunityParticipant($communityUser->community_id)){
-                        $moduleCommunity->changeRoleCommunityUser($communityUser->community_id, $newCommManagerId, \lispa\amos\community\models\CommunityUserMm::ROLE_COMMUNITY_MANAGER);
+                        $moduleCommunity->changeRoleCommunityUser($communityUser->community_id, $newCommManagerId, \open20\amos\community\models\CommunityUserMm::ROLE_COMMUNITY_MANAGER);
                     }
                     else {
-                        $moduleCommunity->createCommunityUser($communityUser->community_id, \lispa\amos\community\models\CommunityUserMm::STATUS_ACTIVE, \lispa\amos\community\models\CommunityUserMm::ROLE_COMMUNITY_MANAGER, $newCommManagerId);
+                        $moduleCommunity->createCommunityUser($communityUser->community_id, \open20\amos\community\models\CommunityUserMm::STATUS_ACTIVE, \open20\amos\community\models\CommunityUserMm::ROLE_COMMUNITY_MANAGER, $newCommManagerId);
                     }
                     $this->sendMailYouHaveToChangeCM($communityUser->community_id, $user);
 
@@ -323,9 +324,9 @@ class UserDropController extends Controller
      * @return bool
      */
     public function hasCommunityManagers($community_id, $user){
-        $countCm = \lispa\amos\community\models\CommunityUserMm::find()
+        $countCm = \open20\amos\community\models\CommunityUserMm::find()
             ->andWhere(['community_id' =>$community_id])
-            ->andWhere(['role' => \lispa\amos\community\models\CommunityUserMm::ROLE_COMMUNITY_MANAGER])
+            ->andWhere(['role' => \open20\amos\community\models\CommunityUserMm::ROLE_COMMUNITY_MANAGER])
             ->andWhere(['!=', 'user_id',$user->id])->count();
         return ($countCm > 0);
     }
@@ -336,7 +337,7 @@ class UserDropController extends Controller
      * @return bool
      */
     public function isAdminCommunityParticipant($communityId){
-        $userMm  =\lispa\amos\community\models\CommunityUserMm::find()->andWhere(['community_id' => $communityId, 'user_id' => 1])->one();
+        $userMm  =\open20\amos\community\models\CommunityUserMm::find()->andWhere(['community_id' => $communityId, 'user_id' => 1])->one();
         return !empty($userMm);
     }
 
@@ -353,7 +354,7 @@ class UserDropController extends Controller
 
         $subject = AmosAdmin::t('amosadmin',"E' necessario assegnare un nuovo community manager");
         $text = "<p>".AmosAdmin::t('amosadmin',"L'utente") . " {$user->userProfile->nomeCognome} con ID: {$user->id} " . AmosAdmin::t('amosadmin',"si è cancellato dalla piattaforma <br> Inserire un nuovo community manager alla community con id: ") . "$communityId</p>";
-        /** @var \lispa\amos\emailmanager\AmosEmail $mailModule */
+        /** @var \open20\amos\emailmanager\AmosEmail $mailModule */
         $mailModule = Yii::$app->getModule("email");
         if (isset($mailModule)) {
                 if (isset(Yii::$app->params['email-assistenza'])) {

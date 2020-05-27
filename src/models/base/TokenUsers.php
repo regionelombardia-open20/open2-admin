@@ -1,6 +1,15 @@
 <?php
 
-namespace lispa\amos\admin\models\base;
+/**
+ * Aria S.p.A.
+ * OPEN 2.0
+ *
+ *
+ * @package    Open20Package
+ * @category   CategoryName
+ */
+
+namespace open20\amos\admin\models\base;
 
 use Yii;
 
@@ -20,9 +29,9 @@ use Yii;
  * @property integer $deleted_by
  *
  * @property TokenGroup $user
- * @property \lispa\amos\core\user\User $user0
+ * @property \open20\amos\core\user\User $user0
  */
-class TokenUsers extends \lispa\amos\core\record\Record
+class TokenUsers extends \open20\amos\core\record\Record
 {
 
 
@@ -45,7 +54,7 @@ class TokenUsers extends \lispa\amos\core\record\Record
             [['created_at', 'updated_at', 'deleted_at'], 'safe'],
             [['token'], 'string', 'max' => 255],
             [['token_group_id'], 'exist', 'skipOnError' => true, 'targetClass' => TokenGroup::className(), 'targetAttribute' => ['token_group_id' => 'id']],
-            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \lispa\amos\core\user\User::className(), 'targetAttribute' => ['user_id' => 'id']],
+            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \open20\amos\core\user\User::className(), 'targetAttribute' => ['user_id' => 'id']],
         ];
     }
 
@@ -82,6 +91,6 @@ class TokenUsers extends \lispa\amos\core\record\Record
      */
     public function getUser()
     {
-        return $this->hasOne(\lispa\amos\core\user\User::className(), ['id' => 'user_id']);
+        return $this->hasOne(\open20\amos\core\user\User::className(), ['id' => 'user_id']);
     }
 }

@@ -1,27 +1,27 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\first-access-wizard
+ * @package    open20\amos\admin\views\first-access-wizard
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\core\forms\ActiveForm;
-use lispa\amos\core\forms\WizardPrevAndContinueButtonWidget;
-use lispa\amos\core\helpers\Html;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\core\forms\ActiveForm;
+use open20\amos\core\forms\WizardPrevAndContinueButtonWidget;
+use open20\amos\core\helpers\Html;
 
 /**
  * @var \yii\web\View $this
- * @var \lispa\amos\admin\models\UserProfile $model
+ * @var \open20\amos\admin\models\UserProfile $model
  */
 
 $partnershipUrl = ['/admin/first-access-wizard/associate-prevalent-partnership', 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true];
 
-/* @var \lispa\amos\cwh\AmosCwh $moduleCwh */
+/* @var \open20\amos\cwh\AmosCwh $moduleCwh */
 $moduleCwh = \Yii::$app->getModule('cwh');
 
 $moduleTag = \Yii::$app->getModule('tag');

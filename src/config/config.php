@@ -1,11 +1,11 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\config
+ * @package    open20\amos\admin\config
  * @category   CategoryName
  */
 
@@ -13,13 +13,13 @@ return [
     'components' => [
         // List of component configurations
         'formatter' => [
-            'class' => 'lispa\amos\core\formatter\Formatter',
+            'class' => 'open20\amos\core\formatter\Formatter',
         ],
         'reCaptcha' => [
             'name' => 'reCaptcha',
             'class' => 'himiklab\yii2\recaptcha\ReCaptcha',
             'siteKey' => '',
-            'secret' => 'Z01Ak_2017',
+            'secret' => 'PUT_SECRET_HERE',
         ],
     ],
     'params' => [

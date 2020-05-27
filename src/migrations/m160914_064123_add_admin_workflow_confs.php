@@ -1,22 +1,23 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\migrations
+ * @package    open20\amos\admin\migrations
  * @category   CategoryName
  */
 
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\core\migration\AmosMigration;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\core\migration\AmosMigration;
 use yii\rbac\Permission;
 
 class m160914_064123_add_admin_workflow_confs extends AmosMigration
 {
     /**
      * Use this instead of function up().
+     * @see \Yii\db\Migration::safeUp() for more info.
      */
     public function safeUp()
     {
@@ -26,6 +27,7 @@ class m160914_064123_add_admin_workflow_confs extends AmosMigration
 
     /**
      * Use this instead of function down().
+     * @see \Yii\db\Migration::safeDown() for more info.
      */
     public function safeDown()
     {

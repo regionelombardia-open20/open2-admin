@@ -1,19 +1,20 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\security
+ * @package    open20\amos\admin\views\security
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\assets\ModuleAdminAsset;
-use lispa\amos\core\forms\ActiveForm;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\icons\AmosIcons;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\assets\ModuleAdminAsset;
+use open20\amos\core\forms\ActiveForm;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\icons\AmosIcons;
+use open20\amos\core\utilities\CoreCommonUtility;
 use yii\helpers\Url;
 
 ModuleAdminAsset::register(Yii::$app->view);
@@ -21,12 +22,12 @@ ModuleAdminAsset::register(Yii::$app->view);
 /**
  * @var yii\web\View $this
  * @var yii\bootstrap\ActiveForm $form
- * @var \lispa\amos\admin\models\LoginForm $model
+ * @var \open20\amos\admin\models\LoginForm $model
  */
 $this->title = AmosAdmin::t('amosadmin', 'Login');
 $this->params['breadcrumbs'][] = $this->title;
 
-/** @var $socialAuthModule \lispa\amos\socialauth\Module */
+/** @var $socialAuthModule \open20\amos\socialauth\Module */
 $socialAuthModule = Yii::$app->getModule('socialauth');
 
 /** @var AmosAdmin $adminModule */
@@ -43,7 +44,7 @@ if ($found) {
     $parsedUrl = parse_url($previousUrl);
     parse_str($parsedUrl['query'], $query_params);
     if ($query_params) {
-        $communityId = \lispa\amos\admin\utility\UserProfileUtility::cleanIntegerParam($query_params['id']);
+        $communityId = \open20\amos\admin\utility\UserProfileUtility::cleanIntegerParam($query_params['id']);
     }
 }
 
@@ -66,7 +67,6 @@ if ($isDemoLogin) {
 ?>
 
 <div id="bk-formDefaultLogin" class="bk-loginContainer loginContainer">
-
     <div class="header col-xs-12">
         <?php if (!isset(Yii::$app->params['logo']) || !Yii::$app->params['logo']) : ?>
             <p class="welcome-message"><?= AmosAdmin::t('amosadmin', '#login_welcome_message') ?></p>
@@ -85,19 +85,19 @@ if ($isDemoLogin) {
         <?php if ($socialAuthModule && $socialAuthModule->enableSpid) : ?>
             <?=
             Html::a(
-                AmosIcons::show('account-circle') . AmosAdmin::t('amosadmin', '#login_spid_text') . ' ' . Html::tag('span', AmosAdmin::t('amosadmin', '#login_spid_text2')),
+                AmosIcons::show('account-circle') . AmosAdmin::t('amosadmin', '#fullsize_login_spid_text'),
                 Url::to('/socialauth/shibboleth/endpoint', 'https'),
                 [
                     'class' => 'btn btn-spid',
-                    'title' => AmosAdmin::t('amosadmin', '#login_spid_title'),
-                    'target' => '_blank'
+                    'title' => AmosAdmin::t('amosadmin', '#fullsize_login_spid_text'),
+                    //'target' => '_blank'
                 ]
             )
             ?>
         <?php endif; ?>
     </div>
 
-    <?php if ($socialAuthModule && $socialAuthModule->enableSpid && !$adminModule->hideStandardLoginPageSection) : ?>
+    <?php if ($socialAuthModule && $socialAuthModule->enableSpid && (CoreCommonUtility::platformSeenFromHeadquarter() || !$adminModule->hideStandardLoginPageSection)) : ?>
         <?= Html::tag('div', Html::tag('span', AmosAdmin::t('amosadmin', '#or')), ['class' => 'or-login col-xs-12 nop']) ?>
     <?php endif; ?>
 
@@ -110,18 +110,18 @@ if ($isDemoLogin) {
         </div>
     <?php endif; ?>
 
-    <?php if (!$adminModule->hideStandardLoginPageSection && $socialAuthModule && $socialAuthModule->enableLogin && !$socialMatch) : ?>
+    <?php if ((CoreCommonUtility::platformSeenFromHeadquarter() || !$adminModule->hideStandardLoginPageSection) && $socialAuthModule && $socialAuthModule->enableLogin && !$socialMatch) : ?>
         <?= Html::tag('div', Html::tag('span', AmosAdmin::t('amosadmin', '#or')), ['class' => 'or-login col-xs-12 nop']) ?>
     <?php endif; ?>
 
     <div class="body col-xs-12 nop">
-        <?php if ($adminModule->showLogInRegisterButton || !$adminModule->hideStandardLoginPageSection): ?>
-            <?php if (!$adminModule->hideStandardLoginPageSection) : ?>
+        <?php if ($adminModule->showLogInRegisterButton || CoreCommonUtility::platformSeenFromHeadquarter() || !$adminModule->hideStandardLoginPageSection): ?>
+            <?php if (CoreCommonUtility::platformSeenFromHeadquarter() || !$adminModule->hideStandardLoginPageSection) : ?>
                 <?= Html::tag('h2', AmosAdmin::t('amosadmin', '#title_login'), ['class' => 'title-login col-xs-12 nop']) ?>
                 <?= Html::tag('h3', AmosAdmin::t('amosadmin', '#subtitle_login'), ['class' => 'subtitle-login col-xs-12 nop']) ?>
             <?php endif; ?>
             <div class="row">
-                <?php if (!$adminModule->hideStandardLoginPageSection) : ?>
+                <?php if (CoreCommonUtility::platformSeenFromHeadquarter() || !$adminModule->hideStandardLoginPageSection) : ?>
                     <div class="col-lg-12 col-sm-12 nop">
                         <?php $form = ActiveForm::begin(['id' => 'login-form']); ?>
                         <?php if (isset(\Yii::$app->params['template-amos']) && \Yii::$app->params['template-amos']): ?>

@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\migrations
+ * @package    open20\amos\admin\migrations
  * @category   CategoryName
  */
 
-use lispa\amos\core\migration\AmosMigrationPermissions;
+use open20\amos\core\migration\AmosMigrationPermissions;
 
 /**
  * Class m170717_135826_update_admin_widgets_permissions
@@ -23,42 +23,42 @@ class m170717_135826_update_admin_widgets_permissions extends AmosMigrationPermi
     {
         return [
             [
-                'name' => \lispa\amos\admin\widgets\graphics\WidgetGraphicMyProfile::className(),
+                'name' => \open20\amos\admin\widgets\graphics\WidgetGraphicMyProfile::className(),
                 'update' => true,
                 'newValues' => [
                     'addParents' => ['ADMIN']
                 ]
             ],
             [
-                'name' => \lispa\amos\admin\widgets\icons\WidgetIconMyProfile::className(),
+                'name' => \open20\amos\admin\widgets\icons\WidgetIconMyProfile::className(),
                 'update' => true,
                 'newValues' => [
                     'addParents' => ['ADMIN']
                 ]
             ],
             [
-                'name' => \lispa\amos\admin\widgets\icons\WidgetIconUserProfile::className(),
+                'name' => \open20\amos\admin\widgets\icons\WidgetIconUserProfile::className(),
                 'update' => true,
                 'newValues' => [
                     'addParents' => ['ADMIN']
                 ]
             ],
             [
-                'name' => \lispa\amos\admin\widgets\icons\WidgetIconValidatedUserProfiles::className(),
+                'name' => \open20\amos\admin\widgets\icons\WidgetIconValidatedUserProfiles::className(),
                 'update' => true,
                 'newValues' => [
                     'addParents' => ['ADMIN']
                 ]
             ],
             [
-                'name' => \lispa\amos\admin\widgets\icons\WidgetIconFacilitatorUserProfiles::className(),
+                'name' => \open20\amos\admin\widgets\icons\WidgetIconFacilitatorUserProfiles::className(),
                 'update' => true,
                 'newValues' => [
                     'addParents' => ['ADMIN']
                 ]
             ],
             [
-                'name' => \lispa\amos\admin\widgets\icons\WidgetIconCommunityManagerUserProfiles::className(),
+                'name' => \open20\amos\admin\widgets\icons\WidgetIconCommunityManagerUserProfiles::className(),
                 'update' => true,
                 'newValues' => [
                     'addParents' => ['ADMIN']

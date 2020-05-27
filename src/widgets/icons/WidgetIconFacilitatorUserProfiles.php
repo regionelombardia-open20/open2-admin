@@ -1,33 +1,37 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\widgets\icons
+ * @package    open20\amos\admin\widgets\icons
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\widgets\icons;
+namespace open20\amos\admin\widgets\icons;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\core\widget\WidgetIcon;
-use lispa\amos\core\widget\WidgetAbstract;
-use lispa\amos\core\icons\AmosIcons;
+use open20\amos\core\widget\WidgetIcon;
+use open20\amos\core\widget\WidgetAbstract;
+use open20\amos\core\icons\AmosIcons;
 
+use open20\amos\admin\AmosAdmin;
+
+use Yii;
 use yii\helpers\ArrayHelper;
 
 /**
  * Class WidgetIconFacilitatorUserProfiles
- * @package lispa\amos\admin\widgets\icons
+ * @package open20\amos\admin\widgets\icons
  */
-class WidgetIconFacilitatorUserProfiles extends WidgetIcon {
+class WidgetIconFacilitatorUserProfiles extends WidgetIcon
+{
 
     /**
      * @inheritdoc
      */
-    public function init() {
+    public function init()
+    {
         parent::init();
 
         $paramsClassSpan = [
@@ -38,7 +42,7 @@ class WidgetIconFacilitatorUserProfiles extends WidgetIcon {
         $this->setLabel(AmosAdmin::tHtml('amosadmin', 'Facilitators'));
         $this->setDescription(AmosAdmin::t('amosadmin', 'List of users with facilitator role'));
 
-        if (!empty(\Yii::$app->params['dashboardEngine']) && \Yii::$app->params['dashboardEngine'] == WidgetAbstract::ENGINE_ROWS) {
+        if (!empty(Yii::$app->params['dashboardEngine']) && Yii::$app->params['dashboardEngine'] == WidgetAbstract::ENGINE_ROWS) {
             $this->setIconFramework(AmosIcons::IC);
             $this->setIcon('user');
             $paramsClassSpan = [];

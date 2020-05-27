@@ -1,53 +1,53 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\config
+ * @package    open20\amos\admin\config
  * @category   CategoryName
  */
 
 return [
     'models' => [
-        'lispa\amos\documenti\models\Documenti' => [
+        'open20\amos\documenti\models\Documenti' => [
             'titolo',
             'sottotitolo',
             'descrizione_breve',
             'descrizione'
         ],
-        'lispa\amos\discussioni\models\DiscussioniTopic' => [
+        'open20\amos\discussioni\models\DiscussioniTopic' => [
             'titolo',
             'testo',
         ],
-        'lispa\amos\discussioni\models\DiscussioniCommenti' => [
+        'open20\amos\discussioni\models\DiscussioniCommenti' => [
             'titolo',
             'testo',
         ],
-        'lispa\amos\news\models\News' => [
+        'open20\amos\news\models\News' => [
             'titolo',
             'sottotitolo',
             'descrizione',
             'descrizione_breve',
         ],
-        'lispa\amos\comments\models\Comment' => [
+        'open20\amos\comments\models\Comment' => [
             'comment_text',
         ],
-        'lispa\amos\comments\models\CommentReply' => [
+        'open20\amos\comments\models\CommentReply' => [
             'comment_reply_text',
         ],
-        'lispa\amos\projectmanagement\models\Projects' => [
+        'open20\amos\projectmanagement\models\Projects' => [
             'name',
             'summary',
         ],
-        'lispa\amos\events\models\Event' => [
+        'open20\amos\events\models\Event' => [
             'status',
             'title',
             'summary',
             'description',
         ],
-        'lispa\amos\partnershipprofiles\models\PartnershipProfiles' => [
+        'open20\amos\partnershipprofiles\models\PartnershipProfiles' => [
             'title',
             'short_description',
             'extended_description',
@@ -62,7 +62,7 @@ return [
             'other_development_stage',
             'other_intellectual_property',
         ],
-        'lispa\amos\partnershipprofiles\models\ExpressionsOfInterest' => [
+        'open20\amos\partnershipprofiles\models\ExpressionsOfInterest' => [
             'status',
             'partnership_offered',
             'additional_information',
@@ -85,17 +85,17 @@ return [
             'initiative_text',
             'website',
         ],
-        'lispa\amos\sondaggi\models\Sondaggi' => [
+        'open20\amos\sondaggi\models\Sondaggi' => [
             'titolo',
             'descrizione'
         ],
-        'lispa\amos\sondaggi\models\SondaggiDomande' => [
+        'open20\amos\sondaggi\models\SondaggiDomande' => [
             'domanda'
         ],
-        'lispa\amos\sondaggi\models\SondaggiRisposte' => [
+        'open20\amos\sondaggi\models\SondaggiRisposte' => [
             'risposta_libera'
         ],
-        'lispa\amos\organizzazioni\models\Profilo' => [
+        'open20\amos\organizzazioni\models\Profilo' => [
             'name',
             'presentazione_della_organizzaz',
             'principali_ambiti_di_attivita_',
@@ -110,16 +110,16 @@ return [
             'rappresentante_legale',
             'referente_operativo',
         ],
-        'lispa\amos\showcaseprojects\models\ShowcaseProject' => [
+        'open20\amos\showcaseprojects\models\ShowcaseProject' => [
             'title',
             'summary',
             'insights',
         ],
-        'lispa\amos\showcaseprojects\models\ShowcaseProjectProposal' => [
+        'open20\amos\showcaseprojects\models\ShowcaseProjectProposal' => [
             'title',
             'summary',
         ],
-        'lispa\amos\een\models\EenPartnershipProposal' => [
+        'open20\amos\een\models\EenPartnershipProposal' => [
             'company_certifications_list',
             'company_experience',
             'company_languages_list',
@@ -142,7 +142,7 @@ return [
             'reference_internal',
             'tags_not_found',
         ],
-        'lispa\amos\proposte_collaborazione\models\ProposteDiCollaborazione' => [
+        'open20\amos\proposte_collaborazione\models\ProposteDiCollaborazione' => [
             'titolo',
             'persona_di_riferimento_e_conta',
             'tipo_di_collaborazione_prospet',
@@ -154,7 +154,7 @@ return [
             'altro_stadio_di_sviluppo_dei_c',
             'altra_proprieta_intellettuale_'
         ],
-        'lispa\amos\proposte_collaborazione\models\ManifestazioniInteresse' => [
+        'open20\amos\proposte_collaborazione\models\ManifestazioniInteresse' => [
             'contributo_offerto',
             'informazioni_aggiuntive',
             'chiarimenti'

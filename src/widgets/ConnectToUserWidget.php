@@ -1,42 +1,40 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\widgets
+ * @package    open20\amos\admin\widgets
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\widgets;
+namespace open20\amos\admin\widgets;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\models\UserContact;
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\user\User;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\models\UserContact;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\icons\AmosIcons;
+use open20\amos\core\user\User;
 use Yii;
 use yii\base\Widget;
 use yii\bootstrap\Modal;
 use yii\helpers\ArrayHelper;
 use yii\redactor\widgets\Redactor;
-use lispa\amos\core\icons\AmosIcons;
 
 /**
- * Class UserContacsWidget
- * @package lispa\amos\admin\widgets
+ * Class ConnectToUserWidget
+ * @package open20\amos\admin\widgets
  */
 class ConnectToUserWidget extends Widget
 {
-
-    const MODAL_CONFIRM_BTN_OPTIONS = ['class' => 'btn btn-navigation-primary btn-connect-to-user'];
+    const MODAL_CONFIRM_BTN_OPTIONS = ['class' => 'btn btn-navigation-primary btn-connect-to-user btn-connect-to-user-confirm'];
     const MODAL_CANCEL_BTN_OPTIONS = [
-        'class' => 'btn btn-secondary btn-connect-to-user',
+        'class' => 'btn btn-secondary btn-connect-to-user btn-connect-to-user-cancel',
         'data-dismiss' => 'modal'
     ];
     const BTN_CLASS_DFL = 'btn btn-navigation-primary btn-connect-to-user';
-
 
     /**
      * @var int $userId
@@ -71,49 +69,49 @@ class ConnectToUserWidget extends Widget
             throw new \Exception(AmosAdmin::t('amosadmin', 'Missing model'));
         }
 
-        if(empty($this->modalButtonConfirmationOptions)){
+        if (empty($this->modalButtonConfirmationOptions)) {
             $this->modalButtonConfirmationOptions = self::MODAL_CONFIRM_BTN_OPTIONS;
-            if(empty($this->modalButtonConfirmationStyle)){
-                if($this->isProfileView){
-                    $this->modalButtonConfirmationOptions['class'] =  $this->modalButtonConfirmationOptions['class']. ' modal-btn-confirm-relative';
+            if (empty($this->modalButtonConfirmationStyle)) {
+                if ($this->isProfileView) {
+                    $this->modalButtonConfirmationOptions['class'] = $this->modalButtonConfirmationOptions['class'] . ' modal-btn-confirm-relative';
                 }
-            }else{
-                $this->modalButtonConfirmationOptions = ArrayHelper::merge(self::MODAL_CONFIRM_BTN_OPTIONS, ['style' => $this->modalButtonConfirmationStyle] );
-            }
-        }
-        if(empty($this->modalButtonCancelOptions)){
-            $this->modalButtonCancelOptions = self::MODAL_CANCEL_BTN_OPTIONS;
-            if(empty($this->modalButtonCancelStyle)){
-                if($this->isProfileView){
-                    $this->modalButtonCancelOptions['class'] =  $this->modalButtonCancelOptions['class']. ' modal-btn-cancel-relative';
-                }
-            }else{
-                $this->modalButtonCancelOptions = ArrayHelper::merge(self::MODAL_CANCEL_BTN_OPTIONS, ['style' => $this->modalButtonCancelStyle ] );
+            } else {
+                $this->modalButtonConfirmationOptions = ArrayHelper::merge(self::MODAL_CONFIRM_BTN_OPTIONS, ['style' => $this->modalButtonConfirmationStyle]);
             }
         }
 
-        if(empty($this->btnOptions)){
-            if(empty($this->btnClass)) {
-                if($this->isProfileView) {
+        if (empty($this->modalButtonCancelOptions)) {
+            $this->modalButtonCancelOptions = self::MODAL_CANCEL_BTN_OPTIONS;
+            if (empty($this->modalButtonCancelStyle)) {
+                if ($this->isProfileView) {
+                    $this->modalButtonCancelOptions['class'] = $this->modalButtonCancelOptions['class'] . ' modal-btn-cancel-relative';
+                }
+            } else {
+                $this->modalButtonCancelOptions = ArrayHelper::merge(self::MODAL_CANCEL_BTN_OPTIONS, ['style' => $this->modalButtonCancelStyle]);
+            }
+        }
+
+        if (empty($this->btnOptions)) {
+            if (empty($this->btnClass)) {
+                if ($this->isProfileView) {
                     $this->btnClass = 'btn btn-secondary';
-                }else{
+                } else {
                     $this->btnClass = self::BTN_CLASS_DFL;
                 }
             }
-            $this->btnOptions = [ 'class' => $this->btnClass . ($this->isGridView ? ' font08' : '')];
-            if(!empty($this->btnStyle)){
-                $this->btnOptions = ArrayHelper::merge($this->btnOptions, ['style' => $this->btnStyle ] );
+            $this->btnOptions = ['class' => $this->btnClass . ($this->isGridView ? ' font08' : '')];
+            if (!empty($this->btnStyle)) {
+                $this->btnOptions = ArrayHelper::merge($this->btnOptions, ['style' => $this->btnStyle]);
             }
         }
-
     }
 
     /**
-     * @return mixed
+     * @return string
+     * @throws \yii\base\InvalidConfigException
      */
     public function run()
     {
-
         //Register javascript to send private message to connected users
         $js = <<<JS
   
@@ -143,9 +141,9 @@ JS;
 
         /** @var UserProfile $model */
         $model = $this->model;
-        if($model instanceof UserContact){
+        if ($model instanceof UserContact) {
             $isUserContactModel = true;
-        }else{
+        } else {
             $isUserContactModel = false;
         }
 
@@ -158,7 +156,7 @@ JS;
         $invited = false;
 
         $userProfile = User::findOne($loggedUserId)->getProfile();
-        if($isUserContactModel){
+        if ($isUserContactModel) {
             $userContact = $model;
         } else {
             $userContact = UserContact::findOne(['contact_id' => $model->user_id, 'user_id' => $loggedUserId]);
@@ -167,12 +165,12 @@ JS;
 
         if (!$userProfile->validato_almeno_una_volta) {
             //The logged user profile has never been validated, it is not possible to send connection request: user is invited to complete the profile and ask for validation
-            $this->btnOptions['class'] = 'btn btn-action-primary'. ($this->isGridView ? ' font08' : '');
+            $this->btnOptions['class'] = 'btn btn-action-primary' . ($this->isGridView ? ' font08' : '');
             $title = AmosAdmin::t('amosadmin', 'Connect') . AmosIcons::show('link');
             $titleLink = AmosAdmin::t('amosadmin', 'Connect');
             $dataToggle = 'modal';
-            $dataTarget = '#notValidatedUserPopup-'.$model->id;
-            if(!$this->onlyButton) {
+            $dataTarget = '#notValidatedUserPopup-' . $model->id;
+            if (!$this->onlyButton) {
                 Modal::begin([
                     'id' => 'notValidatedUserPopup-' . $model->id,
                     'header' => AmosAdmin::t('amosadmin', "Contact request")
@@ -195,8 +193,8 @@ JS;
                 $title = AmosAdmin::t('amosadmin', 'Connect') . AmosIcons::show('link');
                 $titleLink = AmosAdmin::t('amosadmin', 'Connect');
                 $dataToggle = 'modal';
-                $dataTarget = '#invitationPopup-'.$model->id;
-                if(!$this->onlyButton) {
+                $dataTarget = '#invitationPopup-' . $model->id;
+                if (!$this->onlyButton) {
                     Modal::begin([
                         'id' => 'invitationPopup-' . $model->id,
                         'header' => AmosAdmin::t('amosadmin', "Contact request")
@@ -227,13 +225,13 @@ JS;
                         $titleLink = AmosAdmin::t('amosadmin', 'Pending invitation');
                         $dataToggle = 'modal';
                         $idModal = ($isUserContactModel ? $userContact->contact_id : $model->id);
-                        $dataTarget = '#sendReminderPopup-'. $idModal;
-                        if(!$this->onlyButton) {
+                        $dataTarget = '#sendReminderPopup-' . $idModal;
+                        if (!$this->onlyButton) {
                             Modal::begin([
                                 'id' => 'sendReminderPopup-' . $idModal,
                                 'header' => AmosAdmin::t('amosadmin', "Send reminder of connection request")
                             ]);
-                            if(!empty($userContact->last_reminder_at)){
+                            if (!empty($userContact->last_reminder_at)) {
                                 $invitationDate = Yii::$app->getFormatter()->asDatetime($userContact->last_reminder_at);
                             } else {
                                 $invitationDate = Yii::$app->getFormatter()->asDatetime($userContact->created_at);
@@ -251,10 +249,10 @@ JS;
                                 . $invitedName . " " . AmosAdmin::t('amosadmin',
                                     "reminding to answer to your request") . ". ");
                             echo Html::tag('div',
-                                 Html::a(AmosAdmin::t('amosadmin', 'Cancel'), null, $this->modalButtonCancelOptions)
-                                .Html::a(AmosAdmin::t('amosadmin', 'Send reminder'),
-                                     ['/admin/user-contact/send-reminder', 'id' => $userContact->id],
-                                     $this->modalButtonConfirmationOptions),
+                                Html::a(AmosAdmin::t('amosadmin', 'Cancel'), null, $this->modalButtonCancelOptions)
+                                . Html::a(AmosAdmin::t('amosadmin', 'Send reminder'),
+                                    ['/admin/user-contact/send-reminder', 'id' => $userContact->id],
+                                    $this->modalButtonConfirmationOptions),
                                 ['class' => 'pull-right m-15-0']
                             );
                             Modal::end();
@@ -265,8 +263,8 @@ JS;
                         $titleLink = AmosAdmin::t('amosadmin', 'Answer to invitation');
                         $dataToggle = 'modal';
                         $idModal = ($isUserContactModel ? $userContact->user_id : $model->id);
-                        $dataTarget = '#answerInvitationPopup-'.$idModal;
-                        if(!$this->onlyButton) {
+                        $dataTarget = '#answerInvitationPopup-' . $idModal;
+                        if (!$this->onlyButton) {
                             Modal::begin([
                                 'id' => 'answerInvitationPopup-' . $idModal,
                                 'header' => AmosAdmin::t('amosadmin', "Accept or refuse connection request")
@@ -286,7 +284,7 @@ JS;
                                     ],
                                     $btnRejectOpts
                                 )
-                                .Html::a(AmosAdmin::t('amosadmin', 'Accept invitation'),
+                                . Html::a(AmosAdmin::t('amosadmin', 'Accept invitation'),
                                     [
                                         '/admin/user-contact/connect',
                                         'contactId' => $loggedUserId,
@@ -302,26 +300,26 @@ JS;
                 } elseif ($userContact->status == UserContact::STATUS_ACCEPTED) {
                     //user is an active contact, it is possible to send a private message
                     $chatModule = Yii::$app->getModule('chat');
-                    if(isset($chatModule)){
+                    if (isset($chatModule)) {
                         $recipientId = $invited ? $userContact->user_id : $userContact->contact_id;
                         $recipientName = User::findOne($recipientId)->getProfile()->getNomeCognome();
                         $title = AmosAdmin::t('amosadmin', 'Send message');
                         $titleLink = AmosAdmin::t('amosadmin', 'Send message');
                         $dataToggle = 'modal';
-                        $dataTarget = '#sendMessagePopup-'.$recipientId;
-                        if(!$this->onlyButton) {
+                        $dataTarget = '#sendMessagePopup-' . $recipientId;
+                        if (!$this->onlyButton) {
                             Modal::begin([
                                 'id' => 'sendMessagePopup-' . $recipientId,
                                 'header' => AmosAdmin::t('amosadmin', "Send message to") . " " . $recipientName
                             ]);
                             echo
-                            '<div class="col-xs-12 nop">'
+                                '<div class="col-xs-12 nop">'
                                 . '<label class="hidden" for="chat-message">' . AmosAdmin::tHtml('amosadmin',
                                     'Message') . '</label>'
                                 . Redactor::widget([
                                     'name' => 'text',
                                     'options' => [
-                                        'id' => 'chat-message_'.$recipientId,
+                                        'id' => 'chat-message_' . $recipientId,
                                         'class' => 'form-control send-message',
                                         'placeholder' => AmosAdmin::t('amosadmin', 'Write message...')
                                     ],
@@ -337,8 +335,8 @@ JS;
                             echo Html::tag('div',
                                     Html::a(AmosAdmin::t('amosadmin', 'Cancel'), null,
                                         $this->modalButtonCancelOptions)
-                                    . Html::a(AmosAdmin::t('amosadmin', 'Send message'), '/chat/default/send-message?contactId=' . $recipientId  ,
-                                        ArrayHelper::merge($btnOptions, ['id' => 'send-message-btn-'.$recipientId, 'data-recipient_id' => $recipientId])),
+                                    . Html::a(AmosAdmin::t('amosadmin', 'Send message'), '/chat/default/send-message?contactId=' . $recipientId,
+                                        ArrayHelper::merge($btnOptions, ['id' => 'send-message-btn-' . $recipientId, 'data-recipient_id' => $recipientId])),
                                     ['class' => 'pull-right m-15-0']
                                 ) . '</div>';//Html::endForm();
                             Modal::end();
@@ -348,24 +346,23 @@ JS;
             }
         }
 
-        if(empty($title) || $this->onlyModals){
+        if (empty($title) || $this->onlyModals) {
             return '';
-        }else{
+        } else {
             $this->btnOptions = ArrayHelper::merge($this->btnOptions, [
                 'title' => $titleLink
             ]);
         }
-        if(!empty($dataTarget) && !empty($dataToggle)){
+        if (!empty($dataTarget) && !empty($dataToggle)) {
             $this->btnOptions = ArrayHelper::merge($this->btnOptions, [
                 'data-target' => $dataTarget,
                 'data-toggle' => $dataToggle
             ]);
         }
         $btn = Html::a($title, $buttonUrl, $this->btnOptions);
-        if(!empty($this->divClassBtnContainer)){
+        if (!empty($this->divClassBtnContainer)) {
             $btn = Html::tag('div', $btn, ['class' => $this->divClassBtnContainer]);
         }
         return $btn;
-
     }
 }

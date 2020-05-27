@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\bootstrap
+ * @package    open20\amos\admin\bootstrap
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\bootstrap;
+namespace open20\amos\admin\bootstrap;
 
 use yii\base\Application;
 use yii\base\BootstrapInterface;
@@ -38,7 +38,7 @@ class CheckPasswordExpirationComponent implements BootstrapInterface{
         $actionId = $event->action->uniqueId;
 
 
-        $User = \lispa\amos\core\utilities\CurrentUser::getUser();
+        $User = \open20\amos\core\utilities\CurrentUser::getUser();
         if (!$User->isGuest) {
             $UserId = $User->getIdentity()->getId();
             $ruoli = \Yii::$app->authManager->getRolesByUser($UserId);

@@ -1,8 +1,8 @@
 /**
 IMPORT AMOS-LAYOUT VARIABLES
  */
-@import (optional) "../../vendor/lispa/amos-layout/src/assets/resources/base/less/variables.less";
-@import (optional) "../../vendor/lispa/amos-layout/src/assets/resources/base/less/utility.less";
+@import (optional) "../../vendor/open20/amos-layout/src/assets/resources/base/less/variables.less";
+@import (optional) "../../vendor/open20/amos-layout/src/assets/resources/base/less/utility.less";
 /**
 IMPORT STYLE-CUSTOM
  */
@@ -428,7 +428,7 @@ ADMIN CARD VIEW
   margin: 0 0 @margin-default;
   border: solid @border-color-default 0.3px;
   background: @white-color;
-  height: 305px;
+  height: 350px;
   .icon-header {
     height: 150px;
     background-color: @admin-card-background-header;
@@ -488,14 +488,8 @@ ADMIN CARD VIEW
     }
   }
   .icon-footer {
-    height: 40px;
+    min-height: 80px;
     background-color: @admin-card-background-footer;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    > div:last-child {
-      margin-left: auto;
-    }
     .amos-tooltip, .am-google {
       margin-left: @margin-medium;
       color: contrast(@admin-card-background-body);
@@ -503,14 +497,15 @@ ADMIN CARD VIEW
     .am-google {
       font-size: 1.85em;
     }
-    .btn-connect-to-user {
+    .btn-connect-to-user,
+    .user-to-event-widget{
       border: none;
       box-shadow: none;
       text-transform: capitalize;
       font-weight: normal;
-      font-size: 1.5em;
-      padding: 0 @padding-medium;
-      margin: 0;
+      font-size: 1.2em;
+      padding: 0;
+      margin: @margin-min 0 0;
       .am {
         font-size: 1em;
         position: relative;

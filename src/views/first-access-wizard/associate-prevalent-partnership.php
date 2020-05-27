@@ -1,22 +1,22 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\first-access-wizard
+ * @package    open20\amos\admin\views\first-access-wizard
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\interfaces\OrganizationsModuleInterface;
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\core\forms\editors\m2mWidget\M2MWidget;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\interfaces\OrganizationsModuleInterface;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\core\forms\editors\m2mWidget\M2MWidget;
 
 /**
  * @var \yii\web\View $this
- * @var \lispa\amos\admin\models\UserProfile $model
+ * @var \open20\amos\admin\models\UserProfile $model
  */
 
 $this->title = AmosAdmin::t('amosadmin', 'Select prevalent partnership');

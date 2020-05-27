@@ -1,6 +1,15 @@
 <?php
 
-namespace lispa\amos\admin\models\base;
+/**
+ * Aria S.p.A.
+ * OPEN 2.0
+ *
+ *
+ * @package    Open20Package
+ * @category   CategoryName
+ */
+
+namespace open20\amos\admin\models\base;
 
 use Yii;
 
@@ -25,7 +34,7 @@ use Yii;
  *
  * @property TokenUsers[] $tokenUsers
  */
-class TokenGroup extends \lispa\amos\core\record\Record
+class TokenGroup extends \open20\amos\core\record\Record
 {
 
 

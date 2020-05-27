@@ -1,24 +1,24 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\user-profile\boxes
+ * @package    open20\amos\admin\views\user-profile\boxes
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\base\ConfigurationManager;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\icons\AmosIcons;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\base\ConfigurationManager;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\icons\AmosIcons;
 
 /**
  * @var yii\web\View $this
- * @var lispa\amos\core\forms\ActiveForm $form
- * @var lispa\amos\admin\models\UserProfile $model
- * @var lispa\amos\core\user\User $user
+ * @var open20\amos\core\forms\ActiveForm $form
+ * @var open20\amos\admin\models\UserProfile $model
+ * @var open20\amos\core\user\User $user
  * @var bool $spediscicredenzialienable
  */
 
@@ -69,10 +69,10 @@ $adminModule = Yii::$app->controller->module;
                     <?php endif; ?>
                 <?php endif; ?>
                 <?php
-                /** @var \lispa\amos\core\user\User $identity */
+                /** @var \open20\amos\core\user\User $identity */
                 $identity = Yii::$app->user->identity
                 ?>
-                <?php if ($user['id'] == $identity->id): ?>
+                <?php if (Yii::$app->user->can('CHANGE_USER_PASSWORD') && ($user['id'] == $identity->id)): ?>
                     <?= Html::a(AmosIcons::show('unlock') . AmosAdmin::t('amosadmin', 'Cambia password'), ['/admin/user-profile/cambia-password', 'id' => $model->id], [
                         'class' => 'btn  btn-action-primary btn-cambia-password'
                     ]); ?>

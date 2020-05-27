@@ -1,18 +1,18 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\models\base
+ * @package    open20\amos\admin\models\base
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\models\base;
+namespace open20\amos\admin\models\base;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\core\record\Record;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\core\record\Record;
 
 /**
  * Class UserProfileRole
@@ -24,9 +24,9 @@ use lispa\amos\core\record\Record;
  * @property integer $order
  * @property integer $type_cat
  *
- * @property \lispa\amos\admin\models\UserProfile[] $userProfiles
+ * @property \open20\amos\admin\models\UserProfile[] $userProfiles
  *
- * @package lispa\amos\admin\models\base
+ * @package open20\amos\admin\models\base
  */
 class UserProfileRole extends Record
 {
@@ -72,7 +72,7 @@ class UserProfileRole extends Record
      */
     public function getUserProfiles()
     {
-        $modelClass = \lispa\amos\admin\AmosAdmin::instance()->createModel('UserProfile');
+        $modelClass = \open20\amos\admin\AmosAdmin::instance()->createModel('UserProfile');
         return $this->hasMany($modelClass::className(), ['user_profile_role_id' => 'id']);
     }
 }

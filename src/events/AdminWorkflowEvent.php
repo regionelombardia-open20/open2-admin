@@ -1,23 +1,23 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\events
+ * @package    open20\amos\admin\events
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\events;
+namespace open20\amos\admin\events;
 
-use lispa\amos\admin\models\UserProfile;
+use open20\amos\admin\models\UserProfile;
 use Yii;
 use yii\base\Event;
 
 /**
  * Class AdminWorkflowEvent
- * @package lispa\amos\admin\events
+ * @package open20\amos\admin\events
  */
 class AdminWorkflowEvent implements AdminWorkflowEventInterface
 {

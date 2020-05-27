@@ -1,27 +1,27 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\controllers
+ * @package    open20\amos\admin\controllers
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\controllers;
+namespace open20\amos\admin\controllers;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\assets\ModuleAdminAsset;
-use lispa\amos\admin\exceptions\AdminException;
-use lispa\amos\admin\models\CambiaPasswordForm;
-use lispa\amos\admin\models\search\UserProfileAreaSearch;
-use lispa\amos\admin\models\search\UserProfileRoleSearch;
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\core\forms\editors\m2mWidget\controllers\M2MWidgetControllerTrait;
-use lispa\amos\core\forms\editors\m2mWidget\M2MEventsEnum;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\utilities\ArrayUtility;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\assets\ModuleAdminAsset;
+use open20\amos\admin\exceptions\AdminException;
+use open20\amos\admin\models\CambiaPasswordForm;
+use open20\amos\admin\models\search\UserProfileAreaSearch;
+use open20\amos\admin\models\search\UserProfileRoleSearch;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\core\forms\editors\m2mWidget\controllers\M2MWidgetControllerTrait;
+use open20\amos\core\forms\editors\m2mWidget\M2MEventsEnum;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\utilities\ArrayUtility;
 use raoul2000\workflow\base\WorkflowException;
 use Yii;
 use yii\base\Exception;
@@ -35,12 +35,12 @@ use yii\filters\AccessRule;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
-use lispa\amos\admin\interfaces\OrganizationsModuleInterface;
+use open20\amos\admin\interfaces\OrganizationsModuleInterface;
 use yii\web\Controller;
 
 /**
  * Class UserProfileController
- * @package lispa\amos\admin\controllers
+ * @package open20\amos\admin\controllers
  */
 class UserProfileAjaxController extends Controller
 {
@@ -116,7 +116,7 @@ class UserProfileAjaxController extends Controller
     public function actionAjaxContactList($classname, $content_id, $searchName = null){
         $searchName = isset($_GET['searchName']) ? $_GET['searchName'] : '';
         $classname = urldecode($classname);
-        $this->layout= '@vendor/lispa/amos-core/views/layouts/main' ;
+        $this->layout= '@vendor/open20/amos-core/views/layouts/main' ;
 
         $modelContent = $classname::findOne($content_id);
         $availableUserProfileIds = $modelContent->getRecipientsQuery()->select('user_profile.id')->asArray()->column();
@@ -149,13 +149,13 @@ class UserProfileAjaxController extends Controller
         $moduleMessaggi= \Yii::$app->getModule('chat');
         if($moduleMessaggi){
             if(!empty($request)){
-                $textBase = ' questo contenuto ti potrebbe interessare: ' . Html::a($request['url'], $request['url'])  . '<br>' .$request['text'];
+                $textBase = ' questo contenuto ti potrebbe interessare: ' . Html::a($request['url'], $request['url'])  . '<p>' .$request['text'] .'</p>';
                 $request['selected_users'] = array_unique($request['selected_users']);
                 foreach($request['selected_users'] as $user_profile_id){
                     $profile = UserProfile::findOne($user_profile_id);
                     if($profile) {
                         $text = '<strong>'. $profile->nomeCognome. '</strong>' . $textBase;
-                        $message = new \lispa\amos\chat\models\Message();
+                        $message = new \open20\amos\chat\models\Message();
                         $message->text = $text;
                         $message->sender_id = $loggedUserId;
                         $message->receiver_id = $profile->user_id;
@@ -182,7 +182,7 @@ class UserProfileAjaxController extends Controller
         $module = \Yii::$app->getModule('layout');
         if (empty($module)) {
             if (strpos($this->layout, '@') === false) {
-                $this->layout = '@vendor/lispa/amos-core/views/layouts/' . (!empty($layout) ? $layout : $this->layout);
+                $this->layout = '@vendor/open20/amos-core/views/layouts/' . (!empty($layout) ? $layout : $this->layout);
             }
             return true;
         }

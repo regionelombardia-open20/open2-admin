@@ -1,23 +1,23 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\rules
+ * @package    open20\amos\admin\rules
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\rules;
+namespace open20\amos\admin\rules;
 
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\core\record\Record;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\core\record\Record;
 use yii\rbac\Rule;
 
 /**
  * Class DefaultFacilitatorOwnContentRule
- * @package lispa\amos\admin\rules
+ * @package open20\amos\admin\rules
  */
 class DefaultFacilitatorOwnContentRule extends Rule
 {

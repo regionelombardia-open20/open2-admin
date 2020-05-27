@@ -1,19 +1,19 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\mail\user
+ * @package    open20\amos\admin\mail\user
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\utility\UserProfileUtility;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\utility\UserProfileUtility;
 
 /**
- * @var \lispa\amos\admin\models\UserProfile $profile
+ * @var \open20\amos\admin\models\UserProfile $profile
  */
 
 ?>

@@ -1,30 +1,30 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\utility
+ * @package    open20\amos\admin\utility
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\utility;
+namespace open20\amos\admin\utility;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\core\user\User;
-use lispa\amos\core\utilities\Email;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\models\UserContact;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\core\user\User;
+use open20\amos\core\utilities\Email;
+use open20\amos\notificationmanager\AmosNotify;
 use raoul2000\workflow\base\SimpleWorkflowBehavior;
-use lispa\amos\admin\models\UserContact;
-
 use Yii;
 use yii\db\Expression;
 use yii\db\Query;
 
 /**
  * Class UserProfileUtility
- * @package lispa\amos\admin\utility
+ * @package open20\amos\admin\utility
  */
 class UserProfileUtility
 {
@@ -34,6 +34,16 @@ class UserProfileUtility
     const UNABLE_TO_CREATE_USER_ERROR = 1;
     const UNABLE_TO_CREATE_USER_PROFILE_ERROR = 2;
     const UNABLE_TO_ASSIGN_USER_ROLES_ERROR = 3;
+    const UNABLE_TO_SAVE_USER_NOTIFICATIONS_CONFS = 4;
+
+    /**
+     * Deleted account consts
+     */
+    const DELETED_ACCOUNT_NAME = '########';
+    const DELETED_ACCOUNT_SURNAME = '########';
+    const DELETED_ACCOUNT_USERNAME_PREFIX = '#deleted_';
+    const DELETED_ACCOUNT_EMAIL_PREFIX = 'deleted_';
+    const DELETED_ACCOUNT_EMAIL_SUFFIX = '@deleted.it';
 
     /**
      * This method return all facilitator user ids.
@@ -55,9 +65,9 @@ class UserProfileUtility
      * @param int $privacy default Not Accepted
      * @return array Error or user id
      */
-    public static function createNewAccount($name, $surname, $email, $privacy = 0, $sendCredentials = false, $community = null)
+    public static function createNewAccount($name, $surname, $email, $privacy = 0, $sendCredentials = false, $community = null, $urlFirstAccessRedirectUrl = null, $module_name = null)
     {
-        $user = self::createNewUser($email);
+        $user = self::createNewUser($email, null, $module_name);
 
         if (!$user || $user->hasErrors()) {
             return [
@@ -66,7 +76,7 @@ class UserProfileUtility
             ];
         }
 
-        $userProfile = self::createNewUserProfile($user, $name, $surname, $privacy);
+        $userProfile = self::createNewUserProfile($user, $name, $surname, $privacy, $urlFirstAccessRedirectUrl, $module_name);
 
         if (!$userProfile || $userProfile->hasErrors()) {
             return [
@@ -76,15 +86,25 @@ class UserProfileUtility
         }
 
         self::setCwhPersonalValidation($userProfile);
-        $ok = self::setBasicUserRoleToUser($user->id);
+        $ok = self::setBasicUserRoleToUser($user->id, $module_name);
 
         if (!$ok) {
             return [
                 'error' => self::UNABLE_TO_ASSIGN_USER_ROLES_ERROR
             ];
         }
+
+        /** @var AmosNotify $notifyModule */
+        $notifyModule = AmosNotify::instance();
+        $ok = $notifyModule->setDefaultNotificationsConfs($user->id);
+        if (!$ok) {
+            return [
+                'error' => self::UNABLE_TO_SAVE_USER_NOTIFICATIONS_CONFS
+            ];
+        }
+
         if ($sendCredentials) {
-            self::sendCredentialsMail($userProfile, $community);
+            self::sendCredentialsMail($userProfile, $community, $module_name);
         }
 
         return ['user' => $user];
@@ -96,14 +116,14 @@ class UserProfileUtility
      * @param string!null $username
      * @return User
      */
-    public static function createNewUser($email, $username = null)
+    public static function createNewUser($email, $username = null, $module_name = null)
     {
         /** @var User $user */
         $user = AmosAdmin::instance()->createModel('User');
         $user->status = User::STATUS_ACTIVE;
         $user->email = $email;
         /** @var AmosAdmin $adminModule */
-        $adminModule = Yii::$app->getModule(AmosAdmin::getModuleName());
+        $adminModule = Yii::$app->getModule((empty($module_name)? AmosAdmin::getModuleName() : $module_name));
         if (!$adminModule->userCanSelectUsername) {
             if (!empty($username) && is_string($username)) {
                 $user->username = $username;
@@ -191,10 +211,10 @@ class UserProfileUtility
      * @param int $privacy default Not Accepted
      * @return UserProfile
      */
-    public static function createNewUserProfile($user, $name, $surname, $privacy = 0)
+    public static function createNewUserProfile($user, $name, $surname, $privacy = 0,$urlFirstAccessRedirectUrl = null, $module_name = null)
     {
         /** @var AmosAdmin $adminModule */
-        $adminModule = AmosAdmin::instance();
+        $adminModule = \Yii::$app->getModule((empty($module_name)? AmosAdmin::getModuleName() : $module_name));
         /** @var UserProfile $userProfile */
         $userProfile = $adminModule->createModel('UserProfile');
         $userProfile->setScenario(UserProfile::SCENARIO_CREATE_NEW_ACCOUNT);
@@ -203,6 +223,7 @@ class UserProfileUtility
             $userProfile->facilitatore_id = $defaultFacilitatorProfile->id;
         }
         $userProfile->user_id = $user->id;
+        $userProfile->first_access_redirect_url = $urlFirstAccessRedirectUrl;
         $userProfile->attivo = UserProfile::STATUS_ACTIVE;
         if ($adminModule->bypassWorkflow) {
             $userProfile->validato_almeno_una_volta = 1;
@@ -235,7 +256,7 @@ class UserProfileUtility
                     'cwh_nodi_id' => 'user-' . $userProfile->user_id
                 ];
                 // Add cwh permission to create content in 'Personal' scope
-                $cwhAssignCreate = new \lispa\amos\cwh\models\CwhAuthAssignment($permissionCreateArray);
+                $cwhAssignCreate = new \open20\amos\cwh\models\CwhAuthAssignment($permissionCreateArray);
                 $cwhAssignCreate->save(false);
             }
         }
@@ -247,10 +268,10 @@ class UserProfileUtility
      * @param int $userId
      * @return bool
      */
-    public static function setBasicUserRoleToUser($userId)
+    public static function setBasicUserRoleToUser($userId, $module_name = null)
     {
         /** @var AmosAdmin $adminModule */
-        $adminModule = \Yii::$app->getModule(AmosAdmin::getModuleName());
+        $adminModule = \Yii::$app->getModule((empty($module_name)? AmosAdmin::getModuleName() : $module_name));
         $basicUserRole = \Yii::$app->getAuthManager()->getRole($adminModule->defaultUserRole);
         if (is_null($basicUserRole)) {
             return false;
@@ -266,9 +287,9 @@ class UserProfileUtility
 
     /**
      * This method return all communities to view for a single manager in the community managers list.
-     * @param \lispa\amos\community\AmosCommunity $communityModule
+     * @param \open20\amos\community\AmosCommunity $communityModule
      * @param int $userId
-     * @return \lispa\amos\community\models\Community[]
+     * @return \open20\amos\community\models\Community[]
      */
     public static function getCommunitiesForManagers($communityModule, $userId)
     {
@@ -276,7 +297,7 @@ class UserProfileUtility
         $userCommunities = [];
         foreach ($allUserCommunities as $userCommunity) {
             if (
-                ($userCommunity->community_type_id != \lispa\amos\community\models\CommunityType::COMMUNITY_TYPE_CLOSED) ||
+                ($userCommunity->community_type_id != \open20\amos\community\models\CommunityType::COMMUNITY_TYPE_CLOSED) ||
                 $userCommunity->isNetworkUser($userCommunity->id)
             ) {
                 $userCommunities[] = $userCommunity;
@@ -287,16 +308,16 @@ class UserProfileUtility
 
     /**
      * @param UserProfile $model
-     * @param \lispa\amos\community\models\Community $model
+     * @param \open20\amos\community\models\Community $model
      * @return bool
      */
-    public static function sendCredentialsMail($model, $community = null)
+    public static function sendCredentialsMail($model, $community = null, $module_name = null)
     {
         try {
             $model->user->generatePasswordResetToken();
             $model->user->save(false);
             /** @var AmosAdmin $adminModule */
-            $adminModule = \Yii::$app->getModule(AmosAdmin::getModuleName());
+            $adminModule = \Yii::$app->getModule((empty($module_name)? AmosAdmin::getModuleName() : $module_name));
             $subjectView = $adminModule->htmlMailSubject;
             $contentView = $adminModule->htmlMailContent;
             $subject = Email::renderMailPartial($subjectView, ['profile' => $model], \Yii::$app->getUser()->id);
@@ -310,7 +331,7 @@ class UserProfileUtility
 
     /**
      * @param UserProfile $model
-     * @param \lispa\amos\community\models\Community $model
+     * @param \open20\amos\community\models\Community $model
      * @param string $urlPrevious
      * @return bool
      */
@@ -319,14 +340,53 @@ class UserProfileUtility
         try {
             $model->user->generatePasswordResetToken();
             $model->user->save(false);
-            $subjectView = '@vendor/lispa/amos-admin/src/mail/user/forgotpassword-subject';
-            $contentView = '@vendor/lispa/amos-admin/src/mail/user/forgotpassword-html';
+            $subjectView = '@vendor/open20/amos-admin/src/mail/user/forgotpassword-subject';
+            $contentView = '@vendor/open20/amos-admin/src/mail/user/forgotpassword-html';
             $subject = Email::renderMailPartial($subjectView, ['profile' => $model], \Yii::$app->getUser()->id);
             $mail = Email::renderMailPartial($contentView, ['profile' => $model, 'community' => $community, 'urlPrevious' => $urlPrevious], \Yii::$app->getUser()->id);
             return Email::sendMail(Yii::$app->params['supportEmail'], [$model->user->email], $subject, $mail, []);
         } catch (\Exception $ex) {
             \Yii::getLogger()->log($ex->getMessage(), \yii\log\Logger::LEVEL_ERROR);
         }
+        return false;
+    }
+
+    /**
+     * @param UserProfile $model
+     * @param \open20\amos\community\models\Community $model
+     * @return bool
+     */
+    public static function sendUserAcceptRegistrationRequestMail($model, $community = null, $invitationUserId = null)
+    {
+        try {
+            /** @var AmosAdmin $adminModule */
+            $adminModule = \Yii::$app->getModule(AmosAdmin::getModuleName());
+            $subjectView = $adminModule->htmltMailNotifyAcceptedRegistrationRequestSubject;
+            $contentView = $adminModule->htmlMailNotifyAcceptedRegistrationRequestContent;
+
+            $invitationUser = UserProfile::findOne(['user_id' => $invitationUserId]);
+
+            $subject = Email::renderMailPartial(
+                $subjectView,
+                ['profile' => $model],
+                \Yii::$app->getUser()->getId()
+            );
+
+            $mail = Email::renderMailPartial(
+                $contentView,
+                [
+                    'profile' => $model,
+                    'community' => $community,
+                    'invitationUser' => $invitationUser
+                ],
+                \Yii::$app->getUser()->getId()
+            );
+
+            return Email::sendMail(Yii::$app->params['supportEmail'], [$invitationUser->user->email], $subject, $mail, []);
+        } catch (\Exception $ex) {
+            \Yii::getLogger()->log($ex->getMessage(), \yii\log\Logger::LEVEL_ERROR);
+        }
+
         return false;
     }
 
@@ -342,9 +402,9 @@ class UserProfileUtility
         }
         return $subject;
     }
-    
+
     /**
-     * 
+     *
      */
     public static function generateDeactivateSubject(UserProfile $model)
     {
@@ -376,7 +436,8 @@ class UserProfileUtility
      * @throws \ReflectionException
      * Get an array of active facilitator roles in the application (scanning configured plugins)
      */
-    public static function getFacilitatorForModuleRoles() {
+    public static function getFacilitatorForModuleRoles()
+    {
         /** @var array $facilitatorRoles
          * List of facilitator roles for modules set in the application
          */
@@ -392,19 +453,19 @@ class UserProfileUtility
             // ..if a module is not loaded, yii returns an array of config values.
             // In this case, get the full class path from the key of the current
             // value from the array of modules configured in the application
-            if($moduleClass == "") {
+            if ($moduleClass == "") {
                 $module = Yii::$app->getModule($key);
             }
             // Check if the getModelClassName function exists in the module
             if (method_exists($module, 'getModelClassName')) {
                 $moduleModel = $module->getModelClassName();
                 //pr($moduleModel, "modulo con model classname");
-                if(!empty($moduleModel)) {
+                if (!empty($moduleModel)) {
                     // Get the model of the module instance
-                    $moduleModel = '\\'.$moduleModel;
+                    $moduleModel = '\\' . $moduleModel;
                     $moduleModel = new $moduleModel();
                     // Check if the model implements the FacilitatorInterface
-                    if (isset(class_implements($moduleModel)['lispa\amos\core\interfaces\FacilitatorInterface'])) {
+                    if (isset(class_implements($moduleModel)['open20\amos\core\interfaces\FacilitatorInterface'])) {
                         // If the model has a facilitator role set (is not empty)...
                         if (!empty($moduleModel->getFacilitatorRole()) && ($moduleModel->getFacilitatorRole() != "FACILITATOR")) {
                             // ...add the facilitator role for the module to the list of facilitator roles
@@ -427,15 +488,16 @@ class UserProfileUtility
      * @return array
      * Get the facilitator roles activated in the application (passed via $facilitatorPermissionsEnabled param) assigned to a user
      */
-    public static function getFacilitatorRolesForUser($userId, $facilitatorPermissionsEnabled) {
+    public static function getFacilitatorRolesForUser($userId, $facilitatorPermissionsEnabled)
+    {
         $rows = (new Query())
-                ->select(['item_name'])
-                ->from('auth_assignment')
-                ->where([
-                    'user_id' => $userId,
-                    'item_name' => array_keys($facilitatorPermissionsEnabled),
-                ])
-                ->all();
+            ->select(['item_name'])
+            ->from('auth_assignment')
+            ->where([
+                'user_id' => $userId,
+                'item_name' => array_keys($facilitatorPermissionsEnabled),
+            ])
+            ->all();
 
         $result = [];
         foreach ($rows as $row) {
@@ -444,30 +506,31 @@ class UserProfileUtility
 
         return $result;
     }
-    
+
     /**
-     * 
+     *
      * @param type $userId
      * @return type
      */
-    public static function getQueryContacts($userId){
-      $contactsInvited =
-        User::find()
-          ->innerJoin('user_contact', 'user.id = user_contact.contact_id')
-          ->innerJoin('user_profile', 'user_profile.user_id = user.id')
-          ->andWhere('user_contact.deleted_at IS NULL AND user_profile.deleted_at IS NULL')
-          ->andWhere("user_contact.user_id = ".$userId)
-          ->andWhere(['user_contact.status' => UserContact::STATUS_ACCEPTED])
-          ->andWhere(['attivo' => 1]);
+    public static function getQueryContacts($userId)
+    {
+        $contactsInvited =
+            User::find()
+                ->innerJoin('user_contact', 'user.id = user_contact.contact_id')
+                ->innerJoin('user_profile', 'user_profile.user_id = user.id')
+                ->andWhere('user_contact.deleted_at IS NULL AND user_profile.deleted_at IS NULL')
+                ->andWhere("user_contact.user_id = " . $userId)
+                ->andWhere(['user_contact.status' => UserContact::STATUS_ACCEPTED])
+                ->andWhere(['attivo' => 1]);
 
         $contactsInviting =
-          User::find()
-            ->innerJoin('user_contact', 'user.id = user_contact.user_id')
-            ->innerJoin('user_profile', 'user_profile.user_id = user.id')
-            ->andWhere('user_contact.deleted_at IS NULL AND user_profile.deleted_at IS NULL')
-            ->andWhere("user_contact.contact_id = ".$userId)
-            ->andWhere(['user_contact.status' => UserContact::STATUS_ACCEPTED])
-            ->andWhere(['attivo' => 1]);
+            User::find()
+                ->innerJoin('user_contact', 'user.id = user_contact.user_id')
+                ->innerJoin('user_profile', 'user_profile.user_id = user.id')
+                ->andWhere('user_contact.deleted_at IS NULL AND user_profile.deleted_at IS NULL')
+                ->andWhere("user_contact.contact_id = " . $userId)
+                ->andWhere(['user_contact.status' => UserContact::STATUS_ACCEPTED])
+                ->andWhere(['attivo' => 1]);
 
         return $contactsInvited->union($contactsInviting);
     }
@@ -476,10 +539,21 @@ class UserProfileUtility
      * @param $int_param
      * @return null
      */
-    public static function cleanIntegerParam($int_param){
-        if(is_integer($int_param)){
+    public static function cleanIntegerParam($int_param)
+    {
+        if (is_integer($int_param)) {
             return $int_param;
         }
         return null;
+    }
+
+    /**
+     * Returns the mail for deleted users.
+     * @param int $userId
+     * @return string
+     */
+    public static function makeDeletedUserEmail($userId)
+    {
+        return self::DELETED_ACCOUNT_EMAIL_PREFIX . $userId . self::DELETED_ACCOUNT_EMAIL_SUFFIX;
     }
 }

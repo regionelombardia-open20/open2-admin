@@ -1,27 +1,27 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\widgets\graphics
+ * @package    open20\amos\admin\widgets\graphics
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\widgets\graphics;
+namespace open20\amos\admin\widgets\graphics;
 
 use yii\helpers\Html;
-use lispa\amos\core\widget\WidgetGraphic;
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\assets\ModuleAdminAsset;
-use lispa\amos\admin\models\Admin;
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\admin\models\search\UserProfileSearch;
+use open20\amos\core\widget\WidgetGraphic;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\assets\ModuleAdminAsset;
+use open20\amos\admin\models\Admin;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\admin\models\search\UserProfileSearch;
 
 /**
  * Class WidgetGraphicsUsers
- * @package lispa\amos\admin\widgets\graphics
+ * @package open20\amos\admin\widgets\graphics
  */
 class WidgetGraphicsUsers extends WidgetGraphic {
     /**
@@ -69,7 +69,7 @@ class WidgetGraphicsUsers extends WidgetGraphic {
     public function getHtml() {
         ModuleAdminAsset::register($this->getView());
 		$usersList = $this->getDataProvider();
-        $viewToRender = '@vendor/lispa/amos-admin/src/widgets/graphics/views/users_list';
+        $viewToRender = '@vendor/open20/amos-admin/src/widgets/graphics/views/users_list';
 
         return $this->render($viewToRender, [
 			'widget' => $this,
@@ -114,14 +114,14 @@ class WidgetGraphicsUsers extends WidgetGraphic {
 		return [
 			'users' =>	
 				Html::a(AmosAdmin::t('amosadmin', 'Cerca utenti'), 
-					[ '/admin/user-profile/index?enableSearch=1&UserProfileSearch='], [
+					[ '/admin/user-profile/index?enableSearch=1&UserProfileSearch%5B%5D='], [
 						'class' => 'btn btn-navigation-primary btn-search-users',
 						'title' => AmosAdmin::t('amosadmin', 'Ricerca utenti'),
 						'role' 	=> 'button',
 					]),
 			'companies' => 
 				Html::a(AmosAdmin::t('amosadmin', 'Cerca aziende'), 
-					['/organizzazioni/profilo?enableSearch=1&ProfiloSearch='], [
+					['/organizzazioni/profilo/index?enableSearch=1&ProfiloSearch%5B%5D='], [
 						'class' => 'btn btn-navigation-primary btn-search-companies',
 						'title' => AmosAdmin::t('amosadmin', 'Ricerca aziende'),
 					])

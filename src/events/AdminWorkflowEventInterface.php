@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\events
+ * @package    open20\amos\admin\events
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\events;
+namespace open20\amos\admin\events;
 
 use yii\base\Event;
 

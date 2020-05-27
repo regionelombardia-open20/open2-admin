@@ -1,32 +1,32 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\security
+ * @package    open20\amos\admin\views\security
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\assets\ModuleAdminAsset;
-use lispa\amos\core\forms\ActiveForm;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\icons\AmosIcons;
-use yii\helpers\Url;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\assets\ModuleAdminAsset;
+use open20\amos\core\forms\ActiveForm;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\icons\AmosIcons;
+use open20\amos\core\utilities\CoreCommonUtility;
 
 ModuleAdminAsset::register(Yii::$app->view);
 
 /**
  * @var yii\web\View $this
  * @var yii\bootstrap\ActiveForm $form
- * @var \lispa\amos\admin\models\LoginForm $model
+ * @var \open20\amos\admin\models\LoginForm $model
  */
 $this->title = AmosAdmin::t('amosadmin', 'Login');
 $this->params['breadcrumbs'][] = $this->title;
 
-/** @var $socialAuthModule \lispa\amos\socialauth\Module */
+/** @var $socialAuthModule \open20\amos\socialauth\Module */
 $socialAuthModule = Yii::$app->getModule('socialauth');
 
 /** @var AmosAdmin $adminModule */
@@ -38,12 +38,19 @@ $socialProfile = Yii::$app->session->get('social-profile');
 // for redirect to community after login or registration
 $communityId = null;
 $previousUrl = Yii::$app->getUser()->getReturnUrl();
+$enableRedirect = false;
+
+if(strpos($previousUrl, 'enableRedirect')){
+    $enableRedirect = true;
+}
+
+
 $found = strpos($previousUrl, 'community/join?id=');
 if ($found) {
     $parsedUrl = parse_url($previousUrl);
     parse_str($parsedUrl['query'], $query_params);
     if ($query_params) {
-        $communityId = $query_params['id'];
+        $communityId = \open20\amos\admin\utility\UserProfileUtility::cleanIntegerParam($query_params['id']);
     }
 }
 
@@ -87,19 +94,17 @@ if ($isDemoLogin) {
 ?>
 
 <div id="bk-formDefaultLogin" class="loginContainerFullsize">
-    <?php if (!$adminModule->hideStandardLoginPageSection): ?>
-        <div class="login-block col-xs-12 nop">
-            <?php if (!isset(Yii::$app->params['logo']) || !Yii::$app->params['logo']) : ?>
-                <p class="welcome-message"><?= AmosAdmin::t('amosadmin', '#login_welcome_message') ?></p>
-            <?php endif; ?>
+    <div class="login-block col-xs-12 nop">
+        <?php if (!isset(Yii::$app->params['logo']) || !Yii::$app->params['logo']) : ?>
+            <p class="welcome-message"><?= AmosAdmin::t('amosadmin', '#login_welcome_message') ?></p>
+        <?php endif; ?>
 
+        <?php if (CoreCommonUtility::platformSeenFromHeadquarter() || !$adminModule->hideStandardLoginPageSection): ?>
             <?php $form = ActiveForm::begin(['id' => 'login-form']); ?>
             <div class="login-body">
-                <?php if (!$adminModule->hideStandardLoginPageSection) : ?>
-                    <?= Html::tag('h2', AmosAdmin::t('amosadmin', '#fullsize_login'), ['class' => 'title-login col-xs-12 nop']) ?>
-                <?php endif; ?>
+                <?= Html::tag('h2', AmosAdmin::t('amosadmin', '#fullsize_login'), ['class' => 'title-login col-xs-12 nop']) ?>
                 <div class="row">
-                    <?php if (!$adminModule->hideStandardLoginPageSection) : ?>
+                    <?php if (CoreCommonUtility::platformSeenFromHeadquarter() || !$adminModule->hideStandardLoginPageSection) : ?>
                         <div class="col-xs-12 nop">
                             <?php if (isset(\Yii::$app->params['template-amos']) && \Yii::$app->params['template-amos']): ?>
                                 <div class="col-xs-12">
@@ -153,53 +158,54 @@ if ($isDemoLogin) {
                     ['class' => 'remember-me', 'title' => AmosAdmin::t('amosadmin', '#remember_access')]) ?>
             </div>
             <?php ActiveForm::end(); ?>
+        <?php endif; ?>
+    </div>
+
+    <?php if ($socialAuthModule && $socialAuthModule->enableLogin && !$socialMatch) : ?>
+        <div class="social-block col-xs-12 nop">
+            <?= $this->render('parts' . DIRECTORY_SEPARATOR . 'social', [
+                'type' => 'login',
+                'communityId' => $communityId
+            ]); ?>
         </div>
+    <?php endif; ?>
 
-        <?php if ($socialAuthModule && $socialAuthModule->enableLogin && !$socialMatch) : ?>
-            <div class="social-block col-xs-12 nop">
-                <?= $this->render('parts' . DIRECTORY_SEPARATOR . 'social', [
-                    'type' => 'login',
-                    'communityId' => $communityId
-                ]); ?>
-            </div>
-        <?php endif; ?>
+    <?php if ($socialProfile) :
+        echo Html::tag('div',
+            Html::tag('p',
+                AmosAdmin::t('amosadmin', 'You are right to link you {provider} account to your profile', ['provider' => $socialMatch]), ['class' => '']
+            ),
+            ['class' => 'social-block social-register-block col-xs-12 nop']
+        );
+    endif;
+    ?>
 
-        <?php if ($socialProfile) :
-            echo Html::tag('div',
-                Html::tag('p',
-                    AmosAdmin::t('amosadmin', 'You are right to link you {provider} account to your profile', ['provider' => $socialMatch]), ['class' => '']
-                ),
-                ['class' => 'social-block social-register-block col-xs-12 nop']
+    <?php if ($socialAuthModule && $socialAuthModule->enableSpid) : ?>
+        <div class="spid-block col-xs-12 nop">
+            <?= $this->render('parts' . DIRECTORY_SEPARATOR . 'spid'); ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (($adminModule->enableRegister && $adminModule->showLogInRegisterButton) || (!$adminModule->enableRegister && !empty($adminModule->textWarningForRegisterDisabled))): ?>
+        <div class="register-block col-xs-12 nop">
+            <?php
+            $urlRegister = ['/admin/security/register'];
+            if ($communityId) {
+                $urlRegister['community'] = $communityId;
+            } else if ($enableRedirect) {
+                $urlRegister['redirectUrl'] = $previousUrl;
+            }
+            echo Html::tag('h2',
+                AmosAdmin::t('amosadmin', '#fullsize_register_now') .
+                ' ' .
+                Html::a(AmosAdmin::t('amosadmin', '#fullsize_register_now_title_link'), $urlRegister,
+                    [
+                        'title' => AmosAdmin::t('amosadmin', '#fullsize_register_now_title_link', ['appName' => Yii::$app->name]),
+                        'target' => '_self'
+                    ]),
+                ['class' => 'title-login']
             );
-        endif;
-        ?>
-
-        <?php if ($socialAuthModule && $socialAuthModule->enableSpid) : ?>
-            <div class="spid-block col-xs-12 nop">
-                <?= $this->render('parts' . DIRECTORY_SEPARATOR . 'spid'); ?>
-            </div>
-        <?php endif; ?>
-
-
-        <?php if (($adminModule->enableRegister && $adminModule->showLogInRegisterButton) || (!$adminModule->enableRegister && !empty($adminModule->textWarningForRegisterDisabled))): ?>
-            <div class="register-block col-xs-12 nop">
-                <?php
-                $urlRegister = ['/admin/security/register'];
-                if ($communityId) {
-                    $urlRegister['community'] = $communityId;
-                }
-                echo Html::tag('h2',
-                    AmosAdmin::t('amosadmin', '#fullsize_register_now') .
-                    ' ' .
-                    Html::a(AmosAdmin::t('amosadmin', '#fullsize_register_now_title_link'), $urlRegister,
-                        [
-                            'title' => AmosAdmin::t('amosadmin', '#fullsize_register_now_title_link', ['appName' => Yii::$app->name]),
-                            'target' => '_self'
-                        ]),
-                    ['class' => 'title-login']
-                );
-                ?>
-            </div>
-        <?php endif; ?>
+            ?>
+        </div>
     <?php endif; ?>
 </div>

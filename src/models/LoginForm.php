@@ -1,25 +1,25 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\models
+ * @package    open20\amos\admin\models
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\models;
+namespace open20\amos\admin\models;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\core\user\User;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\core\user\User;
 use Yii;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
 
 /**
  * Class LoginForm
- * @package lispa\amos\admin\models
+ * @package open20\amos\admin\models
  */
 class LoginForm extends Model
 {
@@ -49,7 +49,7 @@ class LoginForm extends Model
     public $ruolo;
 
     /**
-     * @var \lispa\amos\core\user\User $_user
+     * @var \open20\amos\core\user\User $_user
      */
     private $_user;
 
@@ -184,7 +184,7 @@ class LoginForm extends Model
     }
 
     /**
-     * @param $user \lispa\amos\core\user\User
+     * @param $user \open20\amos\core\user\User
      */
     private function tickAttemptUser($user)
     {
@@ -203,7 +203,7 @@ class LoginForm extends Model
     }
 
     /**
-     * @param $user \lispa\amos\core\user\User
+     * @param $user \open20\amos\core\user\User
      * @return bool
      */
     private function checkUserAttemptsExceed($user)
@@ -290,7 +290,7 @@ class LoginForm extends Model
     }
 
     /**
-     * @param $user \lispa\amos\core\user\User
+     * @param $user \open20\amos\core\user\User
      * @return int|null
      */
     private function numbersOfAttemptsRemainig($user = false)

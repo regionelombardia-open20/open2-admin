@@ -1,11 +1,11 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\widgets\graphics\views
+ * @package    open20\amos\admin\widgets\graphics\views
  * @category   CategoryName
  */
 
@@ -14,22 +14,22 @@
  * @var ActiveDataProvider $usersList
  * @var WidgetGraphicsUltimeNews $widget
  * @var string $toRefreshSectionId
- * @var \lispa\amos\admin\models\UserProfile $model
+ * @var \open20\amos\admin\models\UserProfile $model
  * @var yii\data\ActiveDataProvider $dataProvider
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\models\search\UserProfileSearch;
-use lispa\amos\admin\widgets\graphics\WidgetGraphicsUsers;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\models\search\UserProfileSearch;
+use open20\amos\admin\widgets\graphics\WidgetGraphicsUsers;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\web\View;
 use yii\widgets\Pjax;
 use yii\widgets\LinkPager;
-use lispa\amos\admin\assets\ModuleAdminAsset;
-use lispa\amos\core\icons\AmosIcons;
-use lispa\amos\core\views\DataProviderView;
-use lispa\amos\core\forms\WidgetGraphicsActions;
+use open20\amos\admin\assets\ModuleAdminAsset;
+use open20\amos\core\icons\AmosIcons;
+use open20\amos\core\views\DataProviderView;
+use open20\amos\core\forms\WidgetGraphicsActions;
 
 ModuleAdminAsset::register($this);
 $moduleAdmin = \Yii::$app->getModule(AmosAdmin::getModuleName());

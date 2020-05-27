@@ -1,18 +1,18 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\commands
+ * @package    open20\amos\admin\commands
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\commands;
+namespace open20\amos\admin\commands;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\core\user\User;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\core\user\User;
 use yii\console\Controller;
 use Yii;
 

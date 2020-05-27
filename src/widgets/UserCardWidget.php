@@ -1,278 +1,368 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\widgets
+ * @package    open20\amos\admin\widgets
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\widgets;
+namespace open20\amos\admin\widgets;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\base\ConfigurationManager;
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\core\forms\ContextMenuWidget;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\icons\AmosIcons;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\base\ConfigurationManager;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\core\forms\ContextMenuWidget;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\icons\AmosIcons;
+use open20\amos\core\module\BaseAmosModule;
+use open20\amos\notificationmanager\forms\NewsWidget;
 use Yii;
 use yii\bootstrap\Widget;
+use yii\web\Application;
 
 /**
  * Class UserCardWidget
- * @package lispa\amos\admin\widgets
+ * @package open20\amos\admin\widgets
  */
-class UserCardWidget extends Widget {
+class UserCardWidget extends Widget
+{
+    /**
+     * @var UserProfile $model
+     */
+    public $model;
+    public $onlyAvatar = true;
+    public $absoluteUrl = false;
+    public $avatarXS = false;
+    public $enableLink = true;
+    public $containerAdditionalClass = '';
+    public $avatarDimension = 'square_small';
 
-  /**
-   * @var UserProfile $model
-   */
-  public $model;
-  public $onlyAvatar = true;
-  public $absoluteUrl = false;
-  public $avatarXS = false;
-  public $enableLink = true;
-  public $containerAdditionalClass = '';
-  public $avatarDimension = 'square_small';
+    /**
+     * @var AmosAdmin $adminModule
+     */
+    private $adminModule = null;
 
-  /**
-   * @var AmosAdmin $adminModule
-   */
-  private $adminModule = null;
+    /**
+     * @var bool $checkReadPermissionForUserLink If true check if the logged user can access the view of the content creator. If false the view link is always enabled.
+     */
+    public $checkReadPermissionForUserLink = true;
 
-  /**
-   * widget initialization
-   */
-  public function init() {
-    parent::init();
+    /**
+     * @var bool $hideCreatorNameSurname If true hide the name and surname of the user.
+     */
+    public $hideNameSurname = false;
 
-    if (is_null($this->model)) {
-      throw new \Exception(AmosAdmin::t('amosadmin', 'Missing model'));
-    }
+    /**
+     * @var string $customUserAvatarImageAlt Custom avatar image alt or link title
+     */
+    public $customUserAvatarImageAlt = '';
 
-    $this->adminModule = Yii::$app->getModule('admin');
-  }
+    /**
+     * @var string $customUserAvatarUrl Custom creator avatar url.
+     */
+    public $customUserAvatarUrl = null;
 
-  /**
-   * @return mixed
-   */
-  public function run() {
-    $html = '';
-    $confirm = $this->getConfirm();
+    /**
+     * @var bool $squareAvatar
+     */
+    public $squareAvatar = false;
 
-    if ($this->absoluteUrl) {
-      $url = $this->model->getAvatarWebUrl($this->avatarDimension);
-    } else {
-      $url = $this->model->getAvatarUrl($this->avatarDimension);
-    }
-    
-    $model = $this->model;
-    $roundImage = Yii::$app->imageUtility->getRoundImage($model);
+    /**
+     * widget initialization
+     */
+    public function init()
+    {
+        parent::init();
 
-    if ($this->absoluteUrl) {
-      $class = $roundImage['class'];
-      if ($class == 'full-width') {
-        $style = "width: 100%; height: auto; margin-top:" . $roundImage['margin-top'] . "%;";
-      } elseif ($class == 'full-height') {
-        $style = "height: 100%; width: auto; margin-left: " . $roundImage['margin-left'] . "%;";
-      } else {
-        $style = " width: 100%; height: auto;";
-      }
-      
-      $htmlOptions = [
-        'style' => $style,
-        'alt' => $model->getNomeCognome()
-      ];
-    } else {
-      $htmlOptions = [
-        'class' => $roundImage['class'],
-        'style' => "margin-left: " . $roundImage['margin-left'] . "%; margin-top: " . $roundImage['margin-top'] . "%;",
-        'alt' => $model->getNomeCognome()
-      ];
-    }
-
-    $htmlTag = Html::img($url, $htmlOptions);
-    $img = ($this->absoluteUrl) 
-      ? $htmlTag 
-      : Html::tag(
-        'div', 
-        $htmlTag,
-        [
-          'class' => 'container-round-img-' 
-          . (($this->avatarXS) ? 'xs' : 'sm') 
-          . ' ' 
-          . $this->containerAdditionalClass
-        ]
-      );
-
-    if ($this->onlyAvatar) {
-      $link = null;
-      if ($this->enableLink) {
-        $link = '/admin/user-profile/view?id=' . $model->id;
-        if ($this->absoluteUrl) {
-          $link = Yii::$app->getUrlManager()->createAbsoluteUrl($link);
+        if (is_null($this->model)) {
+            throw new \Exception(AmosAdmin::t('amosadmin', 'Missing model'));
         }
-      }
-      
-      $html .= Html::a(
-        $img,
-        $link,
-        [
-          'title' => AmosAdmin::t('amosadmin', 'Apri il profilo di {nome_profilo}', ['nome_profilo' => $model->getNomeCognome()]),
-          'data' => $confirm
-      ]);
-    } else {
-      $modals = \lispa\amos\admin\widgets\ConnectToUserWidget::widget([
-        'model' => $this->model,
-        'onlyModals' => true
-      ]);
 
-      $html = $modals . Html::a(
-        $img,
-        null,
-        [
-          'data' => [
-            'toggle' => 'tooltip',
-            'html' => true,
-            'placement' => 'right',
-            'delay' => ['show' => 100, 'hide' => 5000],
-            'trigger' => 'hover',
-            'template' => '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner" style="background-color:transparent"></div></div>',
-          ],
-          'title' => $this->getHtmlTooltip(),
-          'style' => 'border-color:transparent;'
-        ]
-      );
-    }
-    
-    return $html;
-  }
-
-  /**
-   * 
-   * @return string
-   */
-  private function getHtmlTooltip() {
-    $model = $this->model;
-
-    $nomeCognome = '';
-    if ($this->adminModule->confManager->isVisibleBox('box_informazioni_base', ConfigurationManager::VIEW_TYPE_VIEW)) {
-      if ($this->adminModule->confManager->isVisibleField('nome', ConfigurationManager::VIEW_TYPE_VIEW)) {
-        $nomeCognome .= $model->nome;
-      }
-      if ($this->adminModule->confManager->isVisibleField('cognome', ConfigurationManager::VIEW_TYPE_VIEW)) {
-        $nomeCognome .= ' ' . $model->cognome;
-      }
+        $this->adminModule = Yii::$app->getModule('admin');
     }
 
-    $viewUrl = "/admin/user-profile/view?id=" . $model->id;
-    $url = $model->getAvatarUrl(
-      'original',
-      [
-      'class' => 'img-responsive'
-      ]
-    );
-    
-    $roundImage = Yii::$app->imageUtility->getRoundImage($model);
-    $logoOptions = [
-      'class' => $roundImage['class'],
-      'style' => "margin-left: " . $roundImage['margin-left'] . "%; margin-top: " . $roundImage['margin-top'] . "%;",
-    ];
-    $logoLinkOptions = [];
-    $options = [];
-    if (strlen($nomeCognome)) {
-      $logoOptions['alt'] = $nomeCognome;
-      $logoLinkOptions['title'] = $nomeCognome;
-      $options['title'] = $nomeCognome;
+    /**
+     * @return mixed
+     */
+    public function run()
+    {
+        $html = '';
+        $confirm = $this->getConfirm();
+
+        if ($this->customUserAvatarUrl) {
+            $url = $this->customUserAvatarUrl;
+        } else if (isset(\Yii::$app->params['customUserCardWidgetAvatarUrl']) && \Yii::$app->params['customUserCardWidgetAvatarUrl']) {
+            $url = \Yii::$app->params['customUserCardWidgetAvatarUrl'];
+        } else if ($this->absoluteUrl) {
+            $url = $this->model->getAvatarWebUrl($this->avatarDimension);
+        } else {
+            $url = $this->model->getAvatarUrl($this->avatarDimension);
+        }
+
+        $model = $this->model;
+        $roundImage = Yii::$app->imageUtility->getRoundImage($model);
+
+        if ($this->customUserAvatarImageAlt) {
+            $alt = $this->customUserAvatarImageAlt;
+        } else if (isset(\Yii::$app->params['customUserAvatarImageAlt']) && is_string(\Yii::$app->params['customUserAvatarImageAlt'])) {
+            $alt = \Yii::$app->params['customUserAvatarImageAlt'];
+        } else if ($this->hideNameSurname || (isset(\Yii::$app->params['hideListsContentCreatorName']) && (\Yii::$app->params['hideListsContentCreatorName'] === true))) {
+            $alt = '';
+        } else {
+            $alt = $model->getNomeCognome();
+        }
+
+        if ($this->absoluteUrl) {
+            $class = $roundImage['class'];
+            if ($class == 'full-width') {
+                $style = "width: 100%; height: auto; margin-top:" . $roundImage['margin-top'] . "%;";
+            } elseif ($class == 'full-height') {
+                $style = "height: 100%; width: auto; margin-left: " . $roundImage['margin-left'] . "%;";
+            } else {
+                $style = " width: 100%; height: auto;";
+            }
+
+            $htmlOptions = [
+                'style' => $style,
+                'alt' => $alt
+            ];
+        } else {
+            $htmlOptions = [
+                'class' => $roundImage['class'],
+                'style' => "margin-left: " . $roundImage['margin-left'] . "%; margin-top: " . $roundImage['margin-top'] . "%;",
+                'alt' => $alt
+            ];
+        }
+
+        $htmlTag = Html::img($url, $htmlOptions);
+        $img = ($this->absoluteUrl) ? $htmlTag : Html::tag(
+            'div', $htmlTag,
+            [
+                'class' => ((!$this->squareAvatar && !(isset(\Yii::$app->params['userCardWidgetSquareAvatar']) && (\Yii::$app->params['userCardWidgetSquareAvatar'] === true))) ? 'container-round-img-'
+                    . (($this->avatarXS) ? 'xs' : 'sm')
+                    . ' ' : '')
+                    . $this->containerAdditionalClass
+            ]
+        );
+
+        if ($this->onlyAvatar) {
+            if ($this->creatorLinkEnabled()) {
+                $link = null;
+                if ($this->enableLink) {
+                    $link = $this->getCreatorLink();
+                    if ($this->absoluteUrl) {
+                        $link = Yii::$app->getUrlManager()->createAbsoluteUrl($link);
+                    }
+                }
+                if ($this->customUserAvatarImageAlt) {
+                    $title = $this->customUserAvatarImageAlt;
+                } else if (isset(\Yii::$app->params['customUserAvatarImageAlt']) && is_string(\Yii::$app->params['customUserAvatarImageAlt'])) {
+                    $title = \Yii::$app->params['customUserAvatarImageAlt'];
+                } else if ($this->hideNameSurname || (isset(\Yii::$app->params['hideListsContentCreatorName']) && (\Yii::$app->params['hideListsContentCreatorName'] === true))) {
+                    $title = '';
+                } else {
+                    $title = AmosAdmin::t('amosadmin', 'Apri il profilo di {nome_profilo}', ['nome_profilo' => $model->getNomeCognome()]);
+                }
+
+                $html .= Html::a(
+                    $img,
+                    $link,
+                    [
+                        'title' => $title,
+                        'data' => $confirm
+                    ]
+                );
+            } else {
+                $html .= $img;
+            }
+        } else {
+            $modals = ConnectToUserWidget::widget([
+                'model' => $this->model,
+                'onlyModals' => true
+            ]);
+
+            $html = $modals . Html::a(
+                    $img, null,
+                    [
+                        'data' => [
+                            'toggle' => 'tooltip',
+                            'html' => true,
+                            'placement' => 'right',
+                            'delay' => ['show' => 100, 'hide' => 5000],
+                            'trigger' => 'hover',
+                            'template' => '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner" style="background-color:transparent"></div></div>',
+                        ],
+                        'title' => $this->getHtmlTooltip(),
+                        'style' => 'border-color:transparent;'
+                    ]
+                );
+        }
+
+        return $html;
     }
-    $logo = Html::img($url, $logoOptions);
-    Yii::$app->imageUtility->methodGetImageUrl = 'getAvatarUrl';
-    $tooltip = '<div class="icon-view"><div class="card-container col-xs-12 nop">' .
-      ContextMenuWidget::widget([
-        'model' => $model,
-        'actionModify' => "/admin/user-profile/update?id=" . $model->id,
-        'disableDelete' => true
-      ])
-      . '<div class="icon-header grow-pict">
+
+    /**
+     *
+     * @return string
+     */
+    private function getHtmlTooltip()
+    {
+        $model = $this->model;
+
+        $nomeCognome = '';
+        if ($this->customUserAvatarImageAlt) {
+            $nomeCognome = $this->customUserAvatarImageAlt;
+        } else if (isset(\Yii::$app->params['customUserAvatarImageAlt']) && is_string(\Yii::$app->params['customUserAvatarImageAlt'])) {
+            $nomeCognome = \Yii::$app->params['customUserAvatarImageAlt'];
+        } else if ($this->hideNameSurname || (isset(\Yii::$app->params['hideListsContentCreatorName']) && (\Yii::$app->params['hideListsContentCreatorName'] === true))) {
+            $nomeCognome = '';
+        } else {
+            if ($this->adminModule->confManager->isVisibleBox('box_informazioni_base', ConfigurationManager::VIEW_TYPE_VIEW)) {
+                if ($this->adminModule->confManager->isVisibleField('nome', ConfigurationManager::VIEW_TYPE_VIEW)) {
+                    $nomeCognome .= $model->nome;
+                }
+                if ($this->adminModule->confManager->isVisibleField('cognome', ConfigurationManager::VIEW_TYPE_VIEW)) {
+                    $nomeCognome .= ' ' . $model->cognome;
+                }
+            }
+        }
+
+        $viewUrl = $this->getCreatorLink();
+        $url = $model->getAvatarUrl(
+            'original', [
+                'class' => 'img-responsive'
+            ]
+        );
+
+        $roundImage = Yii::$app->imageUtility->getRoundImage($model);
+        $logoOptions = [
+            'class' => $roundImage['class'],
+            'style' => "margin-left: " . $roundImage['margin-left'] . "%; margin-top: " . $roundImage['margin-top'] . "%;",
+        ];
+        $logoLinkOptions = [];
+        $options = [];
+        if (strlen($nomeCognome)) {
+            $logoOptions['alt'] = $nomeCognome;
+            $logoLinkOptions['title'] = $nomeCognome;
+            $options['title'] = $nomeCognome;
+        }
+        $logo = Html::img($url, $logoOptions);
+        Yii::$app->imageUtility->methodGetImageUrl = 'getAvatarUrl';
+        $tooltip = '<div class="icon-view"><div class="card-container col-xs-12 nop">' .
+            ContextMenuWidget::widget([
+                'model' => $model,
+                'actionModify' => "/admin/user-profile/update?id=" . $model->id,
+                'disableDelete' => true
+            ])
+            . '<div class="icon-header grow-pict">
                          <div class="container-round-img">' .
-      Html::a($logo, $viewUrl, $logoLinkOptions) . '</div>';
-    
-    if (Yii::$app->user->id != $model->user_id) {
-      $tooltip .= \lispa\amos\admin\widgets\ConnectToUserWidget::widget([
-          'model' => $model,
-          'divClassBtnContainer' => 'under-img',
-          'onlyButton' => true
-      ]);
-    }
-    
-    $tooltip .= '</div><div class="icon-body">';
-    $newsWidget = \lispa\amos\notificationmanager\forms\NewsWidget::widget([
-      'model' => $model,
-    ]);
-    
-    $tooltip .= $newsWidget . '<h3>' . Html::a($nomeCognome, $viewUrl, $options) . '</h3>';
+            ($this->creatorLinkEnabled() ? Html::a($logo, $viewUrl, $logoLinkOptions) : $logo) .
+            '</div>';
 
-    if ($model->validato_almeno_una_volta) {
-      $icons = '';
-      $color = "grey";
-      $title = AmosAdmin::t('amosadmin', 'Profile Active');
-      if ($model->status == \lispa\amos\admin\models\UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) {
-        $color = "green";
-        $title = AmosAdmin::t('amosadmin', 'Profile Validated');
-      }
-      //TODO replace check-all with cockade
-      $statusIcon = AmosIcons::show('check-all', [
-          'class' => 'am-2 ',
-          'style' => 'color: ' . $color,
-          'title' => $title
-      ]);
-      $icons .= $statusIcon;
-      $facilitatorUserIds = Yii::$app->getAuthManager()->getUserIdsByRole("FACILITATOR");
-      if (in_array($model->user_id, $facilitatorUserIds)) {
-        //TODO replace account with man dressing tie and jacket
-        $facilitatorIcon = AmosIcons::show('account', [
-            'class' => 'am-2',
-            'style' => 'color: green',
-            'title' => AmosAdmin::t('amosadmin', 'Facilitator')
+        if (Yii::$app->user->id != $model->user_id) {
+            $tooltip .= ConnectToUserWidget::widget([
+                'model' => $model,
+                'divClassBtnContainer' => 'under-img',
+                'onlyButton' => true
+            ]);
+        }
+
+        $tooltip .= '</div><div class="icon-body">';
+        $newsWidget = NewsWidget::widget([
+            'model' => $model,
         ]);
-        $icons .= $facilitatorIcon;
-      }
-      $tooltip .= Html::tag('div', $icons);
+
+        $tooltip .= $newsWidget . '<h3>' .
+            ($this->creatorLinkEnabled() ? Html::a($nomeCognome, $viewUrl, $options) : $nomeCognome) .
+            '</h3>';
+
+        if ($model->validato_almeno_una_volta) {
+            $icons = '';
+            $color = "grey";
+            $title = AmosAdmin::t('amosadmin', 'Profile Active');
+            if ($model->status == UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) {
+                $color = "green";
+                $title = AmosAdmin::t('amosadmin', 'Profile Validated');
+            }
+            //TODO replace check-all with cockade
+            $statusIcon = AmosIcons::show('check-all',
+                [
+                    'class' => 'am-2 ',
+                    'style' => 'color: ' . $color,
+                    'title' => $title
+                ]);
+            $icons .= $statusIcon;
+            $facilitatorUserIds = Yii::$app->getAuthManager()->getUserIdsByRole("FACILITATOR");
+            if (in_array($model->user_id, $facilitatorUserIds)) {
+                //TODO replace account with man dressing tie and jacket
+                $facilitatorIcon = AmosIcons::show('account',
+                    [
+                        'class' => 'am-2',
+                        'style' => 'color: green',
+                        'title' => AmosAdmin::t('amosadmin', 'Facilitator')
+                    ]);
+                $icons .= $facilitatorIcon;
+            }
+            $tooltip .= Html::tag('div', $icons);
+        }
+
+        if ((Yii::$app->user->can('ADMIN') || Yii::$app->user->can('AMMINISTRATORE_UTENTI')) && $model->user->email) {
+            $tooltip .= '<p>' .
+                AmosIcons::show('email')
+                . '<span>' . $model->user->email . '</span>' .
+                '</p>';
+        }
+
+        if (
+            ($this->adminModule->confManager->isVisibleBox('box_prevalent_partnership',
+                ConfigurationManager::VIEW_TYPE_VIEW)) &&
+            ($this->adminModule->confManager->isVisibleField('prevalent_partnership_id',
+                ConfigurationManager::VIEW_TYPE_VIEW))
+        ) {
+            $tooltip .= '<p>' . (!is_null($model->prevalentPartnership) ? $model->prevalentPartnership->name : AmosAdmin::t('amosadmin', 'Prevalent partnership not specified')) . '</p>';
+        }
+
+        $tooltip .= '</div></div></div>';
+
+        return $tooltip;
     }
-    
-    if ((Yii::$app->user->can('ADMIN') || Yii::$app->user->can('AMMINISTRATORE_UTENTI')) && $model->user->email) {
-      $tooltip .= '<p>' .
-        AmosIcons::show('email')
-        . '<span>' . $model->user->email . '</span>' .
-        '</p>';
+
+    /**
+     * @return array|null
+     */
+    public function getConfirm()
+    {
+        $controller = Yii::$app->controller;
+        $action = $controller->action->id;
+        $isActionUpdate = ($action != 'view') && ($action == 'update' || $action == 'associa-m2m');
+        $confirm = $isActionUpdate ? [
+            'confirm' => BaseAmosModule::t('amoscore', '#confirm_exit_without_saving')
+        ] : null;
+
+        return $confirm;
     }
 
-    if (
-      ($this->adminModule->confManager->isVisibleBox('box_prevalent_partnership', ConfigurationManager::VIEW_TYPE_VIEW)) &&
-      ($this->adminModule->confManager->isVisibleField('prevalent_partnership_id', ConfigurationManager::VIEW_TYPE_VIEW))
-    ) {
-      $tooltip .= '<p>' . (!is_null($model->prevalentPartnership) ? $model->prevalentPartnership->name : AmosAdmin::t('amosadmin', 'Prevalent partnership not specified')) . '</p>';
+    /**
+     * @return bool
+     */
+    public function creatorLinkEnabled()
+    {
+        if (!$this->enableLink || (isset(\Yii::$app->params['disableLinkContentCreator']) && (\Yii::$app->params['disableLinkContentCreator'] === true))) {
+            return false;
+        }
+        if (\Yii::$app instanceof Application) {
+            return (!$this->checkReadPermissionForUserLink || (\Yii::$app instanceof \yii\console\Application) || \Yii::$app->user->can('USERPROFILE_READ', $this->model));
+        } else return true;
     }
 
-    $tooltip .= '</div></div></div>';
-
-    return $tooltip;
-  }
-
-  /**
-   * @return array|null
-   */
-  public function getConfirm() {
-    $controller = Yii::$app->controller;
-    $action = $controller->action->id;
-    $isActionUpdate = ($action != 'view') && ($action == 'update' || $action == 'associa-m2m');
-    $confirm = $isActionUpdate ? [
-      'confirm' => \lispa\amos\core\module\BaseAmosModule::t('amoscore', '#confirm_exit_without_saving')
-      ] : null;
-
-    return $confirm;
-  }
-
+    /**
+     * @return string
+     */
+    public function getCreatorLink()
+    {
+        return ($this->creatorLinkEnabled() ? $this->model->getFullViewUrl() : null);
+    }
 }

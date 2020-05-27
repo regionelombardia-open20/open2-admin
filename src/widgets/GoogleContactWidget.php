@@ -1,23 +1,23 @@
 <?php
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\widgets
+ * @package    open20\amos\admin\widgets
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\widgets;
+namespace open20\amos\admin\widgets;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\core\icons\AmosIcons;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\core\icons\AmosIcons;
 use yii\base\Widget;
 
 /**
  * Class GoogleContactWidget
- * @package lispa\amos\admin\widgets
+ * @package open20\amos\admin\widgets
  */
 class GoogleContactWidget extends Widget
 {

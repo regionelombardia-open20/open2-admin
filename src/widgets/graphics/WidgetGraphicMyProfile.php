@@ -1,27 +1,27 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\widgets\graphics
+ * @package    open20\amos\admin\widgets\graphics
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\widgets\graphics;
+namespace open20\amos\admin\widgets\graphics;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\assets\ModuleAdminAsset;
-use lispa\amos\admin\base\ConfigurationManager;
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\widget\WidgetGraphic;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\assets\ModuleAdminAsset;
+use open20\amos\admin\base\ConfigurationManager;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\widget\WidgetGraphic;
 use Yii;
 
 /**
  * Class WidgetGraphicMyProfile
- * @package lispa\amos\admin\widgets\graphics
+ * @package open20\amos\admin\widgets\graphics
  */
 class WidgetGraphicMyProfile extends WidgetGraphic
 {
@@ -66,7 +66,7 @@ class WidgetGraphicMyProfile extends WidgetGraphic
     {
         ModuleAdminAsset::register($this->getView());
 
-        $viewPath = '@vendor/lispa/amos-admin/src/widgets/graphics/views/';
+        $viewPath = '@vendor/open20/amos-admin/src/widgets/graphics/views/';
         $viewToRender = $viewPath . 'my_profile';
         if (is_null(\Yii::$app->getModule('layout'))) {
             $viewToRender .= '_old';

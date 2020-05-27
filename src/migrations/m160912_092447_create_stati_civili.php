@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\migrations
+ * @package    open20\amos\admin\migrations
  * @category   CategoryName
  */
 
-use lispa\amos\admin\models\UserProfileStatiCivili;
+use open20\amos\admin\models\UserProfileStatiCivili;
 use yii\db\Migration;
 
 class m160912_092447_create_stati_civili extends Migration

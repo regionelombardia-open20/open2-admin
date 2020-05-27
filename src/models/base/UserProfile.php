@@ -1,20 +1,20 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\models\base
+ * @package    open20\amos\admin\models\base
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\models\base;
+namespace open20\amos\admin\models\base;
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\interfaces\OrganizationsModuleInterface;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\notificationmanager\record\NotifyAuditRecord;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\interfaces\OrganizationsModuleInterface;
+use open20\amos\core\helpers\Html;
+use open20\amos\notificationmanager\record\NotifyAuditRecord;
 use Yii;
 use yii\helpers\ArrayHelper;
 
@@ -93,21 +93,21 @@ use yii\helpers\ArrayHelper;
  * @property integer $updated_by
  * @property integer $deleted_by
  *
- * @property \lispa\amos\comuni\models\IstatComuni $comuneResidenza
- * @property \lispa\amos\comuni\models\IstatProvince $provinciaResidenza
- * @property \lispa\amos\comuni\models\IstatComuni $domicilioComune
- * @property \lispa\amos\comuni\models\IstatComuni $nascitaComuni
- * @property \lispa\amos\comuni\models\IstatProvince $domicilioProvincia
- * @property \lispa\amos\comuni\models\IstatProvince $nascitaProvince
- * @property \lispa\amos\comuni\models\IstatNazioni $nascitaNazioni
- * @property \lispa\amos\admin\models\UserProfile $facilitatore
- * @property \lispa\amos\admin\models\UserProfileArea $userProfileArea
- * @property \lispa\amos\admin\models\UserProfileRole $userProfileRole
- * @property \lispa\amos\admin\models\UserProfileAgeGroup $userProfileAgeGroup
- * @property \lispa\amos\organizzazioni\models\Profilo|\openinnovation\organizations\models\Organizations|\lispa\amos\admin\interfaces\OrganizationsModuleInterface $prevalentPartnership
- * @property \lispa\amos\core\user\User $user
+ * @property \open20\amos\comuni\models\IstatComuni $comuneResidenza
+ * @property \open20\amos\comuni\models\IstatProvince $provinciaResidenza
+ * @property \open20\amos\comuni\models\IstatComuni $domicilioComune
+ * @property \open20\amos\comuni\models\IstatComuni $nascitaComuni
+ * @property \open20\amos\comuni\models\IstatProvince $domicilioProvincia
+ * @property \open20\amos\comuni\models\IstatProvince $nascitaProvince
+ * @property \open20\amos\comuni\models\IstatNazioni $nascitaNazioni
+ * @property \open20\amos\admin\models\UserProfile $facilitatore
+ * @property \open20\amos\admin\models\UserProfileArea $userProfileArea
+ * @property \open20\amos\admin\models\UserProfileRole $userProfileRole
+ * @property \open20\amos\admin\models\UserProfileAgeGroup $userProfileAgeGroup
+ * @property \open20\amos\organizzazioni\models\Profilo|\openinnovation\organizations\models\Organizations|\open20\amos\admin\interfaces\OrganizationsModuleInterface $prevalentPartnership
+ * @property \open20\amos\core\user\User $user
  *
- * @property \lispa\amos\socialauth\models\SocialAuthUsers[] $socialAuthUsers
+ * @property \open20\amos\socialauth\models\SocialAuthUsers[] $socialAuthUsers
  */
 class UserProfile extends NotifyAuditRecord
 {
@@ -154,6 +154,11 @@ class UserProfile extends NotifyAuditRecord
     const SCENARIO_CREATE_NEW_ACCOUNT = 'scenario_create_new_account';
 
     /**
+     * @var AmosAdmin $adminModule
+     */
+    protected $adminModule;
+
+    /**
      * @inheritdoc
      */
     public static function tableName()
@@ -161,13 +166,18 @@ class UserProfile extends NotifyAuditRecord
         return 'user_profile';
     }
 
+    public function init()
+    {
+        parent::init();
+
+        $this->adminModule = AmosAdmin::instance();
+    }
+
     /**
      * @inheritdoc
      */
     public function rules()
     {
-        /** @var AmosAdmin $module */
-        $module = Yii::$app->getModule(AmosAdmin::getModuleName());
         /**
          * @var array $requiredArray
          * default required fields are :
@@ -177,15 +187,15 @@ class UserProfile extends NotifyAuditRecord
          * 
          * In this way everything extends AmosAdmin continue to work fine
          */
-        $requiredArray = $module::getInstance()->profileRequiredFields;
-        
+        $requiredArray = $this->adminModule->profileRequiredFields;
+
         /**
-         * Administrator user may have the need to change userProfiles even 
+         * Administrator user may have the need to change userProfiles even
          * if some required fields have not been set yet, if he changes his own profile, the field are required
          */
         if (
             (Yii::$app instanceof \yii\console\Application) ||
-            ((\Yii::$app->user->can('ADMIN') || Yii::$app->user->can('AMMINISTRATORE_UTENTI')) && $this->id !== 1)
+            ((\Yii::$app->user->can('ADMIN') || Yii::$app->user->can('AMMINISTRATORE_UTENTI')) && ($this->id !== 1) && ($this->adminModule->bypassRequiredForAdmin === true))
         ) {
             $requiredArray = ['nome', 'cognome'];
         }
@@ -278,14 +288,14 @@ class UserProfile extends NotifyAuditRecord
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => AmosAdmin::instance()->createModel('User')->className(), 'targetAttribute' => ['user_id' => 'id']],
             [['user_profile_stati_civili_id'], 'exist', 'skipOnError' => true, 'targetClass' => AmosAdmin::instance()->createModel('UserProfileStatiCivili')->className(), 'targetAttribute' => ['user_profile_stati_civili_id' => 'id']],
             [['user_profile_role_other'], 'required', 'when' => function ($model) {
-                return ($this->user_profile_role_id == \lispa\amos\admin\models\UserProfileRole::OTHER);
+                return ($this->user_profile_role_id == \open20\amos\admin\models\UserProfileRole::OTHER);
             }, 'whenClient' => "function (attribute, value) {
-                return ($('#" . Html::getInputId($this, 'user_profile_role_id') . "').val() == " . \lispa\amos\admin\models\UserProfileRole::OTHER . ");
+                return ($('#" . Html::getInputId($this, 'user_profile_role_id') . "').val() == " . \open20\amos\admin\models\UserProfileRole::OTHER . ");
             }"],
             [['user_profile_area_other'], 'required', 'when' => function ($model) {
-                return ($this->user_profile_area_id == \lispa\amos\admin\models\UserProfileArea::OTHER);
+                return ($this->user_profile_area_id == \open20\amos\admin\models\UserProfileArea::OTHER);
             }, 'whenClient' => "function (attribute, value) {
-                return ($('#" . Html::getInputId($this, 'user_profile_area_id') . "').val() == " . \lispa\amos\admin\models\UserProfileArea::OTHER . ");
+                return ($('#" . Html::getInputId($this, 'user_profile_area_id') . "').val() == " . \open20\amos\admin\models\UserProfileArea::OTHER . ");
             }"],
             [['facilitatore_id'], 'required', 'when' => function ($model) {
                 return ($this->status != self::USERPROFILE_WORKFLOW_STATUS_DRAFT && !AmosAdmin::instance()->bypassWorkflow);
@@ -293,7 +303,7 @@ class UserProfile extends NotifyAuditRecord
             [['privacy'], 'checkPrivacy']
         ];
 
-        if (!$module->enableMultiUsersSameCF) {
+        if (!$this->adminModule->enableMultiUsersSameCF) {
             $rules[] = ['codice_fiscale', 'unique', 'filter' => ['deleted_at' => null]];
         }
 
@@ -315,12 +325,9 @@ class UserProfile extends NotifyAuditRecord
      */
     public function scenarios()
     {
-        /** @var AmosAdmin $adminModule */
-        $adminModule = \Yii::$app->getModule(AmosAdmin::getModuleName());
-
         $scenarios = parent::scenarios();
 
-        $dynamicScenarioFields = $adminModule->confManager->getFormFields();
+        $dynamicScenarioFields = $this->adminModule->confManager->getFormFields();
 
         $scenarios[self::SCENARIO_INTRODUCTION] = $this->createScenarioArray([
         ], $dynamicScenarioFields);
@@ -502,7 +509,7 @@ class UserProfile extends NotifyAuditRecord
      */
     public function getTags()
     {
-        return $this->hasMany(\lispa\amos\tag\models\Tag::className(), ['id' => 'tag_id'])->viaTable('user_profile_tag_mm', ['user_profile_id' => 'id']);
+        return $this->hasMany(\open20\amos\tag\models\Tag::className(), ['id' => 'tag_id'])->viaTable('user_profile_tag_mm', ['user_profile_id' => 'id']);
     }
 
     /**
@@ -590,7 +597,7 @@ class UserProfile extends NotifyAuditRecord
      */
     public function getUserProfileArea()
     {
-        return $this->hasOne(\lispa\amos\admin\models\UserProfileArea::className(), ['id' => 'user_profile_area_id']);
+        return $this->hasOne(\open20\amos\admin\models\UserProfileArea::className(), ['id' => 'user_profile_area_id']);
     }
 
     /**
@@ -598,7 +605,7 @@ class UserProfile extends NotifyAuditRecord
      */
     public function getUserProfileRole()
     {
-        return $this->hasOne(\lispa\amos\admin\models\UserProfileRole::className(), ['id' => 'user_profile_role_id']);
+        return $this->hasOne(\open20\amos\admin\models\UserProfileRole::className(), ['id' => 'user_profile_role_id']);
     }
 
     /**
@@ -606,7 +613,7 @@ class UserProfile extends NotifyAuditRecord
      */
     public function getUserProfileAgeGroup()
     {
-        return $this->hasOne(\lispa\amos\admin\models\UserProfileAgeGroup::className(), ['id' => 'user_profile_age_group_id']);
+        return $this->hasOne(\open20\amos\admin\models\UserProfileAgeGroup::className(), ['id' => 'user_profile_age_group_id']);
     }
 
     /**
@@ -614,7 +621,7 @@ class UserProfile extends NotifyAuditRecord
      */
     public function getUserProfileReactivationRequest()
     {
-        return $this->hasOne(\lispa\amos\admin\models\UserProfileReactivationRequest::className(), ['user_profile_id' => 'id']);
+        return $this->hasOne(\open20\amos\admin\models\UserProfileReactivationRequest::className(), ['user_profile_id' => 'id']);
     }
 
 
@@ -623,11 +630,8 @@ class UserProfile extends NotifyAuditRecord
      */
     public function getPrevalentPartnership()
     {
-        //  $admin = AmosAdmin::getInstance();
-        $admin = Yii::$app->getModule(AmosAdmin::getModuleName());
-        
         /** @var OrganizationsModuleInterface $organizationsModule */
-        $organizationsModule = \Yii::$app->getModule($admin->getOrganizationModuleName());
+        $organizationsModule = \Yii::$app->getModule($this->adminModule->getOrganizationModuleName());
         if (!is_null($organizationsModule)) {
             return $this->hasOne($organizationsModule->getOrganizationModelClass(), ['id' => 'prevalent_partnership_id']);
         } else {
@@ -662,7 +666,7 @@ class UserProfile extends NotifyAuditRecord
         $socialUserQuery = null;
         $socialAuth = Yii::$app->getModule('socialauth');
         if (!is_null($socialAuth)) {
-            $socialUserQuery = $this->hasMany(\lispa\amos\socialauth\models\SocialAuthUsers::className(), ['user_id' => 'user_id']);
+            $socialUserQuery = $this->hasMany(\open20\amos\socialauth\models\SocialAuthUsers::className(), ['user_id' => 'user_id']);
         }
         return $socialUserQuery;
     }

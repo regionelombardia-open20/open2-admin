@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\models
+ * @package    open20\amos\admin\models
  * @category   CategoryName
  */
 
-namespace lispa\amos\admin\models;
+namespace open20\amos\admin\models;
 
 //use backend\modules\cwh\behaviors\CwhNetworkBehaviors;
 //use backend\modules\eventi\models\query\EventiQuery;
@@ -18,7 +18,7 @@ namespace lispa\amos\admin\models;
 /**
  * This is the model class for table "user_profile_stati_civili".
  */
-class UserProfileStatiCivili extends \lispa\amos\admin\models\base\UserProfileStatiCivili
+class UserProfileStatiCivili extends \open20\amos\admin\models\base\UserProfileStatiCivili
 {
     //public $regola_pubblicazione;
     //public $destinatari;

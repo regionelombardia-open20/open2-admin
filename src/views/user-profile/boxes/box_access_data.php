@@ -1,25 +1,26 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\user-profile\boxes
+ * @package    open20\amos\admin\views\user-profile\boxes
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\base\ConfigurationManager;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\icons\AmosIcons;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\base\ConfigurationManager;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\icons\AmosIcons;
+use yii\helpers\FileHelper;
 use yii\web\View;
 
 /**
  * @var yii\web\View $this
- * @var lispa\amos\core\forms\ActiveForm $form
- * @var lispa\amos\admin\models\UserProfile $model
- * @var lispa\amos\core\user\User $user
+ * @var open20\amos\core\forms\ActiveForm $form
+ * @var open20\amos\admin\models\UserProfile $model
+ * @var open20\amos\core\user\User $user
  * @var bool $spediscicredenzialienable
  */
 
@@ -41,6 +42,15 @@ $('#reactivate-account-btn').on('click', function(event) {
         window.location.href = $(this).attr('href');
     }
 });
+
+$('#drop-account-btn').on('click', function(event) {
+    event.preventDefault();
+    var ok = confirm('" . AmosAdmin::t('amosadmin', '#delete_user_data') . "');
+    if (ok) {
+        window.location.href = $(this).attr('href');
+    }
+});
+
 ";
 $this->registerJs($js, View::POS_READY);
 
@@ -93,17 +103,10 @@ $this->registerJs($js, View::POS_READY);
         <?php if (!$model->isNewRecord && isset($user['email']) && strlen(trim($user['email']))): ?>
             <?php if (Yii::$app->getUser()->can("GESTIONE_UTENTI")): ?>
                 <?php if ($spediscicredenzialienable): ?>
-                    <?= Html::a(
-                        AmosIcons::show('email') . AmosAdmin::t('amosadmin', 'Spedisci credenziali'),
-                        [
-                            '/admin/security/spedisci-credenziali',
-                            'id' => $model->id
-                        ],
-                        [
-                            'class' => 'btn btn-navigation-primary btn-spedisci-credenziali ',
-                            'title' => AmosAdmin::t('amosadmin', 'Permette l\'invio di una mail contenente un link temporale per modificare le proprie credenziali di accesso.'),
-                            'data-confirm' => AmosAdmin::t('amosadmin', 'Sei sicuro di voler inviare le credenziali? Sarà inviata una mail contenente un link per modificare le credenziali. Vuoi continuare?')
-                        ]); ?>
+                    <?php echo $this->renderPhpFile(
+                        FileHelper::localize(
+                            $this->context->getViewPath() . DIRECTORY_SEPARATOR . 'help' . DIRECTORY_SEPARATOR . 'send-recovery-password.php'
+                        ), ['model' => $model]); ?>
                 <?php else: ?>
                     <div id="info-spedisci" class="btn btn-action-primary disabled" data-toggle="tooltip" data-placement="left"
                          title="<?= AmosAdmin::t('amosadmin', 'Per spedire le credenziali occorre impostare il Ruolo nella sezione AMMINISTRAZIONE'); ?>">
@@ -114,10 +117,10 @@ $this->registerJs($js, View::POS_READY);
                 <?php endif; ?>
             <?php endif; ?>
             <?php
-            /** @var \lispa\amos\core\user\User $identity */
+            /** @var \open20\amos\core\user\User $identity */
             $identity = Yii::$app->user->identity
             ?>
-            <?php if ($user['id'] == $identity->id): ?>
+            <?php if (Yii::$app->user->can('CHANGE_USER_PASSWORD') && ($user['id'] == $identity->id)): ?>
                 <?= Html::a(AmosIcons::show('unlock') . AmosAdmin::t('amosadmin', 'Cambia password'), ['/admin/user-profile/cambia-password', 'id' => $model->id], [
                     'class' => 'btn  btn-action-primary btn-cambia-password'
                 ]); ?>
@@ -144,7 +147,7 @@ $this->registerJs($js, View::POS_READY);
             'id' => 'drop-account-btn',
             'class' => 'btn btn-danger',
             'title' => AmosAdmin::t('amosadmin', '#delete_user'),
-            'data-confirm' => AmosAdmin::t('amosadmin', '#delete_user_data')
+            //'data-confirm' => AmosAdmin::t('amosadmin', '#delete_user_data')
         ]) ?>
         <?= Html::beginTag('p') ?>
         <?= Html::tag('span', AmosAdmin::t('amosadmin', '#change_irreversible')) ?>

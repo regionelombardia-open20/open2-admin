@@ -1,29 +1,29 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\user-profile
+ * @package    open20\amos\admin\views\user-profile
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\admin\base\ConfigurationManager;
-use lispa\amos\admin\widgets\ConnectToUserWidget;
-use lispa\amos\admin\widgets\SendMessageToUserWidget;
-use lispa\amos\core\forms\ContextMenuWidget;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\icons\AmosIcons;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\base\ConfigurationManager;
+use open20\amos\admin\widgets\ConnectToUserWidget;
+use open20\amos\admin\widgets\SendMessageToUserWidget;
+use open20\amos\core\forms\ContextMenuWidget;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\icons\AmosIcons;
 
 /**
  * @var yii\web\View $this
- * @var \lispa\amos\admin\models\UserProfile $model
+ * @var \open20\amos\admin\models\UserProfile $model
  */
 
 $userId = $model->user_id;
-/** @var \lispa\amos\admin\controllers\UserProfileController $appController */
+/** @var \open20\amos\admin\controllers\UserProfileController $appController */
 $appController = Yii::$app->controller;
 $appController->setCwhScopeNetworkInfo($userId);
 
@@ -63,7 +63,7 @@ if (!is_null($model->prevalentPartnership)) {
         ): ?>
             <div class="container-round-img">
                 <?php
-                $url = $model->getAvatarUrl('square_small');
+                $url = $model->getAvatarUrl('card_users');
                 Yii::$app->imageUtility->methodGetImageUrl = 'getAvatarUrl';
                 $logoOptions = [
                     'class' => Yii::$app->imageUtility->getRoundImage($model)['class'],
@@ -82,14 +82,14 @@ if (!is_null($model->prevalentPartnership)) {
         <?php endif; ?>
     </div>
     <div class="col-xs-12 nop icon-body">
-        <?= \lispa\amos\notificationmanager\forms\NewsWidget::widget([
+        <?= \open20\amos\notificationmanager\forms\NewsWidget::widget([
             'model' => $model,
             'css_class' => 'badge badge-left'
         ]); ?>
         <h3 class="title">
             <?= Html::a($model->getNomeCognome(), $viewUrl, ['title' => AmosAdmin::t('amosadmin', '#icon_name_title_link') . ' ' . $model->getNomeCognome(), 'data-gui' => 'icon-view-profiles']); ?>
         </h3>
-        <?php 
+        <?php
         if (
             ($adminModule->confManager->isVisibleBox('box_prevalent_partnership', ConfigurationManager::VIEW_TYPE_VIEW)) &&
             ($adminModule->confManager->isVisibleField('prevalent_partnership_id', ConfigurationManager::VIEW_TYPE_VIEW))
@@ -114,11 +114,11 @@ if (!is_null($model->prevalentPartnership)) {
         <?php
         // draws google Icon if the userprofile is google contact of logged user
         $googleContactIcon = '';
-        $googleContactIcon = \lispa\amos\admin\widgets\GoogleContactWidget::widget(['model' => $model]);
+        $googleContactIcon = \open20\amos\admin\widgets\GoogleContactWidget::widget(['model' => $model]);
         $googleContactTooltip = (!empty($googleContactIcon)) ? AmosAdmin::t('amosadmin', '#google_contact_tooltip') : '';
 
         $isValidated = '';
-        if ($model->status == \lispa\amos\admin\models\UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) {
+        if ($model->status == \open20\amos\admin\models\UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) {
             $isValidated = AmosAdmin::t('amosadmin', 'Profile Validated');
         }
         $isFacilitator = '';
@@ -136,25 +136,35 @@ if (!is_null($model->prevalentPartnership)) {
         $content .= Html::tag('p', $isFacilitator);
         $content .= Html::tag('p', $googleContactTooltip);
 
-        if (!empty($isValidated) || !empty($isFacilitator)) {
-            echo Html::tag('div', AmosIcons::show('info-circle', [], 'dash'), [
-                'class' => 'amos-tooltip pull-left',
-                'data-toggle' => 'tooltip',
-                'data-html' => 'true',
-                'title' => $content
-            ]);
-        }
+//        if (!empty($isValidated) || !empty($isFacilitator)) {
+//            echo Html::tag('div', AmosIcons::show('info-circle', [], 'dash'), [
+//                'class' => 'amos-tooltip pull-left',
+//                'data-toggle' => 'tooltip',
+//                'data-html' => 'true',
+//                'title' => $content
+//            ]);
+//        }
 
         ?>
         <?= $googleContactIcon; ?>
-
         <?php if (Yii::$app->user->id != $model->user_id): ?>
-            <?php if ($adminModule->enableUserContacts && !$adminModule->enableSendMessage): ?>
-                <?= ConnectToUserWidget::widget(['model' => $model, 'divClassBtnContainer' => 'pull-right']) ?>
-            <?php endif; ?>
-            <?php if (!$adminModule->enableUserContacts && $adminModule->enableSendMessage): ?>
-                <?= SendMessageToUserWidget::widget(['model' => $model, 'divClassBtnContainer' => 'pull-right']) ?>
-            <?php endif; ?>
+            <div class="col-xs-12 icon-btn-action">
+                <?php if ($adminModule->enableUserContacts && !$adminModule->enableSendMessage): ?>
+                    <?= ConnectToUserWidget::widget(['model' => $model, 'divClassBtnContainer' => '']) ?>
+                <?php endif; ?>
+                <?php if (!$adminModule->enableUserContacts && $adminModule->enableSendMessage): ?>
+                    <?= SendMessageToUserWidget::widget(['model' => $model, 'divClassBtnContainer' => '']) ?>
+                <?php endif; ?>
+                <?php if ($adminModule->enableInviteUserToEvent): ?>
+                    <?php
+                    /** @var \open20\amos\events\AmosEvents $eventsModule */
+                    $eventsModule = Yii::$app->getModule('events');
+                    ?>
+                    <?php if (!is_null($eventsModule) && $eventsModule->hasMethod('getInviteUserToEventWidget')): ?>
+                        <?= $eventsModule->getInviteUserToEventWidget($model) ?>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </div>
         <?php endif; ?>
     </div>
 </div>

@@ -1,18 +1,18 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\admin\views\security
+ * @package    open20\amos\admin\views\security
  * @category   CategoryName
  */
 
-use lispa\amos\admin\AmosAdmin;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\admin\assets\ModuleAdminAsset;
-use lispa\amos\core\forms\ActiveForm;
+use open20\amos\admin\AmosAdmin;
+use open20\amos\core\helpers\Html;
+use open20\amos\admin\assets\ModuleAdminAsset;
+use open20\amos\core\forms\ActiveForm;
 use yii\helpers\ArrayHelper;
 
 ModuleAdminAsset::register(Yii::$app->view);
@@ -20,7 +20,7 @@ ModuleAdminAsset::register(Yii::$app->view);
 /**
  * @var yii\web\View $this
  * @var yii\bootstrap\ActiveForm $form
- * @var \lispa\amos\admin\models\RegisterForm $model
+ * @var \open20\amos\admin\models\RegisterForm $model
  */
 $text = AmosAdmin::t('amosadmin', "#register_privacy_alert_not_accepted");
 
@@ -59,12 +59,13 @@ $this->title = AmosAdmin::t('amosadmin', 'Login');
 $this->params['breadcrumbs'][] = $this->title;
 
 /**
- * @var $socialAuthModule \lispa\amos\socialauth\Module
+ * @var $socialAuthModule \open20\amos\socialauth\Module
  */
 $socialAuthModule = Yii::$app->getModule('socialauth');
 
 $socialMatch = Yii::$app->session->get('social-pending');
 $socialProfile = Yii::$app->session->get('social-profile');
+$communityId = Yii::$app->request->get('community');
 ?>
 
 <div id="bk-formDefaultLogin" class="bk-loginContainer loginContainer">
@@ -118,13 +119,17 @@ $socialProfile = Yii::$app->session->get('social-profile');
                 </div>
 
                 <?php
-
-
-                $communityId = \Yii::$app->request->get('community');
                 if($communityId) { ?>
                     <?= Html::hiddenInput('community', $communityId)?>
-                <?php } ?>
+                <?php } 
+                ?>
 
+                <?php
+                if ($iuid) { ?>
+                    <?= Html::hiddenInput('iuid', $iuid)?>
+                <?php } 
+                ?>
+                
                 <div class="col-xs-12">
                     <?= Html::submitButton(AmosAdmin::t('amosadmin', '#register_now'), ['class' => 'btn btn-primary btn-administration-primary pull-right', 'name' => 'login-button', 'title' => AmosAdmin::t('amosadmin', '#register_now')]) ?>
                     <?php ActiveForm::end(); ?>
