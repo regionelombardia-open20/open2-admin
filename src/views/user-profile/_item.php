@@ -50,12 +50,17 @@ $isVisibleEmail = (($adminModule->confManager->isVisibleBox('box_informazioni_ba
 
 $confirmText = AmosAdmin::t('amosadmin', 'You have selected') . " " . $model->getNomeCognome() . " " . AmosAdmin::t('amosadmin', 'as your facilitator. To confirm click on the CONFIRM button. At the confirm the facilitator will be bound to the user profile.');
 
-$isAssociateFacilitator = (Yii::$app->controller->action->id == 'associate-facilitator');
+$isAssociateFacilitator = (Yii::$app->controller->action->id == 'associate-facilitator') || (Yii::$app->controller->action->id == 'send-request-external-facilitator');
+$urlConfirmBtn = Yii::$app->controller->action->id == 'send-request-external-facilitator'
+    ?  '/admin/user-profile/send-request-external-facilitator?idToAssign='.$model->id .'&id='.\Yii::$app->request->get('id')
+    : null;
+
 if ($isAssociateFacilitator) {
     ModalUtility::createConfirmModal([
         'id' => 'confirmPopup' . $model->id,
         'modalDescriptionText' => $confirmText,
-        'confirmBtnOptions' => ['class' => 'btn btn-primary confirmBtn', 'data' => ['model_id' => $model->id]],
+        'confirmBtnOptions' => ['id' => 'confirm-associate-facilitator', 'class' => 'btn btn-primary confirmBtn', 'data' => ['model_id' => $model->id]],
+        'confirmBtnLink' => $urlConfirmBtn
     ]);
 }
 

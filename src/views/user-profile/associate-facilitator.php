@@ -29,10 +29,20 @@ $userProfileTable = $userProfileModel::tableName();
 
 // All facilitators without the user profile in modify.
 $toSkipFacilitatorIds = [$model->user_id];
-if (!is_null($model->facilitatore)) {
-    $toSkipFacilitatorIds[] = $model->facilitatore->user_id;
+
+if(\Yii::$app->request->get('external')){
+    if (!is_null($model->externalFacilitator)) {
+        $toSkipFacilitatorIds[] = $model->externalFacilitator->user_id;
+    }
+    $facilitatorUserIds = array_diff(UserProfileUtility::getAllExternalFacilitatorUserIds(), $toSkipFacilitatorIds);
 }
-$facilitatorUserIds = array_diff(UserProfileUtility::getAllFacilitatorUserIds(), $toSkipFacilitatorIds);
+else{
+    if (!is_null($model->facilitatore)) {
+        $toSkipFacilitatorIds[] = $model->facilitatore->user_id;
+    }
+    $facilitatorUserIds = array_diff(UserProfileUtility::getAllFacilitatorUserIds(), $toSkipFacilitatorIds);
+}
+
 /** @var ActiveQuery $query */
 $query = $userProfileModel::find();
 $query

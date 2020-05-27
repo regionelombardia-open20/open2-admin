@@ -26,6 +26,7 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\web\View;
 
+
 AmosAsset::register($this);
 ModuleUserProfileAsset::register($this);
 
@@ -154,16 +155,17 @@ if ($model->id) {
     $workflowInitialStatusId = $model->getWorkflowSource()->getWorkflow(UserProfile::USERPROFILE_WORKFLOW)->getInitialStatusId();
     $validatorUserIds = $model->getValidatorUsersId();
     if (
-            !$adminModule->disableUpdateChangeStatus &&
-            (!Yii::$app->user->can('ADMIN') && !Yii::$app->user->can('AMMINISTRATORE_UTENTI')) &&
-            !in_array(Yii::$app->user->id, $validatorUserIds) &&
-            ($model->status == UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) &&
-            ($model->status != $workflowInitialStatusId)
+        !$adminModule->disableUpdateChangeStatus &&
+        (!Yii::$app->user->can('ADMIN') && !Yii::$app->user->can('AMMINISTRATORE_UTENTI')) &&
+        !in_array(Yii::$app->user->id, $validatorUserIds) &&
+        ($model->status == UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) &&
+        ($model->status != $workflowInitialStatusId)
     ) {
         $this->registerJs($jsIsProfileModified, View::POS_READY);
     }
 }
 $enableUserContacts = $adminModule->enableUserContacts;
+$enableExternalFacilitator = $adminModule->enableExternalFacilitator;
 $userCanChangeWorkflow = Yii::$app->user->can('CHANGE_USERPROFILE_WORKFLOW_STATUS');
 
 ?>
@@ -241,6 +243,9 @@ $form = ActiveForm::begin([
         <div class="col-xs-12">
             <?php if ($adminModule->confManager->isVisibleBox('box_facilitatori', ConfigurationManager::VIEW_TYPE_FORM)): ?>
                 <?= $this->render('boxes/box_facilitatori', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
+                <?php if ($enableExternalFacilitator) { ?>
+                    <?= $this->render('boxes/box_external_facilitator', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
+                <?php } ?>
             <?php endif; ?>
         </div>
     </div>
@@ -371,7 +376,7 @@ $form = ActiveForm::begin([
                                 <?= $form->field($model, 'default_facilitatore')->checkbox()->label(AmosAdmin::t('amosadmin', 'Is default facilitator') . '?') ?>
                             </div>
                         <?php endif; ?>
-                        <?php if (Yii::$app->user->can('ADMIN') && $adminModule->showFacilitatorForModuleSelect ) : ?>
+                        <?php if (Yii::$app->user->can('ADMIN') && $adminModule->showFacilitatorForModuleSelect) : ?>
                             <?= $this->render('boxes/box_facilitator_roles', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
                         <?php endif; ?>
                         <?php if ($adminModule->confManager->isVisibleBox('box_social_account', ConfigurationManager::VIEW_TYPE_FORM)): ?>
@@ -402,7 +407,7 @@ $form = ActiveForm::begin([
                                 'closeButton' => false
                             ]); ?>
                         <?php } else { ?>
-                                <?= $this->render('boxes/box_notifications', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
+                            <?= $this->render('boxes/box_notifications', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
                         <?php } ?>
                     </div>
                     <?php $this->endBlock(); ?>
@@ -415,7 +420,6 @@ $form = ActiveForm::begin([
                     ?>
                 <?php } ?>
             <?php endif; ?>
-
 
 
             <!-- ADMIN -->
@@ -467,7 +471,8 @@ $form = ActiveForm::begin([
         <?php if ($adminModule->confManager->isVisibleBox('box_privacy', ConfigurationManager::VIEW_TYPE_FORM)): ?>
             <!-- ADMIN cannot check the privacy checkbox of other users -->
             <?php if ((\Yii::$app->user->can('ADMIN') || \Yii::$app->user->can('AMMINISTRATORE_UTENTI')) && ($user->id !== \Yii::$app->user->id)): ?>
-                <div class='col-xs-12 form-group'><strong><?= $model->getAttributeLabel('privacy'); ?>: </strong><?= \Yii::$app->formatter->asBoolean($model->privacy); ?></div>
+                <div class='col-xs-12 form-group'><strong><?= $model->getAttributeLabel('privacy'); ?>
+                        : </strong><?= \Yii::$app->formatter->asBoolean($model->privacy); ?></div>
             <?php else: ?>
                 <?= $this->render('boxes/box_privacy', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
             <?php endif; ?>
@@ -529,7 +534,11 @@ $form = ActiveForm::begin([
         <div class="row">
             <?php
 
-            if (Yii::$app->user->can('ADMIN') || Yii::$app->user->can('AMMINISTRATORE_UTENTI') || Yii::$app->user->can(ValidateUserProfileWorkflowRule::className(), ['model' => $model])) {
+            if (Yii::$app->user->can('ADMIN')
+                || Yii::$app->user->can('AMMINISTRATORE_UTENTI')
+                || Yii::$app->user->can(ValidateUserProfileWorkflowRule::className(), ['model' => $model])
+                || $adminModule->disableSendValidationRequestAuto
+            ) {
                 echo \open20\amos\workflow\widgets\WorkflowTransitionButtonsWidget::widget([
                     // parametri ereditati da verioni precedenti del widget WorkflowTransition
                     'form' => $form,
@@ -537,7 +546,7 @@ $form = ActiveForm::begin([
                     'workflowId' => UserProfile::USERPROFILE_WORKFLOW,
                     'viewWidgetOnNewRecord' => true,
 
-                    'closeButton' => Html::a(AmosAdmin::t('amosadmin', 'Annulla'), Yii::$app->session->get('previousUrl'), ['class' => 'btn btn-secondary']),
+                    'closeButton' => Html::a(AmosAdmin::t('amosadmin', 'Annulla'), !empty(Yii::$app->session->get('previousUrl')) ? Yii::$app->session->get('previousUrl') : \Yii::$app->request->referrer, ['class' => 'btn btn-secondary']),
 
                     // fisso lo stato iniziale per generazione pulsanti e comportamenti
                     // "fake" in fase di creazione (il record non e' ancora inserito nel db)
@@ -557,8 +566,7 @@ $form = ActiveForm::begin([
                     'workflowId' => UserProfile::USERPROFILE_WORKFLOW,
                     'viewWidgetOnNewRecord' => true,
 
-                    'closeButton' => Html::a(Yii::t('amosadmin', 'Annulla'), Yii::$app->session->get('previousUrl'), ['class' => 'btn btn-secondary']),
-
+                    'closeButton' => Html::a(AmosAdmin::t('amosadmin', 'Annulla'), !empty(Yii::$app->session->get('previousUrl')) ? Yii::$app->session->get('previousUrl') : \Yii::$app->request->referrer, ['class' => 'btn btn-secondary']),
                     'transitionStatuses' => [
                         UserProfile::USERPROFILE_WORKFLOW_STATUS_DRAFT => UserProfile::USERPROFILE_WORKFLOW_STATUS_TOVALIDATE,
                         UserProfile::USERPROFILE_WORKFLOW_STATUS_NOTVALIDATED => UserProfile::USERPROFILE_WORKFLOW_STATUS_TOVALIDATE,

@@ -18,8 +18,9 @@ use yii\helpers\Html;
  * @var \open20\amos\admin\models\UserProfile $profile
  */
 
-$appLink = Yii::$app->urlManager->createAbsoluteUrl(['/']);
-$appLinkPrivacy = Yii::$app->urlManager->createAbsoluteUrl(['/admin/user-profile/privacy']);
+$appLink = Yii::$app->params['platform'] ['backendUrl'];//Yii::$app->urlManager->createAbsoluteUrl(['/']);
+$appLink = substr($appLink, -1) == '/' ? $appLink : $appLink . '/';
+$appLinkPrivacy = Yii::$app->params['platform'] ['backendUrl'] .'/admin/user-profile/privacy'; //Yii::$app->urlManager->createAbsoluteUrl(['/admin/user-profile/privacy']);
 $appName = Yii::$app->name;
 
 $this->title = AmosAdmin::t('amosadmin', 'Registrazione {appName}', ['appName' => $appName]);
@@ -37,13 +38,13 @@ $this->registerCssFile('http://fonts.googleapis.com/css?family=Roboto');
                     <div class="testo">
                         <p style="margin-bottom: 20px;">
                             <span style="font-weight: bold;">
-                                <?= AmosAdmin::tHtml('amosadmin', '#welcome_email_dear', [
+                                <?= AmosAdmin::t('amosadmin', '#welcome_email_dear', [
                                     'name' => Html::encode($profile->nome),
                                     'surname' => Html::encode($profile->cognome)
                                 ]); ?>
                                 </span>
                             <br />
-                            <?= AmosAdmin::tHtml('amosadmin', "#welcome_email") . Yii::$app->name ?>.
+                            <?= AmosAdmin::t('amosadmin', "#welcome_email") . Yii::$app->name ?>.
                         </p>
                         <p style="margin-bottom: 20px;">
                             <?php
@@ -68,7 +69,7 @@ $this->registerCssFile('http://fonts.googleapis.com/css?family=Roboto');
                             }
                             $passwordResetTokenExpire = $passwordResetTokenExpire . ' ' . $textDay;
                             ?>
-                            <?= AmosAdmin::tHtml('amosadmin', '#welcome_email_expire', [
+                            <?= AmosAdmin::t('amosadmin', '#welcome_email_expire', [
                                 'passwordResetTokenExpire' =>  $passwordResetTokenExpire,
                                 'supportEmail' => Yii::$app->params['supportEmail']
                             ]); ?>
@@ -79,12 +80,12 @@ $this->registerCssFile('http://fonts.googleapis.com/css?family=Roboto');
                             }
                             ?>
                             <?= Html::beginTag('a', ['href' => $link]) ?>
-                            <?= AmosAdmin::tHtml('amosadmin', "#welcome_email_link") ?>
+                            <?= AmosAdmin::t('amosadmin', "#welcome_email_link") ?>
                             <?= Html::endTag('a'); ?>
                         </p>
                         <p style="margin-bottom: 20px;">
-                            <?= AmosAdmin::tHtml('amosadmin', '#welcome_email_error_link') ?>
-                            <?= AmosAdmin::tHtml('amosadmin', $link) ?>
+                            <?= AmosAdmin::t('amosadmin', '#welcome_email_error_link') ?>
+                            <?= AmosAdmin::t('amosadmin', $link) ?>
                         </p>
 
                         <?php
@@ -94,16 +95,16 @@ $this->registerCssFile('http://fonts.googleapis.com/css?family=Roboto');
                         $social = \Yii::$app->getModule('socialauth');
                         if($social && $social->enableRegister == true ): ?>
                             <p style="margin-bottom: 20px;">
-                                <?= AmosAdmin::tHtml('amosadmin', '#welcome_email_social', [
+                                <?= AmosAdmin::t('amosadmin', '#welcome_email_social', [
                                     'platformName' => Yii::$app->name
                                 ]) ?>
                             </p>
                         <?php endif; ?>
                         <p style="margin-bottom: 20px;">
-                            <?= AmosAdmin::tHtml('amosadmin', '#welcome_email_change_data') ?>
+                            <?= AmosAdmin::t('amosadmin', '#welcome_email_change_data') ?>
                         </p>
                         <p style="text-align: right;margin-bottom: 20px">
-                            <?= AmosAdmin::tHtml('amosadmin', '#welcome_email_thanks') ?>
+                            <?= AmosAdmin::t('amosadmin', '#welcome_email_thanks') ?>
                         </p>
                     </div>
                 </div>

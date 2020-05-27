@@ -823,7 +823,8 @@ return [
     '#subject_notification_accepted_request' => 'Invitation to access the platform',
     '#text_notification_accepted_request' => 'has accepted your request to register on the platform.',
     'Cognome e nome' => 'Surname and name',
-    '#facilitator_assigned' => 'i am your facilitator, accept the invitation to be able to immediately use the private messaging system',
+    '#facilitator_assigned' => ' chose you as a facilitator. You can contact him through the dedicated tool you find on your dashboard, in the management panel',
+    '#facilitator_assigned_obj' => '{nomecognome} chose you as a facilitator',
     '#yours_validated_users' => '',
 
 ];

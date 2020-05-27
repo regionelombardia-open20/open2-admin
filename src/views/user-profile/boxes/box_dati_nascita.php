@@ -69,16 +69,16 @@ $adminModule = Yii::$app->controller->module;
         ): ?>
             <div class="col-lg-6 col-sm-6">
                 <div class="select">
+                    <?php $comuni = \open20\amos\comuni\models\IstatComuni::find()->andWhere(['istat_province_id' => $model->nascita_province_id])->all()?>
                     <?= $form->field($model, 'nascita_comuni_id')->widget(DepDrop::classname(), [
                         'type' => DepDrop::TYPE_SELECT2,
-                        'data' => $model->nascitaComuni ? [$model->nascitaComuni->id => $model->nascitaComuni->nome] : [],
+                        'data' => $model->nascita_province_id ? ArrayHelper::map($comuni, 'id', 'nome') : [],
                         'options' => ['id' => 'nascita_comuni_id-id', 'disabled' => false],
                         'select2Options' => ['pluginOptions' => ['allowClear' => true]],
                         'pluginOptions' => [
                             'depends' => [(false) ?: 'nascita_province_id-id'],
                             'placeholder' => ['Seleziona ...'],
                             'url' => Url::to(['/comuni/default/comuni-by-provincia']),
-                            'initialize' => true,
                             'params' => ['nascita_comuni_id-id'],
                         ],
                     ]); ?>

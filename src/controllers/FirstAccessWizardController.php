@@ -76,8 +76,8 @@ class FirstAccessWizardController extends CrudController
 
         $this->setUpLayout('progress_wizard');
         $this->setTitleAndBreadcrumbs(AmosAdmin::t('amosadmin', 'My Profile'));
-        $this->setStartObjClassName(UserProfile::className());
-        $this->setTargetObjClassName(UserProfile::className());
+        $this->setStartObjClassName(AmosAdmin::instance()->model('UserProfile'));
+        $this->setTargetObjClassName(AmosAdmin::instance()->model('UserProfile'));
 
         $this->on(M2MEventsEnum::EVENT_BEFORE_ASSOCIATE_ONE2MANY, [$this, 'beforeAssociateOneToMany']);
         $this->on(M2MEventsEnum::EVENT_BEFORE_RENDER_ASSOCIATE_ONE2MANY, [$this, 'beforeRenderOneToMany']);
@@ -300,6 +300,9 @@ class FirstAccessWizardController extends CrudController
 
         $this->model->setScenario(UserProfile::SCENARIO_INTRODUCING_MYSELF);
         if (Yii::$app->getRequest()->post() && $this->model->load(Yii::$app->getRequest()->post()) && $this->model->save()) {
+            if(!empty(\Yii::$app->request->get('gotoFacilitator'))){
+                return $this->redirect(['/admin/first-access-wizard/associate-facilitator', 'id' => $this->model->id, 'viewM2MWidgetGenericSearch' => true]);
+            }
             return $this->goToNextPart();
         }
 

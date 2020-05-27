@@ -52,13 +52,18 @@ class DefaultFacilitatorOwnContentRule extends Rule
         }
 
         // Search content creator facilitator
-        $contentOwnerFacilitatorObj = UserProfile::findOne(['id' => $contentOwnerObj->facilitatore_id]);
-        if (is_null($contentOwnerFacilitatorObj)) {
+        $contentOwnerFacilitatorObj = UserProfile::find()->andWhere(['OR',
+            ['id' => $contentOwnerObj->facilitatore_id],
+        ])->one();
+        $contentOwnerExternalFacilitatorObj = UserProfile::find()->andWhere(['OR',
+            ['id' => $contentOwnerObj->external_facilitator_id],
+        ])->one();
+        if (is_null($contentOwnerFacilitatorObj) && is_null($contentOwnerExternalFacilitatorObj)) {
             return false;
         }
 
         // Check if content owner facilitator is the same of the logged user
-        return ($contentOwnerFacilitatorObj->user_id == $loggedUserId);
+        return ($contentOwnerFacilitatorObj->user_id == $loggedUserId || $contentOwnerExternalFacilitatorObj->user_id == $loggedUserId);
     }
 
     /**

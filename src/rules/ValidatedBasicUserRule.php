@@ -11,11 +11,7 @@
 
 namespace open20\amos\admin\rules;
 
-use open20\amos\admin\AmosAdmin;
-use open20\amos\community\AmosCommunity;
 use open20\amos\admin\models\UserProfile;
-use open20\amos\cwh\AmosCwh;
-
 use Yii;
 use yii\rbac\Rule;
 
@@ -29,7 +25,7 @@ class ValidatedBasicUserRule extends Rule
      * @inheritdoc
      */
     public $name = 'validatedBasicUser';
-    
+
     /**
      * @inheritdoc
      */
@@ -37,21 +33,21 @@ class ValidatedBasicUserRule extends Rule
     {
         /** @var UserProfile $loggedUser */
         $loggedUser = \Yii::$app->getUser()->identity->profile;
-        $adminModule =\Yii::$app->getModule('admin');
-        $communityModule =\Yii::$app->getModule('communty');
-        $cwhModule =\Yii::$app->getModule('cwh');
-        $scope = $cwhModule->getCwhScope();
+        $adminModule = \Yii::$app->getModule('admin');
+        $communityModule = \Yii::$app->getModule('communty');
+        $cwhModule = \Yii::$app->getModule('cwh');
+        $scope = (!is_null($cwhModule) ? $cwhModule->getCwhScope() : []);
         
         if (($adminModule->createContentInMyOwnCommunityOnly === true) && (isset($scope['community']) && !(empty($communityModule)))) {
             if (isset($scope['community']) && !(empty($communityModule))) {
                 $myOwnCommunities = $communityModule->getCommunitiesByUserId(Yii::$app->getUser()->getId(), true);
-                
+
                 return (in_array($scope['community'], $myOwnCommunities));
             }
-            
+
             return false;
         }
-        
+
         return ($loggedUser->validato_almeno_una_volta == true);
     }
 }

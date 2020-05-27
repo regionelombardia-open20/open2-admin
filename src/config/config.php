@@ -19,7 +19,7 @@ return [
             'name' => 'reCaptcha',
             'class' => 'himiklab\yii2\recaptcha\ReCaptcha',
             'siteKey' => '',
-            'secret' => 'PUT_SECRET_HERE',
+            'secret' => 'Z01Ak_2017',
         ],
     ],
     'params' => [

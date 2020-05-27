@@ -55,6 +55,16 @@ class UserProfileUtility
     }
 
     /**
+     * This method return all facilitator user ids.
+     * @return int[]
+     */
+    public static function getAllExternalFacilitatorUserIds()
+    {
+        return \Yii::$app->getAuthManager()->getUserIdsByRole('FACILITATOR_EXTERNAL');
+    }
+
+
+    /**
      * The method create a new account. It creates a new User and new UserProfile only with name, surname
      * and email. The email must be unique in the database! It assign the BASIC_USER role to the new user.
      * This method returns the user id if all goes well. It returns boolean false in case of errors.
@@ -95,12 +105,14 @@ class UserProfileUtility
         }
 
         /** @var AmosNotify $notifyModule */
-        $notifyModule = AmosNotify::instance();
-        $ok = $notifyModule->setDefaultNotificationsConfs($user->id);
-        if (!$ok) {
-            return [
-                'error' => self::UNABLE_TO_SAVE_USER_NOTIFICATIONS_CONFS
-            ];
+        $notifyModule = Yii::$app->getModule('notify');
+        if (!is_null($notifyModule)) {
+            $ok = $notifyModule->setDefaultNotificationsConfs($user->id);
+            if (!$ok) {
+                return [
+                    'error' => self::UNABLE_TO_SAVE_USER_NOTIFICATIONS_CONFS
+                ];
+            }
         }
 
         if ($sendCredentials) {
@@ -320,8 +332,8 @@ class UserProfileUtility
             $adminModule = \Yii::$app->getModule((empty($module_name)? AmosAdmin::getModuleName() : $module_name));
             $subjectView = $adminModule->htmlMailSubject;
             $contentView = $adminModule->htmlMailContent;
-            $subject = Email::renderMailPartial($subjectView, ['profile' => $model], \Yii::$app->getUser()->id);
-            $mail = Email::renderMailPartial($contentView, ['profile' => $model, 'community' => $community], \Yii::$app->getUser()->id);
+            $subject = Email::renderMailPartial($subjectView, ['profile' => $model], $model->user->id);
+            $mail = Email::renderMailPartial($contentView, ['profile' => $model, 'community' => $community], $model->user->id);
             return Email::sendMail(Yii::$app->params['supportEmail'], [$model->user->email], $subject, $mail, []);
         } catch (\Exception $ex) {
             \Yii::getLogger()->log($ex->getMessage(), \yii\log\Logger::LEVEL_ERROR);
@@ -555,5 +567,28 @@ class UserProfileUtility
     public static function makeDeletedUserEmail($userId)
     {
         return self::DELETED_ACCOUNT_EMAIL_PREFIX . $userId . self::DELETED_ACCOUNT_EMAIL_SUFFIX;
+    }
+
+    /**
+     * @param $model UserProfile
+     */
+    public static function deassignRoleFacilitator($model){
+        if (\Yii::$app->authManager->checkAccess($model->user_id, 'FACILITATOR')) {
+            $roleFacilitator = \Yii::$app->authManager->getRole('FACILITATOR');
+            if ($roleFacilitator) {
+                $model->enable_facilitator_box = 0;
+                $model->save(false);
+                \Yii::$app->authManager->revoke($roleFacilitator, $model->user_id);
+                $facilitatoreDefault = UserProfile::find()->andWhere(['default_facilitatore' => 1])->one();
+                $profilesToModify = UserProfile::find()->andWhere(['facilitatore_id' => $model->id])->all();
+
+                if ($facilitatoreDefault) {
+                    foreach ($profilesToModify as $profile) {
+                        $profile->facilitatore_id = $facilitatoreDefault->id;
+                        $profile->save(false);
+                    }
+                }
+            }
+        }
     }
 }

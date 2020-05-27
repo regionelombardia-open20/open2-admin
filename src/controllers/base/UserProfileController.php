@@ -130,11 +130,13 @@ class UserProfileController extends CrudController
             'createNewBtnLabel' => AmosAdmin::t('amosadmin', 'Add new user')
         ];
 
-        if (\Yii::$app->getModule('invitations')
-            && (\Yii::$app->getUser()->can('INVITATIONS_BASIC_USER') || \Yii::$app->getUser()->can('INVITATIONS_ADMINISTRATOR'))) {
+        if (\Yii::$app->getModule('invitations') && (\Yii::$app->getUser()->can('INVITATIONS_BASIC_USER') || \Yii::$app->getUser()->can('INVITATIONS_ADMINISTRATOR'))
+            &&
+            !$this->adminModule->checkManageInviteBlackList() //aggiunta chiamata metodo checkMAnageInviteBlackList
+        ) {
             $widget                                      = new \open20\amos\invitations\widgets\icons\WidgetIconInvitations();
-            $invitations                                 = Html::a(AmosAdmin::t('amosadmin', 'Gestisci inviti'), $widget->url,
-                    ['class' => 'btn btn-navigation-primary']);
+            $invitations                                 = Html::a(AmosAdmin::t('amosadmin', 'Gestisci inviti'),
+                    $widget->url, ['class' => 'btn btn-navigation-primary']);
             Yii::$app->view->params['additionalButtons'] = [
                 'htmlButtons' => [$invitations]
             ];
@@ -215,10 +217,9 @@ class UserProfileController extends CrudController
         $this->model = $this->findModel($id);
 
         return $this->render(
-            'view', 
-            [
+                'view', [
                 'model' => $this->model,
-            ]
+                ]
         );
     }
 
@@ -247,6 +248,7 @@ class UserProfileController extends CrudController
         // Salvo l'utente e subito dopo salvo il profilo agganciando l'utente
         if ($user->load(Yii::$app->request->post()) && $user->validate()) {
             if (!($profile->load(Yii::$app->request->post()) && $profile->validate())) {
+
                 // QUALCOSA è andato storto! ERRORE...
                 Yii::$app->getSession()->addFlash('danger',
                     AmosAdmin::t('amosadmin', 'Internal error. Impossible to link user to the relative profile.'));
@@ -274,8 +276,9 @@ class UserProfileController extends CrudController
 
             // Se mi trovo qua posso salvare entrambe le entità senza avere errore
             $user->save();
-            $profile->user_id          = $user->id;
-            $profile->widgets_selected = 'a:2:{s:7:"primary";a:1:{i:0;a:6:{i:0;a:2:{s:4:"code";s:12:"USER_PROFILE";s:11:"module_name";s:5:"admin";}i:1;a:2:{s:4:"code";s:5:"USERS";s:11:"module_name";s:5:"admin";}i:2;a:2:{s:4:"code";s:11:"TAG_MANAGER";s:11:"module_name";s:3:"tag";}i:3;a:2:{s:4:"code";s:4:"ENTI";s:11:"module_name";s:4:"enti";}i:4;a:2:{s:4:"code";s:9:"ENTI_TIPO";s:11:"module_name";s:4:"enti";}i:5;a:2:{s:4:"code";s:4:"SEDI";s:11:"module_name";s:4:"enti";}}}s:5:"admin";a:1:{i:0;a:2:{i:0;a:2:{s:4:"code";s:12:"USER_PROFILE";s:11:"module_name";s:5:"admin";}i:1;a:2:{s:4:"code";s:5:"USERS";s:11:"module_name";s:5:"admin";}}}}';
+            $profile->presentazione_breve = strip_tags($profile->presentazione_breve);
+            $profile->user_id             = $user->id;
+            $profile->widgets_selected    = 'a:2:{s:7:"primary";a:1:{i:0;a:6:{i:0;a:2:{s:4:"code";s:12:"USER_PROFILE";s:11:"module_name";s:5:"admin";}i:1;a:2:{s:4:"code";s:5:"USERS";s:11:"module_name";s:5:"admin";}i:2;a:2:{s:4:"code";s:11:"TAG_MANAGER";s:11:"module_name";s:3:"tag";}i:3;a:2:{s:4:"code";s:4:"ENTI";s:11:"module_name";s:4:"enti";}i:4;a:2:{s:4:"code";s:9:"ENTI_TIPO";s:11:"module_name";s:4:"enti";}i:5;a:2:{s:4:"code";s:4:"SEDI";s:11:"module_name";s:4:"enti";}}}s:5:"admin";a:1:{i:0;a:2:{i:0;a:2:{s:4:"code";s:12:"USER_PROFILE";s:11:"module_name";s:5:"admin";}i:1;a:2:{s:4:"code";s:5:"USERS";s:11:"module_name";s:5:"admin";}}}}';
 
             // it's used to create a new profile in the status to validate directly
             if ($profile->getWorkflowSource()->getWorkflow(UserProfile::USERPROFILE_WORKFLOW)->getInitialStatusId() !== UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) {
@@ -292,6 +295,13 @@ class UserProfileController extends CrudController
             }
 
             $savedProfile = $profile->save();
+
+
+            $postTightCoupling = (!empty(\Yii::$app->request->post()['UserProfile']['tightCouplingField']) ? \Yii::$app->request->post()['UserProfile']['tightCouplingField']
+                    : []);
+            $this->setTightCouplingUser($profile->user_id, $postTightCoupling);
+
+
             //setting personal validation scope for contents if cwh module is enabled
             if ($savedProfile) {
                 $cwhModule = Yii::$app->getModule('cwh');
@@ -341,18 +351,21 @@ class UserProfileController extends CrudController
                     $ok = $notifyModule->setDefaultNotificationsConfs($user->id);
                 }
                 if (!$ok) {
-                    Yii::$app->getSession()->addFlash('danger', AmosAdmin::t('amosadmin', 'Error while saving email frequency'));
-                    return $this->render('create', [
-                        'model' => $profile,
-                        'user' => $user,
-                        'permissionSave' => 'USERPROFILE_CREATE',
+                    Yii::$app->getSession()->addFlash('danger',
+                        AmosAdmin::t('amosadmin', 'Error while saving email frequency'));
+                    return $this->render('create',
+                            [
+                            'model' => $profile,
+                            'user' => $user,
+                            'permissionSave' => 'USERPROFILE_CREATE',
                     ]);
                 }
             }
 
             /** @var AmosAdmin $adminModule */
             $adminModule = \Yii::$app->getModule(AmosAdmin::getModuleName());
-            Yii::$app->getAuthManager()->assign(Yii::$app->getAuthManager()->getRole($adminModule->defaultUserRole), $user->id);
+            Yii::$app->getAuthManager()->assign(Yii::$app->getAuthManager()->getRole($adminModule->defaultUserRole),
+                $user->id);
             Yii::$app->getSession()->addFlash('success', AmosAdmin::t('amosadmin', 'Utente creato correttamente.'));
             //return $this->redirect(['view', 'id' => $this->model->id]);
             return $this->redirectOnCreate($profile);
@@ -360,10 +373,11 @@ class UserProfileController extends CrudController
             //Ripasso al form i dati inseriti anche se non corretti...
             $user->load(Yii::$app->request->post());
             $profile->load(Yii::$app->request->post());
-            return $this->render('create', [
-                'model' => $profile,
-                'user' => $user,
-                'permissionSave' => 'USERPROFILE_CREATE',
+            return $this->render('create',
+                    [
+                    'model' => $profile,
+                    'user' => $user,
+                    'permissionSave' => 'USERPROFILE_CREATE',
             ]);
         }
     }
@@ -389,9 +403,11 @@ class UserProfileController extends CrudController
             $url = Yii::$app->urlManager->createUrl(['/admin/user-profile/update', 'id' => $id]);
         }
 
+
         // Finding the user profile model
         $this->model = $this->findModel($id);
 
+        $this->model->tightCouplingField = $this->getTightCouplingUser($this->model->user_id);
         // Setting the dynamic scenario. It's compiled dinamically by the
         // configuration manager based on the module configurations.
         // Remove this row to restore the default functionalities.
@@ -436,7 +452,7 @@ class UserProfileController extends CrudController
             $this->model->load(Yii::$app->request->post());
             $this->model->user->load(Yii::$app->request->post());
             if ($this->model->validate() && $this->model->user->validate()) {
-      
+                //$this->model->presentazione_breve = strip_tags($this->model->presentazione_breve);
                 if (empty(Yii::$app->request->post('notify_from_editorial_staff'))) {
                     $this->model->notify_from_editorial_staff = 0;
                     if ($this->model->notify_from_editorial_staff != $notify_from_editorial_staff) {
@@ -472,6 +488,10 @@ class UserProfileController extends CrudController
                 }
 
                 if ($this->model->save() && $this->model->user->save()) {
+                    $postTightCoupling = (!empty(\Yii::$app->request->post()['UserProfile']['tightCouplingField']) ? \Yii::$app->request->post()['UserProfile']['tightCouplingField']
+                            : []);
+                    $this->setTightCouplingUser($this->model->user_id, $postTightCoupling);
+
                     $this->assignFacilitator($isFacilitatorRoleRemoved);
 
                     if (empty($this->model->userProfileImage)) {
@@ -854,18 +874,76 @@ class UserProfileController extends CrudController
 
                 $selectedFacilitatorRoles = Yii::$app->request->post('selectedFacilitatorRoles');
                 // Assign selected facilitator roles
-                if(!empty($selectedFacilitatorRoles)) {
+                if (!empty($selectedFacilitatorRoles)) {
                     foreach ($selectedFacilitatorRoles as $role) {
                         Yii::$app->db
                             ->createCommand()
                             ->insert('auth_assignment',
                                 [
-                                    'user_id' => $this->model->user_id,
-                                    'item_name' => $role,
-                                    'created_at' => time(),
-                                ])
+                                'user_id' => $this->model->user_id,
+                                'item_name' => $role,
+                                'created_at' => time(),
+                            ])
                             ->execute();
                     }
+                }
+            }
+        }
+    }
+
+    /**
+     * 
+     * @param integer $user_id
+     * @return array
+     */
+    public function getTightCouplingUser($user_id)
+    {
+        $admin = AmosAdmin::getInstance();
+        if ($admin->tightCoupling == true) {
+            $tightCouplingModel = null;
+            $tightCouplingField = null;
+            if (!empty($admin->tightCouplingModel) && is_array($admin->tightCouplingModel)) {
+                foreach ($admin->tightCouplingModel as $k => $v) {
+                    $tightCouplingModel = $k;
+                    $tightCouplingField = $v;
+                }
+            }
+
+            if (!empty($tightCouplingModel) && !empty($tightCouplingField)) {
+                return ArrayHelper::map($tightCouplingModel::find()->andWhere(['user_id' => $user_id])
+                            ->andWhere([$admin->tightCouplingExcludeField => 0])
+                            ->select($tightCouplingField)->all(), $tightCouplingField, $tightCouplingField);
+            }
+        }
+        return [];
+    }
+
+    /**
+     *
+     * @param integer $user_id
+     * @param array $value
+     */
+    public function setTightCouplingUser($user_id, $value)
+    {
+        $admin = AmosAdmin::getInstance();
+        if ($admin->tightCoupling == true) {
+            $tightCouplingModel = null;
+            $tightCouplingField = null;
+            if (!empty($admin->tightCouplingModel) && is_array($admin->tightCouplingModel)) {
+                foreach ($admin->tightCouplingModel as $k => $v) {
+                    $tightCouplingModel = $k;
+                    $tightCouplingField = $v;
+                }
+            }
+
+            if (!empty($tightCouplingModel) && !empty($tightCouplingField)) {
+                $tightCouplingModel::deleteAll(['user_id' => $user_id, $admin->tightCouplingExcludeField => 0]);
+                foreach ((array) $value as $k => $v) {
+                    $model                                      = new $tightCouplingModel;
+                    $model->user_id                             = $user_id;
+                    $model->$tightCouplingField                 = $v;
+                    $model->{$admin->tightCouplingExcludeField} = 0;
+                    $model->save(false);
                 }
             }
         }

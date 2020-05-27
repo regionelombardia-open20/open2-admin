@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Aria S.p.A.
  * OPEN 2.0
@@ -45,6 +44,43 @@ class UpdateOwnUserProfile extends Rule
                 $model = $this->instanceModel($model, $post['id']);
             }
         }
+
+        //INIZIO ACCOPPIAMENTO STRETTO CON ALTRA ENTITA'
+        /** @var AmosAdmin $adminModule */
+        $adminModule = \Yii::$app->getModule('admin');
+        if ($adminModule->tightCoupling == true && !\Yii::$app->user->can($adminModule->tightCouplingRoleAdmin)) {
+            $tightCouplingModel = null;
+            $tightCouplingField = null;
+            if (!empty($adminModule->tightCouplingModel) && is_array($adminModule->tightCouplingModel)) {
+                foreach ($adminModule->tightCouplingModel as $k => $v) {
+                    $tightCouplingModel = $k;
+                    $tightCouplingField = $v;
+                }
+            }
+
+            if (!empty($tightCouplingModel) && !empty($tightCouplingField)) {
+                $my = [];
+                $myGroups = $tightCouplingModel::find()
+                    ->andWhere(['user_id' => $user])
+                    ->select($tightCouplingField)
+                    ->andWhere(['exclude_from_query' => 1])
+                    ->orderBy($tightCouplingField)->asArray()->all();
+                $groupUserUpdate = $tightCouplingModel::find()
+                    ->andWhere(['user_id' => $model->user_id])
+                    ->select($tightCouplingField)
+                    ->andWhere(['exclude_from_query' => 1])
+                    ->orderBy($tightCouplingField)->asArray()->all();
+                foreach ($myGroups as $k => $v) {
+                    foreach ($groupUserUpdate as $k1 => $v1) {
+                        if ($v[$tightCouplingField] == $v1[$tightCouplingField]) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        //FINE ACCOPPIAMENTO STRETTO CON ALTRA ENTITA'
 
         return ($model->user_id == $user);
     }

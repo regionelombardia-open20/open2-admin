@@ -133,6 +133,10 @@ class LoginForm extends Model
      */
     public function login()
     {
+        $authTimeout = 3600 * 24 * 30;
+        if(!empty(\Yii::$app->user->authTimeout)){
+            $authTimeout = \Yii::$app->user->authTimeout;
+        }
         if ($this->checkUserAttemptsExceed($this->getUser())) {
             return false;
         } else {
@@ -140,7 +144,7 @@ class LoginForm extends Model
                 //Reset attempts
                 $this->resetLockoutAttempts();
 
-                return Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600 * 24 * 30 : 0);
+                return Yii::$app->user->login($this->getUser(), $this->rememberMe ? $authTimeout : 0);
             } else {
                 $this->tickAttemptUser($this->getUser());
 

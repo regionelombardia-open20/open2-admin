@@ -671,6 +671,7 @@ return [
     'to join your contact network?' => 'ad entrare a far parte della tua rete?',
     '#tooltip_facilitator' => 'La piattaforma ti ha assegnato in automatico un facilitatore, ma se desideri puoi cambiarlo scegliendo una persona che conosce la tua identità professionale e ti può aiutare a valorizzarla con suggerimenti e modifiche alle informazioni che hai inserito.',
     '#TOVALIDATE_buttonLabel_v2' => 'In attesa di validazione',
+    '#TOVALIDATE_buttonLabel' => 'Richiedi validazione',
     'To validate' => 'Da validare',
     '#TOVALIDATE_description_v2' => 'per validare o rifiutare successivamente il profilo',
     '#TOVALIDATE_label_v2' => 'Il profilo è in attesa di essere validato',
@@ -825,7 +826,8 @@ return [
     'Cognome e nome' => 'Cognome e nome',
     'Notifications' => 'Notifiche',
     'Configure notifications' => 'Configura notifiche',
-    '#facilitator_assigned' => 'sono il tuo facilitatore, accetta l\'invito per poter usufluire subito del sistema di messaggistica privato',
+    '#facilitator_assigned' => ' ti ha scelto come facilitatore. Puoi contattarlo attraverso lo strumento dedicato che trovi sulla tua dashboard, nel pannello di gestione',
+    '#facilitator_assigned_obj' => '{nomecognome} ti ha scelto come facilitatore',
     '#yours_validated_users' => '',
-
+    'External facilitator in platform' => 'Il tuo facilitatore in piattaforma'
 ];

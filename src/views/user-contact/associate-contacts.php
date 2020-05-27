@@ -55,7 +55,7 @@ if (isset($post['genericSearch'])) {
         'to' => 'id'
     ],
     'modelTargetSearch' => [
-        'class' => \open20\amos\admin\models\UserProfile::className(),
+        'class' => AmosAdmin::instance()->createModel('UserProfile')->className(),
         'query' => $query,
     ],
     'targetFooterButtons' => Html::a(AmosAdmin::t('amosadmin', 'Close'), Yii::$app->urlManager->createUrl([

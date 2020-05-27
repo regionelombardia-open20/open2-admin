@@ -21,7 +21,7 @@
     "require": {
         "php": ">=5.4.0",
         "open20/amos-comuni": "*",
-        "open20/amos-core": "^1.9.59",
+        "open20/amos-core": "^1.9.62",
         "open20/amos-attachments": "^1.1.11",
         "open20/amos-notify": "^1.4.17",
         "open20/amos-social-auth": "^1.1.7",

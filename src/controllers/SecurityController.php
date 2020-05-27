@@ -459,9 +459,9 @@ class SecurityController extends BackendController
         $this->setUpLayout('login');
 
         if (!Yii::$app->user->isGuest) {
-            Yii::$app->session->addFlash('danger', AmosAdmin::t('amosadmin', 'Already Logged In'));
-
-            return $this->goHome();
+            Yii::$app->session->set('removeAfterLogout', 'true');
+            Yii::$app->user->logout();
+            Yii::$app->session->remove('removeAfterLogout');
         }
 
         /**
@@ -778,7 +778,7 @@ class SecurityController extends BackendController
         //Set Current admin user in session
         Yii::$app->session->set('IMPERSONATOR', $impersonator);
 
-        return $this->redirect('/');
+        return $this->redirect(['/dashboard']);
     }
 
     /**
@@ -794,7 +794,10 @@ class SecurityController extends BackendController
             Yii::$app->session->remove('IMPERSONATOR');
 
             //Timeout login
-            $loginTimeout = Yii::$app->params['loginTimeout'] ?: 3600;
+            $loginTimeout = 3600 * 24 * 30;
+            if(!empty(\Yii::$app->user->authTimeout)){
+                $loginTimeout = \Yii::$app->user->authTimeout;
+            }
 
             //Go out from this user
             Yii::$app->user->logout();
@@ -806,7 +809,7 @@ class SecurityController extends BackendController
             Yii::$app->user->login($identity, $loginTimeout);
         }
 
-        return $this->redirect('/');
+        return $this->redirect(['/dashboard']);
     }
 
     /**
@@ -1202,6 +1205,10 @@ class SecurityController extends BackendController
      */
     public function loginByToken($model, $token)
     {
+        $authTimeout = 3600 * 24 * 30;
+        if(!empty(\Yii::$app->user->authTimeout)){
+            $authTimeout = \Yii::$app->user->authTimeout;
+        }
         $tokenUser = TokenUsers::find()->andWhere(['token' => $token])->one();
         /** @var $tokenUser TokenUsers */
         if ($tokenUser) {
@@ -1209,7 +1216,7 @@ class SecurityController extends BackendController
                 /** @var  $user User */
                 $user            = $tokenUser->user;
                 $model->username = $user->username;
-                if (Yii::$app->user->login($user, $model->rememberMe ? 3600 * 24 * 30 : 0)) {
+                if (Yii::$app->user->login($user, $model->rememberMe ? $authTimeout : 0)) {
                     $tokenUser->used = $tokenUser->used + 1;
                     $tokenUser->save();
                     return $this->redirect($tokenUser->tokenGroup->url_redirect);

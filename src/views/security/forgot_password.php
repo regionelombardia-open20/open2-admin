@@ -18,7 +18,7 @@ $this->title = AmosAdmin::t('amosadmin', 'Password dimenticata');
 $this->params['breadcrumbs'][] = $this->title;
 
 $referrer = \Yii::$app->request->referrer;
-if(strpos($referrer, 'javascript') !== false){
+if( (strpos($referrer, 'javascript') !== false) || (strpos($referrer ,\Yii::$app->params['backendUrl']) == false ) ){
     $referrer = null;
 }
 ModuleAdminAsset::register(Yii::$app->view);

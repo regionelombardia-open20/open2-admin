@@ -11,6 +11,7 @@
 
 namespace open20\amos\admin\models\base;
 
+use open20\amos\admin\AmosAdmin;
 use Yii;
 
 /**
@@ -77,6 +78,6 @@ class UserProfileReactivationRequest extends \open20\amos\core\record\Record
      */
     public function getUserProfile()
     {
-        return $this->hasOne(\open20\amos\admin\models\UserProfile::className(), ['id' => 'user_profile_id']);
+        return $this->hasOne(AmosAdmin::instance()->model('UserProfile'), ['id' => 'user_profile_id']);
     }
 }

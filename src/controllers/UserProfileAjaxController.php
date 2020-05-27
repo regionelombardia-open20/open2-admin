@@ -98,7 +98,12 @@ class UserProfileAjaxController extends Controller
             $query = new Query();
             $query->select(new Expression("user_id as id, CONCAT(nome, ' ', cognome) AS text"))
                 ->from('user_profile')
-                ->andWhere(['or',['like', 'nome', $q], ['like', 'cognome', $q]])
+                ->andWhere(['or',
+                    ['like', 'cognome', $q],
+                    ['like', 'nome', $q],
+                    ['like', "CONCAT( nome , ' ', cognome )", $q],
+                    ['like', "CONCAT( cognome , ' ', nome )", $q],
+                ])
                 ->andWhere(['is', 'deleted_at', null])
                 ->limit(20);
             $command = $query->createCommand();

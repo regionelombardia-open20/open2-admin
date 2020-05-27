@@ -155,7 +155,7 @@ JS;
                 ): ?>
                     <div class="row">
                         <div class="col-md-3 col-sm-4 col-xs-12 bold"><?= $model->getAttributeLabel('presentazione_breve') ?></div>
-                        <div class="col-md-9 col-sm-8 col-xs-12"><?= $model->presentazione_breve ?></div>
+                        <div class="col-md-9 col-sm-8 col-xs-12"><?= strip_tags($model->presentazione_breve) ?></div>
                     </div>
                 <?php endif; ?>
                 <?php if (
@@ -347,23 +347,25 @@ JS;
             <!-- end ADMIN - PRIVILEGES -->
         </div>
 
-        <div class="col-md-4 col-xs-12">
-            <!-- AREE INTERESSE -->
-            <?php if (\Yii::$app->getModule('tag')): ?>
-                <div class="col-xs-12 tags-section-sidebar nop" id="section-tags">
-                    <?= Html::tag('h2', AmosIcons::show('tag', [], 'dash') . AmosAdmin::t('amosadmin', '#tags_title')) ?>
-                    <div class="col-xs-12">
-                        <?= \open20\amos\core\forms\ListTagsWidget::widget([
-                            'userProfile' => $model->id,
-                            'className' => $model->className(),
-                            'viewFilesCounter' => true,
-                        ]);
-                        ?>
+        <?php if (Yii::$app->user->can('VIEW_TAG_TABS_PERMISSION')): ?>
+            <div class="col-md-4 col-xs-12">
+                <!-- AREE INTERESSE -->
+                <?php if (\Yii::$app->getModule('tag')): ?>
+                    <div class="col-xs-12 tags-section-sidebar nop" id="section-tags">
+                        <?= Html::tag('h2', AmosIcons::show('tag', [], 'dash') . AmosAdmin::t('amosadmin', '#tags_title')) ?>
+                        <div class="col-xs-12">
+                            <?= \open20\amos\core\forms\ListTagsWidget::widget([
+                                'userProfile' => $model->id,
+                                'className' => $model->className(),
+                                'viewFilesCounter' => true,
+                            ]);
+                            ?>
+                        </div>
                     </div>
-                </div>
-            <?php endif; ?>
-            <!-- end AREE INTERESSE -->
-        </div>
+                <?php endif; ?>
+                <!-- end AREE INTERESSE -->
+            </div>
+        <?php endif; ?>
     </div>
     <?= Html::a(AmosAdmin::t('amosadmin', '#go_back'), (Yii::$app->session->get('previousUrl') ?: \Yii::$app->request->referrer), [
         'class' => 'btn btn-secondary pull-left'

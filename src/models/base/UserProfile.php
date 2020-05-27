@@ -61,6 +61,7 @@ use yii\helpers\ArrayHelper;
  * @property string $googleplus
  * @property string $ultimo_accesso
  * @property string $ultimo_logout
+ * @property integer $count_logins
  * @property integer $validato_almeno_una_volta
  * @property integer $avatar_id
  * @property integer $nascita_nazioni_id
@@ -75,6 +76,7 @@ use yii\helpers\ArrayHelper;
  * @property integer $domicilio_comune_id
  * @property integer $residenza_nazione_id
  * @property integer $facilitatore_id
+ * @property integer $external_facilitator_id
  * @property integer $default_facilitatore
  * @property integer $dont_show_facilitator
  * @property integer $enable_facilitator_box
@@ -233,6 +235,8 @@ class UserProfile extends NotifyAuditRecord
                 'default_facilitatore',
                 'prevalent_partnership_id',
                 'enable_facilitator_box',
+                'external_facilitator_id',
+                'count_logins'
             ], 'integer'],
             [[
                 'nascita_data',
@@ -279,7 +283,6 @@ class UserProfile extends NotifyAuditRecord
             [['domicilio_civico'], 'string', 'max' => 10],
             [['domicilio_lat', 'domicilio_lon'], 'string', 'max' => 45],
             [['presentazione_breve'], 'string', 'max' => 140],
-            [['presentazione_personale'], 'string', 'max' => 600],
             [['codice_fiscale'], 'string', 'max' => 16],
             [['user_profile_titoli_studio_id'], 'exist', 'skipOnError' => true, 'targetClass' => AmosAdmin::instance()->createModel('UserProfileTitoliStudio')->className(), 'targetAttribute' => ['user_profile_titoli_studio_id' => 'id']],
             [['facilitatore_id'], 'exist', 'skipOnError' => true, 'targetClass' => AmosAdmin::instance()->createModel('UserProfile')->className(), 'targetAttribute' => ['facilitatore_id' => 'id']],
@@ -305,6 +308,9 @@ class UserProfile extends NotifyAuditRecord
 
         if (!$this->adminModule->enableMultiUsersSameCF) {
             $rules[] = ['codice_fiscale', 'unique', 'filter' => ['deleted_at' => null]];
+        }
+        if(!\Yii::$app->user->can('FACILITATOR')&& !Yii::$app->user->can('VALIDATOR') && !Yii::$app->user->can('ADMIN') ){
+            $rules[] =[['presentazione_personale'], 'string', 'max' => 600];
         }
 
         return $rules;
@@ -358,7 +364,7 @@ class UserProfile extends NotifyAuditRecord
             'attivo'
         ];
 
-        $scenarios[self::SCENARIO_CREATE_NEW_ACCOUNT] = [
+        $scenarios[self::SCENARIO_CREATE_NEW_ACCOUNT] = $this->createScenarioArray([
             'user_id',
             'attivo',
             'status',
@@ -366,7 +372,7 @@ class UserProfile extends NotifyAuditRecord
             'cognome',
             'facilitatore_id',
             'widgets_selected'
-        ];
+        ], $dynamicScenarioFields);
 
         $scenarios[self::SCENARIO_DYNAMIC] = $dynamicScenarioFields;
 
@@ -584,6 +590,15 @@ class UserProfile extends NotifyAuditRecord
         return $this->hasOne(AmosAdmin::instance()->createModel('UserProfile')->className(), ['id' => 'facilitatore_id']);
     }
 
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getExternalFacilitator()
+    {
+        return $this->hasOne(AmosAdmin::instance()->createModel('UserProfile')->className(), ['id' => 'external_facilitator_id']);
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -633,7 +648,9 @@ class UserProfile extends NotifyAuditRecord
         /** @var OrganizationsModuleInterface $organizationsModule */
         $organizationsModule = \Yii::$app->getModule($this->adminModule->getOrganizationModuleName());
         if (!is_null($organizationsModule)) {
-            return $this->hasOne($organizationsModule->getOrganizationModelClass(), ['id' => 'prevalent_partnership_id']);
+            $organizationsClass = $organizationsModule->getOrganizationModelClass();
+            return $this->hasOne($organizationsClass, ['id' => 'prevalent_partnership_id'])
+            ->onCondition([$organizationsClass::tableName().'.deleted_at' => null]);
         } else {
             return null;
         }
@@ -670,4 +687,12 @@ class UserProfile extends NotifyAuditRecord
         }
         return $socialUserQuery;
     }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUserProfileExternalFacilitator(){
+        return $this->hasOne(\open20\amos\admin\models\UserProfileExternalFacilitator::className(), ['user_profile_id' => 'id'])->orderBy('id DESC');
+    }
+
 }

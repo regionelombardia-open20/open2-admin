@@ -69,7 +69,7 @@ class WidgetIconInactiveUserProfiles extends WidgetIcon
 
         $this->setBulletCount(
             $this->makeBulletCounter(
-                Yii::$app->getUser()->getId(), UserProfile::className(), $query
+                Yii::$app->getUser()->getId(), AmosAdmin::instance()->model('UserProfile'), $query
             )
         );
     }

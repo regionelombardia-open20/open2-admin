@@ -69,7 +69,7 @@ class WidgetIconCommunityManagerUserProfiles extends WidgetIcon
         $this->setBulletCount(
             $this->makeBulletCounter(
                 Yii::$app->getUser()->getId(),
-                UserProfile::className(),
+                AmosAdmin::instance()->model('UserProfile'),
                 $dataProvvider->query
             )
         );

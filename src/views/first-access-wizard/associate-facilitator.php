@@ -33,6 +33,7 @@ $facilitatorUserIds = array_diff(UserProfileUtility::getAllFacilitatorUserIds(),
 $query = UserProfile::find();
 $query
     ->andWhere(['user_id' => $facilitatorUserIds])
+    ->andWhere(['not like', 'nome', UserProfileUtility::DELETED_ACCOUNT_NAME])
     ->orderBy(['cognome' => SORT_ASC, 'nome' => SORT_ASC]);
 $post = Yii::$app->request->post();
 
@@ -60,7 +61,7 @@ $formName = 'UserProfile';
 $postKey = 'user';
 $js = "
 var hiddenInputContainer = $('.hiddenInputContainer');
-$('.set-facilitator-btn').on('click', function(event) {
+$(document).on('click', '#confirm-associate-facilitator', function(event) {
     event.preventDefault();
     $(this).data('model_id');" . '
     var newHiddenInput = \'<input type="hidden" name="' . $formName . '[' . $postKey . '][]" value="\' + $(this).data(\'model_id\') + \'"/>\';
@@ -68,10 +69,7 @@ $('.set-facilitator-btn').on('click', function(event) {
     hiddenInputContainer.empty();
     hiddenInputContainer.append(newHiddenInput);
     hiddenInputContainer.append(selection);
-    var confirmText = '" . AmosAdmin::t('amosadmin', 'You have selected') . " ' + $(this).data('model_name') + ' ' + $(this).data('model_surname') + \" " . AmosAdmin::t('amosadmin', 'as your facilitator. To confirm click on the CONFIRM button. At the confirm the facilitator will be bound to the user profile.') . "\";
-    if (confirm(confirmText)) {
-        hiddenInputContainer.parents('form').submit();
-    }
+    hiddenInputContainer.parents('form').submit();
 });
 ";
 $this->registerJs($js, View::POS_READY);
@@ -87,7 +85,7 @@ $this->registerJs($js, View::POS_READY);
         'to' => 'user_id'
     ],
     'modelTargetSearch' => [
-        'class' => UserProfile::className(),
+        'class' => AmosAdmin::instance()->model('UserProfile'),
         'query' => $query,
     ],
     'gridId' => 'associate-facilitator',

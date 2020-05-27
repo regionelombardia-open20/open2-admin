@@ -29,6 +29,24 @@ use open20\amos\admin\base\ConfigurationManager;
 /** @var AmosAdmin $adminModule */
 $adminModule = Yii::$app->controller->module;
 
+$js = <<<JS
+    $('#change-facilitator-button, #insert-facilitator-button').click(function(e){
+        e.preventDefault();
+        var action = $('#first-access-wizard-form').attr('action');
+        if(action.indexOf("?") > -1){
+            action += '&';
+        }
+        else {
+           action += '?';
+        }
+        action = action + 'gotoFacilitator=1';
+        console.log(action);
+        $('#first-access-wizard-form').attr('action', action);
+        $('#first-access-wizard-form').submit();
+    });
+JS;
+
+$this->registerJs($js);
 ?>
 
 <div class="first-access-wizard-introducing-myself">
@@ -140,12 +158,12 @@ $adminModule = Yii::$app->controller->module;
                         <div class="col-xs-9 m-t-10">
                             <p><strong><?= $facilitatorUserProfile->getNomeCognome() ?></strong></p>
                             <div><?= AmosAdmin::t('amosadmin', 'Prevalent partnership') . ': ' . (!is_null($facilitatorUserProfile->prevalentPartnership) ? $facilitatorUserProfile->prevalentPartnership->name : '-') ?></div>
-                            <div><?= Html::a(AmosAdmin::t('amosadmin', 'Change facilitator'), ['/admin/first-access-wizard/associate-facilitator', 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true]) ?></div>
+                            <?= Html::a(AmosAdmin::t('amosadmin', 'Change facilitator'), ['/admin/first-access-wizard/associate-facilitator', 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true], ['id' => 'change-facilitator-button']) ?>
                         </div>
                     <?php else: ?>
                         <div class="col-xs-9 m-t-10">
                             <div><?= AmosAdmin::tHtml('amosadmin', 'Facilitator not selected') ?></div>
-                            <div><?= Html::a(AmosAdmin::t('amosadmin', 'Select facilitator'), ['/admin/first-access-wizard/associate-facilitator', 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true]) ?></div>
+                            <?= Html::a(AmosAdmin::t('amosadmin', 'Change facilitator'), ['/admin/first-access-wizard/associate-facilitator', 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true], ['id' => 'insert-facilitator-button']) ?>
                         </div>
                     <?php endif; ?>
                     <div class="clearfix"></div>

@@ -42,6 +42,26 @@ class FirstAccessWizardComponent extends Component /*implements BootstrapInterfa
         return null;
     }
 
+    /**
+     * @param null $moduleClassName
+     * @return null|\yii\web\Response
+     */
+    public function showMessageCompleteProfile($moduleClassName = null){
+
+        /** @var \open20\amos\core\user\User $loggedUser */
+        $loggedUser = \Yii::$app->getUser()->identity;
+        /** @var \open20\amos\admin\models\UserProfile $loggedUserProfile */
+        $loggedUserProfile = $loggedUser->getProfile();
+        if (!$loggedUserProfile->validato_almeno_una_volta && ($loggedUserProfile->status == UserProfile::USERPROFILE_WORKFLOW_STATUS_DRAFT)) {
+            if (is_null($moduleClassName)) {
+                $moduleClassName = AmosAdmin::className();
+            }
+            /** @var \open20\amos\core\module\AmosModule $moduleClassName */
+            return \Yii::$app->controller->redirect(['/' . $moduleClassName::getModuleName() . '/user-profile/complete-profile']);
+        }
+        return null;
+    }
+
 
     /**
      * @param $url

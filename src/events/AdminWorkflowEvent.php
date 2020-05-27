@@ -11,7 +11,9 @@
 
 namespace open20\amos\admin\events;
 
+use open20\amos\admin\AmosAdmin;
 use open20\amos\admin\models\UserProfile;
+use open20\amos\admin\utility\UserProfileMailUtility;
 use Yii;
 use yii\base\Event;
 
@@ -45,5 +47,27 @@ class AdminWorkflowEvent implements AdminWorkflowEventInterface
                 $auth->assign($roleObj, $userId);
             }
         }
+    }
+
+    /**
+     * @param Event $event
+     */
+    public function afterEnterStatusNotValidated(Event $event){
+        $userProfile = $event->data;
+        return UserProfileMailUtility::sendEmailValidationRejected($userProfile);
+    }
+    /**
+     * @param Event $event
+     */
+    public function afterEnterStatusToValidate(Event $event){
+        $userProfile = $event->data;
+        $nomeCognome = '';
+        $facilitatore = $userProfile->facilitatore;
+        if($facilitatore){
+            $nomeCognome = $facilitatore->nomeCognome;
+        }
+        \Yii::$app->session->addFlash('success',AmosAdmin::t('amosadmin', "La tua richiesta è stata inviata al Facilitatore {nomeCognome}.<br> Riceverai un riscontro sulla validazione del tuo profilo.",[
+            'nomeCognome' => $nomeCognome
+        ]));
     }
 }

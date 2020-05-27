@@ -671,6 +671,7 @@ return [
     'to join your contact network?' => 'to join your contact network?',
     '#tooltip_facilitator' => 'The platform has automatically assigned you a facilitator, but if you want you can change it by choosing a person who knows your professional identity and can help you to enhance it with suggestions and changes to the information you have entered.',
     '#TOVALIDATE_buttonLabel_v2' => 'Waiting to be validated',
+    '#TOVALIDATE_buttonLabel' => 'Request validation',
     '#TOVALIDATE_description_v2' => 'to validate or reject the profile later',
     '#TOVALIDATE_label_v2' => 'The profile is waiting to be validated',
     '#TOVALIDATE_message_v2' => 'Confirm to change the profile and bring it to the status: WAITING FOR VALIDATION?',
@@ -822,7 +823,8 @@ return [
     '#subject_notification_accepted_request' => 'Invitation to access the platform',
     '#text_notification_accepted_request' => 'has accepted your request to register on the platform.',
     'Cognome e nome' => 'Surname and name',
-    '#facilitator_assigned' => 'i am your facilitator, accept the invitation to be able to immediately use the private messaging system',
+    '#facilitator_assigned' => ' chose you as a facilitator. You can contact him through the dedicated tool you find on your dashboard, in the management panel',
+    '#facilitator_assigned_obj' => '{nomecognome} chose you as a facilitator',
     '#yours_validated_users' => '',
 
 ];

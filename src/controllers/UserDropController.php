@@ -70,6 +70,8 @@ class UserDropController extends Controller
             /** @var  $user User*/
             $user = $this->maskUserData($user);
 
+            UserProfileUtility::deassignRoleFacilitator($user->userProfile);
+
             $user->userProfile->deactivateUserProfile();
         }
     }
@@ -225,6 +227,7 @@ class UserDropController extends Controller
         $profile = UserProfile::findOne(['user_id' => $userRecord->id]);
 
         if($profile && $profile->id) {
+            UserProfileUtility::deassignRoleFacilitator($profile);
             $profile->delete();
         }
 

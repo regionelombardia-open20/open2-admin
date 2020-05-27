@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Aria S.p.A.
  * OPEN 2.0
@@ -31,30 +30,26 @@ use yii\helpers\ArrayHelper;
  */
 class AmosAdmin extends AmosModule implements SearchModuleInterface
 {
-    const site_key_param = 'google_recaptcha_site_key';
-
+    const site_key_param               = 'google_recaptcha_site_key';
     //google contacts session keys
-    const GOOGLE_CONTACTS = 'contacts';
-    const GOOGLE_CONTACTS_PLATFORM = 'contacts_platform';
+    const GOOGLE_CONTACTS              = 'contacts';
+    const GOOGLE_CONTACTS_PLATFORM     = 'contacts_platform';
     const GOOGLE_CONTACTS_NOT_PLATFORM = 'contacts_not_platform';
 
-    
     public $controllerNamespace = 'open20\amos\admin\controllers';
-    public $whiteListRoles = [];
-    public $name = 'Utenti';
-    public $searchListFields = [];
-
-    public $hardDelete = false;
+    public $whiteListRoles      = [];
+    public $name                = 'Utenti';
+    public $searchListFields    = [];
+    public $hardDelete          = false;
 
     /**
      * @var bool $enableRegister - set to true to enable user register to the application and create his own userprofile
      */
     public $enableRegister = false;
-    
+
     /**
      * @var bool $showLogInRegisterButton - set to true to enable user register button on login form
      */
-    
     public $showLogInRegisterButton = true;
 
     /**
@@ -276,6 +271,26 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
     public $bypassRequiredForAdmin = true;
 
     /**
+     * @var bool
+     */
+    public $enableExternalFacilitator = false;
+
+    /**
+     * @var bool
+     */
+    public $disableFirstAccesWizard = false;
+
+    /**
+     * @var bool
+     */
+    public $disableSendValidationRequestAuto = false;
+
+    /**
+     * @var bool
+     */
+    public $sendValidationRejectionEmail = false;
+
+    /**
      * @inheritdoc
      */
     public $db_fields_translation = [
@@ -300,8 +315,7 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
      * @var bool $enableUserContactsWidget
      */
     public $enableUserContactsWidget = true;
-    
-    public $defaultProfileImagePath = "@webroot/img/defaultProfilo.png";
+    public $defaultProfileImagePath  = "@webroot/img/defaultProfilo.png";
 
     /**
      * @var bool $enableInviteUserToEvent If true enable a link on single user useful to invite a user to a published event with an event community.
@@ -314,7 +328,70 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
      * @var bool $createContentInMyOwnCommunityOnly
      */
     public $createContentInMyOwnCommunityOnly = false;
-    
+
+    /* Array che verifica se una action appartiene alla blacklist oppure no */
+    /* ovvero se un ruolo è autorizzato o meno a lanciare una action. */
+    public $actionBlacklistManageInvite = [];
+
+    /**
+     * @var bool $bypassConfirmForFacilitator
+     * If true bypass confirm for facilitator, autoconfirm without request.
+     *
+     */
+    public $bypassConfirmForFacilitator = false;
+
+    /**
+     * Accoppiamento stretto con altra entità, permette di filtrare gli utenti in join con altra tabella
+     * @var type $tightCoupling
+     */
+    public $tightCoupling = false;
+
+    /**
+     * Permette di configurare il model e il campo da verificare per filtrare in base all'appartenenza dell'utente
+     * loggato al medesimo gruppo. Il campo implicito di verifica è lo user_id sia sullo UserProfile sia sulla nuova entità
+     * Esempio:
+     * ```php
+     * ['\open20\amos\events\models\EventGroupReferentMm' => 'event_group_referent_id']
+     * ```
+     * @var array $tightCouplingModel
+     */
+    public $tightCouplingModel;
+
+    /**
+     * Permette di configurare la classe come chiave e il metodo come valore dell'array per poter effettuare
+     * la query di recupero dei gruppi
+     * Esempio:
+     * ```php
+     * ['\open20\amos\events\models\EventGroupReferent' => 'getTightCouplingGroups']
+     * ```
+     * @var array $tightCouplingModel
+     */
+    public $tightCouplingMethod;
+
+    /**
+     * Permette di definire il nome del campo da utilizzare come campo visualizzato nella select del gruppo nel profilo
+     * @var string
+     */
+    public $tightCouplingMethodField = 'denominazione';
+
+    /**
+     * Ruolo assegnato in caso di associazione al gruppo
+     * @var string $tightCouplingAssignmentRole
+     */
+    public $tightCouplingAssignmentRole;
+
+    /**
+     * Campo se settato a 1 da escludere nelle query di qualsiasi tipo nel profilo
+     * @var type
+     */
+    public $tightCouplingExcludeField = 'exclude_from_query';
+
+    /**
+     * Ruolo per il quale non verranno filtrati i risultati se l'accoppiamento stretto è attivo e configurato
+     * @var type $tightCouplingRoleAdmin
+     */
+    public $tightCouplingRoleAdmin = 'ADMIN';
+
     /**
      * @return string
      */
@@ -350,7 +427,10 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
 
     public static function getModelSearchClassName()
     {
-        return __NAMESPACE__ . '\models\search\UserProfileSearch';
+        //return __NAMESPACE__ . '\models\search\UserProfileSearch';
+        $admin     = AmosAdmin::instance();
+        $userClass = $admin->model('UserProfileSearch');
+        return $userClass;
     }
 
     public static function getModuleIconName()
@@ -366,9 +446,9 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
     {
         parent::init();
 
-        \Yii::setAlias('@open20/amos/' . static::getModuleName() . '/controllers', __DIR__ . '/controllers/');
+        \Yii::setAlias('@open20/amos/'.static::getModuleName().'/controllers', __DIR__.'/controllers/');
         // initialize the module with the configuration loaded from config.php
-        \Yii::configure($this, require(__DIR__ . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php'));
+        \Yii::configure($this, require(__DIR__.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'config.php'));
 
         $this->confManager = new ConfigurationManager([
             'fieldsConfigurations' => $this->fieldsConfigurations
@@ -436,23 +516,23 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
     protected function getDefaultModels()
     {
         return [
-            'UserProfile' => __NAMESPACE__ . '\\' . 'models\UserProfile',
-            'UserContact' => __NAMESPACE__ . '\\' . 'models\UserContact',
-            'UserProfileStatiCivili' => __NAMESPACE__ . '\\' . 'models\UserProfileStatiCivili',
-            'UserProfileTitoliStudio' => __NAMESPACE__ . '\\' . 'models\UserProfileTitoliStudio',
+            'UserProfile' => __NAMESPACE__.'\\'.'models\UserProfile',
+            'UserContact' => __NAMESPACE__.'\\'.'models\UserContact',
+            'UserProfileStatiCivili' => __NAMESPACE__.'\\'.'models\UserProfileStatiCivili',
+            'UserProfileTitoliStudio' => __NAMESPACE__.'\\'.'models\UserProfileTitoliStudio',
             'User' => 'open20\amos\core\user\User',
             'IstatComuni' => 'open20\amos\comuni\models\IstatComuni',
             'IstatProvince' => 'open20\amos\comuni\models\IstatProvince',
             'IstatRegioni' => 'open20\amos\comuni\models\IstatRegioni',
             'IstatNazioni' => 'open20\amos\comuni\models\IstatNazioni',
-            'ForgotPasswordForm' => __NAMESPACE__ . '\\' . 'models\ForgotPasswordForm',
-            'LoginForm' => __NAMESPACE__ . '\\' . 'models\LoginForm',
-            'ProfileReactivationForm' => __NAMESPACE__ . '\\' . 'models\ProfileReactivationForm',
-            'RegisterForm' => __NAMESPACE__ . '\\' . 'models\RegisterForm',
+            'ForgotPasswordForm' => __NAMESPACE__.'\\'.'models\ForgotPasswordForm',
+            'LoginForm' => __NAMESPACE__.'\\'.'models\LoginForm',
+            'ProfileReactivationForm' => __NAMESPACE__.'\\'.'models\ProfileReactivationForm',
+            'RegisterForm' => __NAMESPACE__.'\\'.'models\RegisterForm',
             'Ruoli' => 'common\models\Ruoli',
-            'UserProfileSearch' => __NAMESPACE__ . '\\' . 'models\search\UserProfileSearch',
-            'UserContactSearch' => __NAMESPACE__ . '\\' . 'models\search\UserContactSearch',
-            'UserProfileTitoliStudioSearch' => __NAMESPACE__ . '\\' . 'models\search\UserProfileTitoliStudioSearch',
+            'UserProfileSearch' => __NAMESPACE__.'\\'.'models\search\UserProfileSearch',
+            'UserContactSearch' => __NAMESPACE__.'\\'.'models\search\UserContactSearch',
+            'UserProfileTitoliStudioSearch' => __NAMESPACE__.'\\'.'models\search\UserProfileTitoliStudioSearch',
         ];
     }
 
@@ -467,9 +547,11 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
      * @param bool|false $sendCredentials if credential mail must be sent to the newly created user
      * @return array
      */
-    public function createNewAccount($name, $surname, $email, $privacy, $sendCredentials = false, $community = null, $urlFirstAccessRedirectUrl = null)
+    public function createNewAccount($name, $surname, $email, $privacy, $sendCredentials = false, $community = null,
+                                     $urlFirstAccessRedirectUrl = null)
     {
-        return UserProfileUtility::createNewAccount($name, $surname, $email, $privacy, $sendCredentials, $community, $urlFirstAccessRedirectUrl);
+        return UserProfileUtility::createNewAccount($name, $surname, $email, $privacy, $sendCredentials, $community,
+                $urlFirstAccessRedirectUrl);
     }
 
     /**
@@ -480,33 +562,33 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
     {
         $connections = $serviceGoogle->people_connections->listPeopleConnections(
             'people/me', array('personFields' => 'photos,names,emailAddresses'));
-        $items = $connections->getTotalItems();
-        $message = AmosAdmin::t('amosadmin', 'Google contacts: {count}', ['count' => $items]);
-        $session = Yii::$app->session;
+        $items       = $connections->getTotalItems();
+        $message     = AmosAdmin::t('amosadmin', 'Google contacts: {count}', ['count' => $items]);
+        $session     = Yii::$app->session;
         if ($items) {
-            $contacts = [];
-            $inPlatform = [];
+            $contacts      = [];
+            $inPlatform    = [];
             $notInplatform = [];
-            $i = 0;
+            $i             = 0;
             /**  @var \Google_Service_PeopleService_Person $connection */
             foreach ($connections as $connection) {
-                $contact = [];
-                $names = [];
-                $photos = [];
+                $contact              = [];
+                $names                = [];
+                $photos               = [];
                 $names['displayName'] = ArrayHelper::getColumn($connection->getNames(), 'displayName');
-                $names['name'] = ArrayHelper::getColumn($connection->getNames(), 'givenName');
-                $names['surname'] = ArrayHelper::getColumn($connection->getNames(), 'familyName');
-                $photos['url'] = ArrayHelper::getColumn($connection->getPhotos(), 'url');
-                $emails = ArrayHelper::getColumn($connection->getEmailAddresses(), 'value');
-                $emails = array_unique($emails);
+                $names['name']        = ArrayHelper::getColumn($connection->getNames(), 'givenName');
+                $names['surname']     = ArrayHelper::getColumn($connection->getNames(), 'familyName');
+                $photos['url']        = ArrayHelper::getColumn($connection->getPhotos(), 'url');
+                $emails               = ArrayHelper::getColumn($connection->getEmailAddresses(), 'value');
+                $emails               = array_unique($emails);
                 foreach ($emails as $email) {
-                    $contact['email'] = $email;
-                    $contact['names'] = $names;
+                    $contact['email']  = $email;
+                    $contact['names']  = $names;
                     $contact['photos'] = $photos;
-                    $user = User::findByEmail($email);
+                    $user              = User::findByEmail($email);
                     if (!is_null($user)) {
                         $contact['user_id'] = $user->id;
-                        $inPlatform[] = $user->id;
+                        $inPlatform[]       = $user->id;
                     } else {
                         $notInplatform[] = $i;
                     }
@@ -518,7 +600,8 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
                     $session->set(self::GOOGLE_CONTACTS_NOT_PLATFORM, $notInplatform);
                 }
             }
-            $message .= '<br/>' . AmosAdmin::t('amosadmin', 'Registered in \'{appName}\': {count}', ['appName' => \Yii::$app->name, 'count' => count($inPlatform)]);
+            $message .= '<br/>'.AmosAdmin::t('amosadmin', 'Registered in \'{appName}\': {count}',
+                    ['appName' => \Yii::$app->name, 'count' => count($inPlatform)]);
         }
         return $message;
     }
@@ -546,7 +629,7 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
         $socialAuth = Yii::$app->getModule('socialauth');
         if (!is_null($socialAuth)) {
             if (is_null($id)) {
-                $userId = Yii::$app->user->id;
+                $userId  = Yii::$app->user->id;
                 $profile = UserProfile::findOne(['user_id' => $userId]);
             } else {
                 $profile = UserProfile::findOne($id);
@@ -564,8 +647,14 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
         return null;
     }
 
-    public static function getModelClassName() {
-        return __NAMESPACE__ . '\models\UserProfile';
+    public static function getModelClassName()
+    {
+        return __NAMESPACE__.'\models\UserProfile';
     }
 
+    //nuovo metodo controllo su blacklist
+    public function checkManageInviteBlackList()
+    {
+        return in_array(\Yii::$app->controller->action->id, $this->actionBlacklistManageInvite);
+    }
 }

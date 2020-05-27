@@ -56,8 +56,13 @@ class FirstAccessWizard implements BootstrapInterface
                 $data_limite     = new \DateTime('2018-07-05');
                 if (empty($userProfile->first_access_redirect_url)) {
                     $userProfileWizard = new FirstAccessWizardComponent();
-                    $showWizard        = $userProfileWizard->showWizard();
-                    if (!is_null($showWizard)) {
+                    if($adminModule->disableFirstAccesWizard){
+                        $show        = $userProfileWizard->showMessageCompleteProfile();
+                    }
+                    else {
+                        $show        = $userProfileWizard->showWizard();
+                    }
+                    if (!is_null($show)) {
                         \Yii::$app->response->send();
                     }
                 } elseif ($data_iscrizione > $data_limite && ($userProfile->first_access_redirect_url == '/community/join?id=2751'

@@ -27,10 +27,18 @@ $enableExternalFacilitator = $adminModule->enableExternalFacilitator;
 
 /** @var \open20\amos\admin\models\UserProfile $facilitatorUserProfile */
 $facilitatorUserProfile = $model->facilitatore; // Non modificare! Dev'essere usata la relazione!!!
-$titleBox = AmosAdmin::t('amosadmin', 'The facilitator');
-$url = '/admin/user-profile/associate-facilitator';
+$titleBox = AmosAdmin::t('amosadmin', 'External facilitator in platform');
+$url = '/admin/user-profile/send-request-external-facilitator';
 $isRequestPending = false;
 $facilitatorRequest = null;
+
+
+$facilitatorUserProfile = $model->externalFacilitator;
+$facilitatorRequest = $model->userProfileExternalFacilitator;
+if ($facilitatorRequest && $facilitatorRequest->status == \open20\amos\admin\models\UserProfileExternalFacilitator::EXTERNAL_FACILITATOR_REQUEST) {
+    $isRequestPending = true;
+}
+
 
 ?>
 
@@ -52,7 +60,7 @@ $facilitatorRequest = null;
 
         <div class="col-xs-12 ">
             <div class="col-xs-12 facilitator-id m-t-15">
-                <?php if ($model->isNewRecord): ?>
+                <?php if ($model->isNewRecord) { ?>
                     <div class="m-t-20">
                         <?= Alert::widget([
                             'type' => Alert::TYPE_WARNING,
@@ -60,8 +68,13 @@ $facilitatorRequest = null;
                             'closeButton' => false
                         ]); ?>
                     </div>
-                <?php else: ?>
-                    <?php if (!is_null($facilitatorUserProfile)): ?>
+                <?php } else { ?>
+                    <?php  if ($isRequestPending) { ?>
+                        <p><?= AmosAdmin::tHtml('amosadmin', '<strong>Richiesta inviata:</strong> in attesa di risposta da <strong>{nomeCognome}</strong>', [
+                                'nomeCognome' => $facilitatorRequest->externalFacilitator->nomeCognome
+                            ]) ?>
+                        </p>
+                    <?php } else if (!is_null($facilitatorUserProfile)) { ?>
                         <!--                        <div class="col-sm-1 col-xs-4 m-t-10 m-b-10">-->
                         <?php
                         Yii::$app->imageUtility->methodGetImageUrl = "getAvatarUrl";
@@ -89,15 +102,15 @@ $facilitatorRequest = null;
                         <p><?= Html::tag('span', AmosAdmin::t('amosadmin', 'Nome')) . Html::tag('span', $facilitatorUserProfile->nome); ?></p>
                         <p><?= Html::tag('span', AmosAdmin::t('amosadmin', 'Cognome')) . Html::tag('span', $facilitatorUserProfile->cognome); ?></p>
                         <p><?= Html::tag('span', AmosAdmin::t('amosadmin', 'Prevalent partnership')) . $prevalentPartnershipName ?></p>
-                        <?php if (!$enableExternalFacilitator || ($enableExternalFacilitator && \Yii::$app->user->can('ADMIN'))) { ?>
-                            <p><?= Html::a(AmosAdmin::t('amosadmin', 'Change facilitator'), [$url, 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true, 'external' => $external]) ?></p>
-                            <!--                        </div>-->
-                        <?php } ?>
-                    <?php else: ?>
+                        <p><?= Html::a(AmosAdmin::t('amosadmin', 'Change facilitator'), [$url, 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true, 'external' => $external]) ?></p>
+                        <!--                        </div>-->
+                    <?php } else {  ?>
                             <p><?= AmosAdmin::tHtml('amosadmin', 'Facilitator not selected') ?></p>
                             <p><?= Html::a(AmosAdmin::t('amosadmin', 'Select facilitator'), [$url, 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true, 'external' => $external]) ?></p>
-                    <?php endif; ?>
-                <?php endif; ?>
+                        <?php
+                    }
+                }
+                ?>
             </div>
         </div>
     </div>

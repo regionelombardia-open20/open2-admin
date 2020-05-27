@@ -94,7 +94,7 @@ class UserContact extends AmosRecordAudit
      */
     public function getUserProfile()
     {
-        return $this->hasOne(\open20\amos\admin\models\UserProfile::className(), ['user_id' => 'user_id']);
+        return $this->hasOne(AmosAdmin::instance()->model('UserProfile'), ['user_id' => 'user_id']);
     }
 
     /**
@@ -102,6 +102,6 @@ class UserContact extends AmosRecordAudit
      */
     public function getContactUserProfile()
     {
-        return $this->hasOne(\open20\amos\admin\models\UserProfile::className(), ['user_id' => 'contact_id']);
+        return $this->hasOne(AmosAdmin::instance()->model('UserProfile'), ['user_id' => 'contact_id']);
     }
 }

@@ -21,6 +21,7 @@ use open20\amos\core\helpers\Html;
 use open20\amos\core\icons\AmosIcons;
 use open20\amos\core\user\User;
 use open20\amos\core\utilities\Email;
+use open20\amos\notificationmanager\AmosNotify;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\AccessRule;
@@ -114,9 +115,9 @@ class UserContactController extends CrudController
         $this->setUpLayout();
         
         $this->setMmTableName(UserContact::className());
-        $this->setStartObjClassName(UserProfile::className());
+        $this->setStartObjClassName(AmosAdmin::instance()->model('UserProfile'));
         $this->setMmStartKey('user_id');
-        $this->setTargetObjClassName(UserProfile::className());
+        $this->setTargetObjClassName(AmosAdmin::instance()->model('UserProfile'));
         $this->setMmTargetKey('id');
         $this->setRedirectAction('update');
         $this->setOptions(['#' => 'tab-network']);
@@ -242,10 +243,17 @@ class UserContactController extends CrudController
                     $url = Yii::$app->urlManager->createAbsoluteUrl('myactivities/my-activities/index');
                 }
             } else {
-                $tos = [$user->email];
-                $contactProfile = $invitedUser->getProfile();
-                $message = AmosAdmin::t('amosadmin',"accepted your connection invitation and is now active in your contact list");
-                $messageLink = AmosAdmin::t('amosadmin', "and open the network section in your profile to check the status of your contacts");
+                /** @var AmosNotify $notifyModule */
+                $notifyModule = Yii::$app->getModule('notify');
+                if ($notifyModule && $notifyModule->hasMethod('contactAccepted')) {
+                    $notifyModule->contactAccepted($user, $invitedUser);
+                    return;                    
+                } else {
+                    $tos = [$user->email];
+                    $contactProfile = $invitedUser->getProfile();
+                    $message = AmosAdmin::t('amosadmin',"accepted your connection invitation and is now active in your contact list");
+                    $messageLink = AmosAdmin::t('amosadmin', "and open the network section in your profile to check the status of your contacts");
+                }
             }
             if (!isset($url)){
                 $url = Yii::$app->urlManager->createAbsoluteUrl('dashboard');

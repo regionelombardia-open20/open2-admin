@@ -234,6 +234,8 @@ If true enable a link on single user useful to invite a user to a published even
 * **createContentInMyOwnCommunityOnly** - boolean, default = false
 If true the validate basic user can create contents only in his/her own Communities
 
+* **actionBlacklistManageInvite** - array, default = [] 
+Array used for checking that action controller can use invitation button.
 
 ### How to use Token groups 
 First create the token group and the you can use the following functions. 
