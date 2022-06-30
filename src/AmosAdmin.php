@@ -271,6 +271,11 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
     public $enableMultiUsersSameCF = false;
 
     /**
+     * @var bool $enableUserCanChangeProfile If true the logged user can change profile with another with the same fiscal code. Require enableMultiUsersSameCF = true.
+     */
+    public $enableUserCanChangeProfile = false;
+
+    /**
      * @var bool $bypassRequiredForAdmin If true the required fields for logged user admin is only name and surname when update another user.
      */
     public $bypassRequiredForAdmin = true;
@@ -548,6 +553,7 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
     protected function getDefaultModels()
     {
         return [
+            'ChangeUserCreateForm' => __NAMESPACE__ . '\\' . 'models\ChangeUserCreateForm',
             'UserProfile' => __NAMESPACE__ . '\\' . 'models\UserProfile',
             'UserContact' => __NAMESPACE__ . '\\' . 'models\UserContact',
             'UserProfileStatiCivili' => __NAMESPACE__ . '\\' . 'models\UserProfileStatiCivili',
@@ -563,10 +569,23 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
             'RegisterForm' => __NAMESPACE__ . '\\' . 'models\RegisterForm',
             'CambiaPasswordForm' => __NAMESPACE__ . '\\' . 'models\CambiaPasswordForm',
             'Ruoli' => 'common\models\Ruoli',
+            'ChangeUserSearch' => __NAMESPACE__ . '\\' . 'models\search\ChangeUserSearch',
             'UserProfileSearch' => __NAMESPACE__ . '\\' . 'models\search\UserProfileSearch',
             'UserContactSearch' => __NAMESPACE__ . '\\' . 'models\search\UserContactSearch',
             'UserProfileTitoliStudioSearch' => __NAMESPACE__ . '\\' . 'models\search\UserProfileTitoliStudioSearch',
         ];
+    }
+    
+    /**
+     * @return bool
+     */
+    public function loggedUserCanChangeProfile()
+    {
+        return (
+            $this->enableUserCanChangeProfile &&
+            $this->enableMultiUsersSameCF &&
+            Yii::$app->user->can('CHANGE_USER_PROFILE')
+        );
     }
 
     /**

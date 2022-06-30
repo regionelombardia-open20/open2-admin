@@ -618,3 +618,79 @@ same as amos-layout form default style
 /**
 end user profile ajax
  */
+
+ //GRAFICA CAMBIO UTENTE
+.change-user-index {
+  margin-top: 30px;
+  div[data-role="list-view"] {
+    display: flex;
+    flex-wrap: wrap;
+    .change-user-card-container {
+      position: relative;
+      background-color: #D8D8D8;
+      margin: 30px 0;
+      padding: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      min-height: 200px;
+      .change-user-card-img {
+        display: flex;
+        .container-round-img {
+          border-radius: 0;
+          width: 100px;
+          height: 100px;
+          overflow: hidden;
+          background-color: #fff;
+          margin: 0;
+          border: 1px solid #d8d8d8;
+          z-index: 2;
+          margin-top: -60px;
+          a {
+            display: flex;
+            height: 100%;
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+        }
+        }
+        .change-user-organization {
+          font-weight: bold;
+          padding-left: 10px;
+          /* width: 60%; */
+        }
+      }
+      .change-user-card-body {
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: auto;
+        .change-user-card-info {
+          display: flex;
+          strong {
+            margin-right: 5px;
+          }
+          span {
+            word-break: break-word;
+          }
+        }
+        .change-user-cta {
+          margin-top: 15px;
+          text-transform: uppercase;
+          font-weight: bold;
+          width: 100%;
+          &:not(.btn) {
+            line-height: 1.42857143;
+            padding-top: 6px;
+            padding-bottom: 6px;
+          }
+          .am-check-circle {
+            color: lighten(@primary-color,15%);
+            border-radius: 50%;
+            background-color: white;
+          }
+        }
+      }
+    }
+  }
+}
