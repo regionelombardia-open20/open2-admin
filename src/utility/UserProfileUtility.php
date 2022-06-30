@@ -602,11 +602,12 @@ class UserProfileUtility
     }
 
     /**
-     * A social-aut is on and someone ask for a sign-in or sign-up action?
+     * A social-auth is on and someone ask for a sign-in or sign-up action?
      * 
-     * @param type $model
-     * @param type $userProfile
-     * @return boolean
+     * @param UserProfile $userProfile
+     * @return bool
+     * @throws \open20\amos\cwh\exceptions\CwhException
+     * @throws \yii\base\InvalidConfigException
      */
     public static function updateTagTreesAfterUserCreation($userProfile)
     {
@@ -635,7 +636,8 @@ class UserProfileUtility
             $providers = array_change_key_case($socialModule->providers);
 
             $tagsTreeCodes = $providers[$provider]['syncronizeTagsTreeCodes'];
-
+    
+            /** @var Tag $rootTagNode */
             $rootTagNode = Tag::find()
                 ->select(['root', 'codice', 'deleted_at'])
                 ->where([
@@ -645,27 +647,30 @@ class UserProfileUtility
                 ->one();
 
             if (!empty($rootTagNode)) {
-                $tagTable = Tag::tableName();
                 $tagsCode = $socialProfile->tagscode;
-
-                foreach($tagsCode as $code) {
-                    $tag = Tag::find()
-                        ->andWhere(['codice' => $code])
-                        ->andWhere(['root' => $rootTagNode->root])
-                        ->one();
-
-                    if (!(empty($tag))) {
-                        CwhUtil::addNewUserInterest(
-                            $tag,
-                            $userProfile->id
-                        );
+                if (!empty($tagsCode)) {
+                    $userInterestsTagIds = CwhUtil::findInterestTagIdsByUser($userProfile->id);
+    
+                    foreach($tagsCode as $code) {
+                        /** @var Tag $tag */
+                        $tag = Tag::find()
+                            ->andWhere(['codice' => $code])
+                            ->andWhere(['root' => $rootTagNode->root])
+                            ->one();
+        
+                        if (!empty($tag) && !in_array($tag->id, $userInterestsTagIds)) {
+                            CwhUtil::addNewUserInterest(
+                                $tag,
+                                $userProfile->id
+                            );
+                        }
                     }
                 }
             }
         }
+        
+        return true;
     }
-
-
 
     /**
      * @param null $user_id
