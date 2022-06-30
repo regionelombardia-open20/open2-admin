@@ -328,7 +328,7 @@ class UserProfileUtility
      * @param \open20\amos\community\models\Community $model
      * @return bool
      */
-    public static function sendCredentialsMail($model, $community = null, $module_name = null)
+    public static function sendCredentialsMail($model, $community = null, $module_name = null, $socialAccount = false)
     {
         try {
             $model->user->generatePasswordResetToken();
@@ -337,8 +337,8 @@ class UserProfileUtility
             $adminModule = \Yii::$app->getModule((empty($module_name)? AmosAdmin::getModuleName() : $module_name));
             $subjectView = $adminModule->htmlMailSubject;
             $contentView = $adminModule->htmlMailContent;
-            $subject = Email::renderMailPartial($subjectView, ['profile' => $model], $model->user->id);
-            $mail = Email::renderMailPartial($contentView, ['profile' => $model, 'community' => $community], $model->user->id);
+            $subject = Email::renderMailPartial($subjectView, ['profile' => $model, 'socialAccount' => $socialAccount], $model->user->id);
+            $mail = Email::renderMailPartial($contentView, ['profile' => $model, 'community' => $community, 'socialAccount' => $socialAccount], $model->user->id);
             return Email::sendMail(Yii::$app->params['supportEmail'], [$model->user->email], $subject, $mail, []);
         } catch (\Exception $ex) {
             \Yii::getLogger()->log($ex->getMessage(), \yii\log\Logger::LEVEL_ERROR);

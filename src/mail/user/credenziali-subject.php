@@ -13,6 +13,7 @@ use open20\amos\admin\utility\UserProfileUtility;
 
 /**
  * @var \open20\amos\admin\models\UserProfile $profile
+ * @var bool $socialAccount
  */
 
 ?>

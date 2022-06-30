@@ -511,6 +511,8 @@ class SecurityController extends BackendController
 
         // Pre-compile with SPID session data
         $spidData = \Yii::$app->session->get('IDM');
+        
+        $socialAccount = false;
 
         if (!empty($getParams['name']) && !empty($getParams['surname']) && !empty($getParams['email'])) {
             $model->nome = $getParams['name'];
@@ -520,10 +522,12 @@ class SecurityController extends BackendController
             $model->nome = $socialProfile->firstName;
             $model->cognome = $socialProfile->lastName;
             $model->email = $socialProfile->email;
+            $socialAccount = true;
         } elseif ($spidData && $spidData['emailAddress']) {
             $model->nome = $spidData['nome'];
             $model->cognome = $spidData['cognome'];
             $model->email = $spidData['emailAddress'];
+            $socialAccount = true;
         }
     
         if ($this->adminModule->enableDlSemplification && !$spidData) {
@@ -638,7 +642,7 @@ class SecurityController extends BackendController
                 }
             }
 
-            $sent = UserProfileUtility::sendCredentialsMail($newUserProfile, $community);
+            $sent = UserProfileUtility::sendCredentialsMail($newUserProfile, $community, null, $socialAccount);
 
             if (!$sent) {
                 //Yii::$app->session->addFlash('danger', AmosAdmin::t('amosadmin', '#error_send_register_mail'));
@@ -660,6 +664,9 @@ class SecurityController extends BackendController
                 if ($this->adminModule->enableDlSemplification) {
                     $msg1 .= '_dl_semplification';
                     $msg2 .= '_dl_semplification';
+                } elseif ($socialAccount) {
+                    $msg1 .= '_social_registration';
+                    $msg2 .= '_social_registration';
                 }
                 
                 return $this->render('security-message', [
