@@ -44,7 +44,7 @@ $this->registerJs($js, View::POS_READY);
 ?>
 
 <section class="account-admin-section col-xs-12 nop">
-    <h2>
+    <h2 class="subtitle-form">
         <!--        < ?= AmosIcons::show('account') ?>-->
         <?= AmosAdmin::t('amosadmin', 'Account'); ?>
     </h2>
@@ -94,7 +94,7 @@ $this->registerJs($js, View::POS_READY);
     <div class="clearfix"></div>
 </section>
 <section class="m-t-30">
-    <h2>
+    <h2 >
         <!--        < ?= AmosIcons::show('account') ?>-->
         <?= AmosAdmin::t('amosadmin', 'Delete Account'); ?>
     </h2>

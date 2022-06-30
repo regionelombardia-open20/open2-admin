@@ -30,7 +30,7 @@ $enableAutoOpenSearchPanel = !isset(\Yii::$app->params['enableAutoOpenSearchPane
 ?>
 
 <div class="user-profile-search element-to-toggle" data-toggle-element="form-search">
-    <div class="col-xs-12"><h2><?= AmosAdmin::t('amosadmin', 'Search by') ?>:</h2></div>
+    <div class="col-xs-12"><p class="h3"><?= AmosAdmin::t('amosadmin', 'Search by') ?>:</p></div>
     <?php
     $form = ActiveForm::begin([
         'action' => (isset($originAction) ? [$originAction] : ['index']),
@@ -98,7 +98,7 @@ $enableAutoOpenSearchPanel = !isset(\Yii::$app->params['enableAutoOpenSearchPane
             </div>
         <?php } ?>
 
-        <?php if (!$adminModule->bypassWorkflow) { ?>
+        <?php if (!$adminModule->bypassWorkflow && !$adminModule->completeBypassWorkflow) { ?>
             <div class="col-sm-6 col-lg-3">
                 <?= $form->field($model, 'userProfileStatus')->dropDownList($appController->getWorkflowStatuses($model),
                     ['prompt' => AmosAdmin::t('amosadmin', 'Select/Choose') . '...', 'disabled' => false]);

@@ -13,6 +13,7 @@ namespace open20\amos\admin\events;
 
 use open20\amos\admin\AmosAdmin;
 use open20\amos\admin\models\UserProfile;
+use open20\amos\admin\models\UserProfileValidationNotify;
 use open20\amos\admin\utility\UserProfileMailUtility;
 use Yii;
 use yii\base\Event;
@@ -48,14 +49,30 @@ class AdminWorkflowEvent implements AdminWorkflowEventInterface
             }
         }
     }
-
+    
     /**
      * @param Event $event
      */
-    public function afterEnterStatusNotValidated(Event $event){
+    public function afterEnterStatusValidated(Event $event)
+    {
         $userProfile = $event->data;
-        return UserProfileMailUtility::sendEmailValidationRejected($userProfile);
+        /** @var UserProfileValidationNotify $newModel */
+        $newModel = AmosAdmin::instance()->createModel('UserProfileValidationNotify');
+        $newModel::createNotify($userProfile->user_id, UserProfileValidationNotify::STATUS_ACTIVE);
     }
+    
+    /**
+     * @param Event $event
+     */
+    public function afterEnterStatusNotValidated(Event $event)
+    {
+        $userProfile = $event->data;
+        /** @var UserProfileValidationNotify $newModel */
+        $newModel = AmosAdmin::instance()->createModel('UserProfileValidationNotify');
+        $newModel::createNotify($userProfile->user_id, UserProfileValidationNotify::STATUS_DISABLED);
+        UserProfileMailUtility::sendEmailValidationRejected($userProfile);
+    }
+    
     /**
      * @param Event $event
      */

@@ -23,6 +23,7 @@ use raoul2000\workflow\base\SimpleWorkflowBehavior;
 use Yii;
 use yii\db\Expression;
 use yii\db\Query;
+use yii\log\Logger;
 
 /**
  * Class UserProfileUtility
@@ -75,7 +76,7 @@ class UserProfileUtility
      * @param string $email
      * @param string $community Community
      * @param int $privacy default Not Accepted
-     * @return array Error or user id
+     * @return array Error or user object
      */
     public static function createNewAccount($name, $surname, $email, $privacy = 0, $sendCredentials = false, $community = null, $urlFirstAccessRedirectUrl = null, $module_name = null)
     {
@@ -83,6 +84,7 @@ class UserProfileUtility
 
         if (!$user || $user->hasErrors()) {
             return [
+                'userId' => 0,
                 'error' => self::UNABLE_TO_CREATE_USER_ERROR,
                 'messages' => $user->getErrors()
             ];
@@ -92,6 +94,7 @@ class UserProfileUtility
 
         if (!$userProfile || $userProfile->hasErrors()) {
             return [
+                'userId' => $user->id,
                 'error' => self::UNABLE_TO_CREATE_USER_PROFILE_ERROR,
                 'messages' => $userProfile->getErrors()
             ];
@@ -102,6 +105,7 @@ class UserProfileUtility
 
         if (!$ok) {
             return [
+                'userId' => $user->id,
                 'error' => self::UNABLE_TO_ASSIGN_USER_ROLES_ERROR
             ];
         }
@@ -112,6 +116,7 @@ class UserProfileUtility
             $ok = $notifyModule->setDefaultNotificationsConfs($user->id);
             if (!$ok) {
                 return [
+                    'userId' => $user->id,
                     'error' => self::UNABLE_TO_SAVE_USER_NOTIFICATIONS_CONFS
                 ];
             }
@@ -140,7 +145,7 @@ class UserProfileUtility
         $user->status = User::STATUS_ACTIVE;
         $user->email = $email;
         /** @var AmosAdmin $adminModule */
-        $adminModule = Yii::$app->getModule((empty($module_name)? AmosAdmin::getModuleName() : $module_name));
+        $adminModule = Yii::$app->getModule((empty($module_name) ? AmosAdmin::getModuleName() : $module_name));
         if (!$adminModule->userCanSelectUsername) {
             if (!empty($username) && is_string($username)) {
                 $user->username = $username;
@@ -221,6 +226,56 @@ class UserProfileUtility
     }
 
     /**
+     * @param User $user
+     * @return mixed
+     */
+    public static function maskUserProfileData($user)
+    {
+        $profile = $user->userProfile;
+        self::maskProfileData($profile);
+        $user = self::maskUserData($user);
+        return $user;
+    }
+
+    /**
+     * @param User $user
+     * @return mixed
+     */
+    public static function maskUserData($user)
+    {
+        $user->username = UserProfileUtility::DELETED_ACCOUNT_USERNAME_PREFIX . $user->id;
+        $user->auth_key = '';
+        $user->password_hash = '';
+        $user->email = UserProfileUtility::makeDeletedUserEmail($user->id);
+        $user->save(false);
+        return $user;
+    }
+
+    /**
+     * @param UserProfile $profile
+     * @return mixed
+     */
+    public static function maskProfileData($profile)
+    {
+        $blackList = ['id', 'nome', 'cognome', 'user_id', 'attivo', 'status', 'created_at', 'updated_at', 'deleted_at', 'created_by', 'updated_by', 'deleted_by', 'default_facilitatore'];
+        $profile->nome = self::DELETED_ACCOUNT_NAME;
+        $profile->cognome = self::DELETED_ACCOUNT_SURNAME;
+        $profileAtributes = $profile->attributes;
+        foreach ($profileAtributes as $attribute => $value) {
+            if (!in_array($attribute, $blackList)) {
+                $profile->$attribute = null;
+            }
+        }
+        // delete profile image
+        $image = $profile->getUserProfileImage();
+        if (!empty($image)) {
+            $image->delete();
+        }
+        $profile->save(false);
+        return $profile;
+    }
+
+    /**
      * This method create new UserProfile only with the name and surname.
      * @param User $user
      * @param string $name
@@ -228,10 +283,10 @@ class UserProfileUtility
      * @param int $privacy default Not Accepted
      * @return UserProfile
      */
-    public static function createNewUserProfile($user, $name, $surname, $privacy = 0,$urlFirstAccessRedirectUrl = null, $module_name = null)
+    public static function createNewUserProfile($user, $name, $surname, $privacy = 0, $urlFirstAccessRedirectUrl = null, $module_name = null)
     {
         /** @var AmosAdmin $adminModule */
-        $adminModule = \Yii::$app->getModule((empty($module_name)? AmosAdmin::getModuleName() : $module_name));
+        $adminModule = \Yii::$app->getModule((empty($module_name) ? AmosAdmin::getModuleName() : $module_name));
         /** @var UserProfile $userProfile */
         $userProfile = $adminModule->createModel('UserProfile');
         $userProfile->setScenario(UserProfile::SCENARIO_CREATE_NEW_ACCOUNT);
@@ -242,7 +297,7 @@ class UserProfileUtility
         $userProfile->user_id = $user->id;
         $userProfile->first_access_redirect_url = $urlFirstAccessRedirectUrl;
         $userProfile->attivo = UserProfile::STATUS_ACTIVE;
-        if ($adminModule->bypassWorkflow) {
+        if ($adminModule->bypassWorkflow || $adminModule->completeBypassWorkflow) {
             $userProfile->validato_almeno_una_volta = 1;
         }
         $userProfile->status = $userProfile->getWorkflowSource()->getWorkflow(UserProfile::USERPROFILE_WORKFLOW)->getInitialStatusId();
@@ -288,7 +343,7 @@ class UserProfileUtility
     public static function setBasicUserRoleToUser($userId, $module_name = null)
     {
         /** @var AmosAdmin $adminModule */
-        $adminModule = \Yii::$app->getModule((empty($module_name)? AmosAdmin::getModuleName() : $module_name));
+        $adminModule = \Yii::$app->getModule((empty($module_name) ? AmosAdmin::getModuleName() : $module_name));
         $basicUserRole = \Yii::$app->getAuthManager()->getRole($adminModule->defaultUserRole);
         if (is_null($basicUserRole)) {
             return false;
@@ -297,6 +352,7 @@ class UserProfileUtility
         try {
             \Yii::$app->getAuthManager()->assign($basicUserRole, $userId);
         } catch (\Exception $exception) {
+            \Yii::getLogger()->log($exception->getMessage(), Logger::LEVEL_ERROR);
             $ok = false;
         }
         return $ok;
@@ -325,30 +381,32 @@ class UserProfileUtility
 
     /**
      * @param UserProfile $model
-     * @param \open20\amos\community\models\Community $model
+     * @param \open20\amos\community\models\Community|null $community
+     * @param string|null $module_name
+     * @param bool $socialAccount
      * @return bool
      */
-    public static function sendCredentialsMail($model, $community = null, $module_name = null)
+    public static function sendCredentialsMail($model, $community = null, $module_name = null, $socialAccount = false)
     {
         try {
             $model->user->generatePasswordResetToken();
             $model->user->save(false);
             /** @var AmosAdmin $adminModule */
-            $adminModule = \Yii::$app->getModule((empty($module_name)? AmosAdmin::getModuleName() : $module_name));
+            $adminModule = \Yii::$app->getModule((empty($module_name) ? AmosAdmin::getModuleName() : $module_name));
             $subjectView = $adminModule->htmlMailSubject;
             $contentView = $adminModule->htmlMailContent;
-            $subject = Email::renderMailPartial($subjectView, ['profile' => $model], $model->user->id);
-            $mail = Email::renderMailPartial($contentView, ['profile' => $model, 'community' => $community], $model->user->id);
-            return Email::sendMail(Yii::$app->params['supportEmail'], [$model->user->email], $subject, $mail, []);
+            $subject = Email::renderMailPartial($subjectView, ['profile' => $model, 'socialAccount' => $socialAccount], $model->user->id);
+            $mail = Email::renderMailPartial($contentView, ['profile' => $model, 'community' => $community, 'socialAccount' => $socialAccount], $model->user->id);
+            return Email::sendMail(Yii::$app->params['supportEmail'], [$model->user->email], $subject, $mail, [], [], ['profile' => $model, 'community' => $community, 'socialAccount' => $socialAccount]);
         } catch (\Exception $ex) {
-            \Yii::getLogger()->log($ex->getMessage(), \yii\log\Logger::LEVEL_ERROR);
+            \Yii::getLogger()->log($ex->getMessage(), Logger::LEVEL_ERROR);
         }
         return false;
     }
 
     /**
      * @param UserProfile $model
-     * @param \open20\amos\community\models\Community $model
+     * @param \open20\amos\community\models\Community|null $community
      * @param string $urlPrevious
      * @return bool
      */
@@ -357,17 +415,17 @@ class UserProfileUtility
         try {
             $model->user->generatePasswordResetToken();
             $model->user->save(false);
-            
+
             /** @var AmosAdmin $adminModule */
-            $adminModule = \Yii::$app->getModule((empty($module_name)? AmosAdmin::getModuleName() : $module_name));
+            $adminModule = \Yii::$app->getModule((empty($module_name) ? AmosAdmin::getModuleName() : $module_name));
             $subjectView = $adminModule->htmlMailForgotPasswordSubjectView;
             $contentView = $adminModule->htmlMailForgotPasswordView;
 
             $subject = Email::renderMailPartial($subjectView, ['profile' => $model], \Yii::$app->getUser()->id);
             $mail = Email::renderMailPartial($contentView, ['profile' => $model, 'community' => $community, 'urlPrevious' => $urlPrevious], \Yii::$app->getUser()->id);
-            return Email::sendMail(Yii::$app->params['supportEmail'], [$model->user->email], $subject, $mail, []);
+            return Email::sendMail(Yii::$app->params['supportEmail'], [$model->user->email], $subject, $mail, [], [], ['profile' => $model, 'community' => $community, 'urlPrevious' => $urlPrevious]);
         } catch (\Exception $ex) {
-            \Yii::getLogger()->log($ex->getMessage(), \yii\log\Logger::LEVEL_ERROR);
+            \Yii::getLogger()->log($ex->getMessage(), Logger::LEVEL_ERROR);
         }
         return false;
     }
@@ -581,7 +639,8 @@ class UserProfileUtility
     /**
      * @param $model UserProfile
      */
-    public static function deassignRoleFacilitator($model){
+    public static function deassignRoleFacilitator($model)
+    {
         if (\Yii::$app->authManager->checkAccess($model->user_id, 'FACILITATOR')) {
             $roleFacilitator = \Yii::$app->authManager->getRole('FACILITATOR');
             if ($roleFacilitator) {
@@ -603,7 +662,7 @@ class UserProfileUtility
 
     /**
      * A social-auth is on and someone ask for a sign-in or sign-up action?
-     * 
+     *
      * @param UserProfile $userProfile
      * @return bool
      * @throws \open20\amos\cwh\exceptions\CwhException
@@ -611,18 +670,22 @@ class UserProfileUtility
      */
     public static function updateTagTreesAfterUserCreation($userProfile)
     {
+        if (\Yii::$app instanceof \yii\console\Application) {
+            return true;
+        }
+
         // Cwh module is on?
         $cwhModule = Yii::$app->getModule('cwh');
-        
+
         // Tag module is on?
         $tagModule = Yii::$app->getModule('tag');
-        
+
         // Social Auth is on?
         $socialModule = Yii::$app->getModule('socialauth');
-        
+
         //Get current provider from session
         $provider = Yii::$app->session->get('social-pending');
-        
+
         if ((empty($provider)) || (empty($tagModule)) || (empty($socialModule)) || (empty($cwhModule))) {
             return false;
         }
@@ -636,7 +699,7 @@ class UserProfileUtility
             $providers = array_change_key_case($socialModule->providers);
 
             $tagsTreeCodes = $providers[$provider]['syncronizeTagsTreeCodes'];
-    
+
             /** @var Tag $rootTagNode */
             $rootTagNode = Tag::find()
                 ->select(['root', 'codice', 'deleted_at'])
@@ -650,14 +713,14 @@ class UserProfileUtility
                 $tagsCode = $socialProfile->tagscode;
                 if (!empty($tagsCode)) {
                     $userInterestsTagIds = CwhUtil::findInterestTagIdsByUser($userProfile->id);
-    
-                    foreach($tagsCode as $code) {
+
+                    foreach ($tagsCode as $code) {
                         /** @var Tag $tag */
                         $tag = Tag::find()
                             ->andWhere(['codice' => $code])
                             ->andWhere(['root' => $rootTagNode->root])
                             ->one();
-        
+
                         if (!empty($tag) && !in_array($tag->id, $userInterestsTagIds)) {
                             CwhUtil::addNewUserInterest(
                                 $tag,
@@ -668,7 +731,7 @@ class UserProfileUtility
                 }
             }
         }
-        
+
         return true;
     }
 
@@ -678,13 +741,26 @@ class UserProfileUtility
      */
     public static function isSpidConnected($user_id = null)
     {
-        if(empty($user_id)){
+        if (empty($user_id)) {
             $user_id = \Yii::$app->user->id;
         }
         $module = \Yii::$app->getModule('socialauth');
         if ($module) {
-            $count =  \open20\amos\socialauth\models\SocialIdmUser::find()->andWhere(['user_id' => $user_id])->count();
-            return $count > 0;
+            /** @var UserProfile $userProfileModel */
+            $userProfileModel = AmosAdmin::instance()->createModel('UserProfile');
+            /** @var UserProfile $userProfile */
+            $userProfile = $userProfileModel::findOne(['user_id' => $user_id]);
+            if (is_null($userProfile)) {
+                return false;
+            }
+            $mainUserProfile = $userProfile->mainUserProfile;
+            // If it's not null it means that the $userProfile isn't the main profile.
+            // Then sets the $user_id with the main user profile linked to the spid account.
+            if (!is_null($mainUserProfile)) {
+                $user_id = $mainUserProfile->user_id;
+            }
+            $count = \open20\amos\socialauth\models\SocialIdmUser::find()->andWhere(['user_id' => $user_id])->count();
+            return ($count > 0);
         }
         return false;
     }
@@ -718,10 +794,11 @@ class UserProfileUtility
     /**
      * @return bool
      */
-    public static function isExpiredDateDlSemplification(){
+    public static function isExpiredDateDlSemplification()
+    {
         $expireDate = new \DateTime('2021-10-01 00:00:00');
         $now = new \DateTime();
-        if($now >= $expireDate){
+        if ($now >= $expireDate) {
             return true;
         }
         return false;
@@ -743,7 +820,7 @@ class UserProfileUtility
                 if (!UserProfileUtility::isSpidConnected()) {
                     $pwdExpired = UserProfileUtility::isPasswordExpired(Yii::$app->user->id);
                     $dateDlExpired = UserProfileUtility::isExpiredDateDlSemplification();
-                    
+
                     if ($pwdExpired || $dateDlExpired) {
                         return true;
                     }

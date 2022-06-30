@@ -23,7 +23,9 @@ ModuleAdminAsset::register(Yii::$app->view);
 <div id="bk-formDefaultLogin" class="loginContainerFullsize">
     <div class="login-block disablenotify-block col-xs-12 nop">
         <div class="login-body">
-            <h2 class="title-login"><?= AmosAdmin::t('amosadmin', '#disable_notification'); ?></h2>
+            <?php if (\Yii::$app->params['befe'] !== true) { ?>
+                <h2 class="title-login"><?= AmosAdmin::t('amosadmin', '#disable_notification'); ?></h2>
+            <?php } ?>
             <h3 class="title-login"><?= AmosAdmin::t('amosadmin', '#disable_notification_text'); ?></h3>
             <?php $form = ActiveForm::begin(['id' => 'disable-notifications']); ?>
             <div class="row">

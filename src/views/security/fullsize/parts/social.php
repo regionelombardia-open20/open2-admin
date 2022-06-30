@@ -47,20 +47,21 @@ if(!empty($adminModule) && $adminModule->enableDlSemplification){
 
 
 ?>
-<?= Html::tag('h2', ($type == 'login') ? AmosAdmin::t('amosadmin', '#fullsize_social_title_login') : AmosAdmin::t('amosadmin', '#fullsize_social_title_register'), ['class' => 'title-login']) ?>
-<div class="social-buttons col-xs-12 nop">
+<?= Html::tag('h5', ($type == 'login') ? AmosAdmin::t('amosadmin', '#fullsize_social_title_login') : AmosAdmin::t('amosadmin', '#fullsize_social_title_register'), ['class' => 'title-login']) ?>
+<div class="social-buttons row">
     <?php
     foreach ($socialAuthModule->providers as $name => $config) :
         ?>
-        <div class="col-xs-12 nop">
+
+        <div class="col-xs-12 nop" style="max-width:50%;">
             <a
-                    class="btn btn-<?= strtolower($name); ?> social-link"
+                    class="btn btn-<?= strtolower($name); ?> btn-block social-link"
                     title="<?= ($type == 'login') ? AmosAdmin::t('amosadmin', '#login_with_social') : AmosAdmin::t('amosadmin', '#register_with_social') ?> <?= $name; ?>"
                     target="_self"
                     href="<?= Yii::$app->urlManager->createAbsoluteUrl($urlSocial . strtolower($name).$paramCommunity.$paramsRedirectUrl); ?>"
             >
                 <span class="am am-<?= strtolower($name); ?>"></span>
-                <span class="text"><?= $name; ?></span>
+                <span class="text"><?= AmosAdmin::t('amosadmin', '#register_with_social_label_btn') . ' ' . $name; ?></span>
             </a>
         </div>
     <?php endforeach; ?>

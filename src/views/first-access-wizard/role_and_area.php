@@ -88,11 +88,11 @@ $this->registerCss("
     <section>
         <div class="row">
             <div class="col-xs-12">
-                <h4><?= AmosAdmin::t('amosadmin', '#faw_rea_text',[
+                <p class="lead"><?= AmosAdmin::t('amosadmin', '#faw_rea_text',[
                         'appName' => Yii::$app->name
-                    ]) ?></h4>
+                    ]) ?></p>
             </div>
-            <div class="col-md-6 col-xs-12">
+            <div class="col-md-6">
                 <?= $form->field($model, 'user_profile_role_id', [
                     'template' => "{label}\n{hint}\n{beginWrapper}\n{input}\n{error}\n{endWrapper}",
                 ])
@@ -125,7 +125,7 @@ $this->registerCss("
             </div>
         </div>
     </section>
-    
+   
     <?= WizardPrevAndContinueButtonWidget::widget([
         'model' => $model,
         'previousUrl' => Yii::$app->getUrlManager()->createUrl(['/'.AmosAdmin::getModuleName().'/first-access-wizard/introducing-myself'])

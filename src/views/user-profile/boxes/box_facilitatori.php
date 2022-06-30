@@ -90,8 +90,29 @@ $facilitatorRequest = null;
                         <p><?= Html::tag('span', AmosAdmin::t('amosadmin', 'Cognome')) . Html::tag('span', $facilitatorUserProfile->cognome); ?></p>
                         <p><?= Html::tag('span', AmosAdmin::t('amosadmin', 'Prevalent partnership')) . $prevalentPartnershipName ?></p>
                         <?php if (!$enableExternalFacilitator || ($enableExternalFacilitator && \Yii::$app->user->can('ADMIN'))) { ?>
-                            <p><?= Html::a(AmosAdmin::t('amosadmin', 'Change facilitator'), [$url, 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true, 'external' => $external]) ?></p>
+                            <p>
+                            <?= Html::a(
+                                    AmosIcons::show('comments') . 
+                                    Html::tag('span', AmosAdmin::t('amosadmin', 'Send message'),['class'=> 'sr-only']),
+                                    ['/messages/' . $facilitatorUserProfile->id],
+                                ['class' => 'btn btn-secondary', 'title'=>AmosAdmin::t('amosadmin','Apri la chat diretta con il tuo facilitatore')]
+                                    );
+                                ?>
+                            </p>
                             <!--                        </div>-->
+                        <?php } ?>
+                        <?php if (!$enableExternalFacilitator || ($enableExternalFacilitator && \Yii::$app->user->can('ADMIN'))) { ?>
+                           
+                            <!--                        </div>-->
+                            <p>
+                            <?= Html::a(
+                                    AmosIcons::show('refresh') . 
+                                    Html::tag('span', AmosAdmin::t('amosadmin', 'Change facilitator'),['class'=> 'sr-only']),
+                                    [$url, 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true, 'external' => $external] ,
+                                ['class' => 'btn btn-secondary', 'title'=> AmosAdmin::t('amosadmin', 'Change facilitator')]
+                                    );
+                                ?>
+                            </p>
                         <?php } ?>
                     <?php else: ?>
                             <p><?= AmosAdmin::tHtml('amosadmin', 'Facilitator not selected') ?></p>

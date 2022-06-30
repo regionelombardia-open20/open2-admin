@@ -45,7 +45,7 @@ class WidgetIconUserProfile extends WidgetIcon
         $this->setDescription(AmosAdmin::t('amosadmin', 'List of all platform users'));
 
         if (!empty(Yii::$app->params['dashboardEngine']) && Yii::$app->params['dashboardEngine'] == WidgetAbstract::ENGINE_ROWS) {
-            $this->setIconFramework(AmosIcons::IC);
+            $this->setIconFramework(AmosIcons::IC); 
             $this->setIcon('user');
             $paramsClassSpan = [];
         } else {
@@ -63,24 +63,7 @@ class WidgetIconUserProfile extends WidgetIcon
                 $paramsClassSpan
             )
         );
-
-        $query = new Query();
-        $query
-            ->select([UserProfile::tableName().'.id', UserProfile::tableName().'.attivo', UserProfile::tableName().'.deleted_at'])
-            ->from(UserProfile::tableName())
-            ->andWhere([
-                '>=', 
-                UserProfile::tableName().'.created_at',
-                Yii::$app->getUser()->getIdentity()->getProfile()->ultimo_logout
-            ]);
-        
-        $this->setBulletCount(
-            $this->makeBulletCounter(
-                Yii::$app->getUser()->getId(),
-                AmosAdmin::instance()->model('UserProfile'),
-                $query
-            )
-        );
+       
     }
 
 }

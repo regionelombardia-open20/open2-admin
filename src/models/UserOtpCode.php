@@ -199,14 +199,23 @@ class UserOtpCode extends \open20\amos\admin\models\base\UserOtpCode
      * @return bool
      * @throws \yii\base\InvalidConfigException
      */
-    public static function isExpired($code, $type)
+    public static function isExpired($code, $type,  $user_id = null)
     {
         $id_session = \Yii::$app->session->getId();
-        $authentication = UserOtpCode::find()
-            ->andWhere([
-                'session_id' => $id_session,
-                'type' => $type,
-                'otp_code' => $code])->one();
+        if (!empty($user_id)) {
+            $authentication = UserOtpCode::find()
+                ->andWhere([
+                    'user_id' => $user_id,
+                    'type' => $type,
+                    'otp_code' => $code])->one();
+
+        } else {
+            $authentication = UserOtpCode::find()
+                ->andWhere([
+                    'session_id' => $id_session,
+                    'type' => $type,
+                    'otp_code' => $code])->one();
+        }
 
         $isExpired = false;
         $expireDate = new \DateTime($authentication->expire);

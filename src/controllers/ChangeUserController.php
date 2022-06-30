@@ -53,64 +53,64 @@ class ChangeUserController extends CrudController
     const ERROR_POINT_DUPLICATE_USER_AVATAR = 3;
     const ERROR_POINT_DUPLICATE_NOTIFICATION_CONF = 4;
     const ERROR_POINT_AFTER_CREATE_YOUR_NEW_PROFILE = 5;
-    
+
     /**
      * @var AmosAdmin $adminModule
      */
     protected $adminModule;
-    
+
     /**
      * @var FileModule $attachmentsModule
      */
     protected $attachmentsModule;
-    
+
     /**
      * @var AmosNotify $notifyModule
      */
     protected $notifyModule;
-    
+
     /**
      * @var AmosCwh $cwhModule
      */
     protected $cwhModule;
-    
+
     /**
      * @var array $errorPoints
      */
     protected $errorPoints = [];
-    
+
     /**
      * @var bool $notificationsAlreadyRemoved
      */
     protected $notificationsAlreadyRemoved = false;
-    
+
     /**
      * @inheritdoc
      */
     public function init()
     {
         $this->adminModule = AmosAdmin::instance();
-        
+
         $this->setModelObj($this->adminModule->createModel('UserProfile'));
         $this->setModelSearch($this->adminModule->createModel('ChangeUserSearch'));
-        
+
         $this->viewIcon = [
             'name' => 'icon',
             'label' => AmosIcons::show('grid') . Html::tag('p', AmosAdmin::t('amosadmin', 'Icone')),
             'url' => '?currentView=icon'
         ];
-        
+
         $this->setAvailableViews([
             'icon' => $this->viewIcon,
         ]);
-        
+
         parent::init();
-        
+
         if (!empty(\Yii::$app->params['dashboardEngine']) && \Yii::$app->params['dashboardEngine'] == WidgetAbstract::ENGINE_ROWS) {
             $this->view->pluginIcon = 'ic ic-user';
         }
         $this->setUpLayout();
-        
+
         $this->errorPoints = [
             self::ERROR_POINT_AFTER_CREATE_YOUR_NEW_PROFILE,
             self::ERROR_POINT_DUPLICATE_NOTIFICATION_CONF,
@@ -119,7 +119,7 @@ class ChangeUserController extends CrudController
             self::ERROR_POINT_CREATE_NEW_ACCOUNT
         ];
     }
-    
+
     /**
      * @inheritdoc
      */
@@ -149,7 +149,7 @@ class ChangeUserController extends CrudController
             ]
         ]);
     }
-    
+
     /**
      * Set a view param used in \open20\amos\core\forms\CreateNewButtonWidget
      */
@@ -161,7 +161,7 @@ class ChangeUserController extends CrudController
             'urlCreateNew' => ['/' . AmosAdmin::getModuleName() . '/change-user/create-your-new-profile']
         ];
     }
-    
+
     /**
      * Used for set page title and breadcrumbs.
      * @param string $pageTitle
@@ -175,7 +175,7 @@ class ChangeUserController extends CrudController
             ['label' => $pageTitle]
         ];
     }
-    
+
     /**
      * Used for set lists view params.
      */
@@ -189,7 +189,7 @@ class ChangeUserController extends CrudController
         \Yii::$app->session->set(AmosAdmin::beginCreateNewSessionKey(), Url::previous());
         \Yii::$app->session->set(AmosAdmin::beginCreateNewSessionKeyDateTime(), date('Y-m-d H:i:s'));
     }
-    
+
     /**
      * @return string
      */
@@ -205,7 +205,7 @@ class ChangeUserController extends CrudController
         }
         return $this->goHome();
     }
-    
+
     /**
      * This action render the logged user other profiles list.
      * @return string
@@ -214,7 +214,7 @@ class ChangeUserController extends CrudController
     {
         $this->setDataProvider($this->modelSearch->search(\Yii::$app->request->getQueryParams()));
         $this->setListsViewParams();
-        
+
         return $this->render('my-users-list', [
             'dataProvider' => $this->getDataProvider(),
             'model' => $this->getModelSearch(),
@@ -222,7 +222,7 @@ class ChangeUserController extends CrudController
             'availableViews' => $this->getAvailableViews(),
         ]);
     }
-    
+
     /**
      * This action change the logged user with the selected profile.
      * @param int $user_id
@@ -235,37 +235,37 @@ class ChangeUserController extends CrudController
         $loggedUser = \Yii::$app->user->identity;
         $loggedUserId = $loggedUser->id;
         $loggedUserProfile = $loggedUser->userProfile;
-        
+
         if (empty($loggedUserProfile->codice_fiscale)) {
             \Yii::$app->getSession()->addFlash('danger', AmosAdmin::t('amosadmin', '#change_user_error_empty_cf'));
             return $this->redirectAfterError();
         }
-        
+
         $requestedUser = User::findOne($user_id);
         $requestedUserId = $requestedUser->id;
-        
+
         if (is_null($requestedUser)) {
             \Yii::$app->getSession()->addFlash('danger', AmosAdmin::t('amosadmin', '#change_user_error_user_not_exists'));
             return $this->redirectAfterError();
         }
-        
+
         if ($requestedUserId == $loggedUserId) {
             \Yii::$app->getSession()->addFlash('danger', AmosAdmin::t('amosadmin', '#change_user_error_user_already_logged'));
             return $this->redirectAfterError();
         }
-        
+
         $requestedUserProfile = $requestedUser->userProfile;
-        
+
         if ($requestedUserProfile->nome == UserProfileUtility::DELETED_ACCOUNT_NAME) {
             \Yii::$app->getSession()->addFlash('danger', AmosAdmin::t('amosadmin', '#change_user_error_user_deleted'));
             return $this->redirectAfterError();
         }
-        
+
         if ($requestedUserProfile->isDeactivated()) {
             \Yii::$app->getSession()->addFlash('danger', AmosAdmin::t('amosadmin', '#change_user_error_user_deactivated'));
             return $this->redirectAfterError();
         }
-        
+
         /** @var ActiveQuery $queryLoggedUser */
         $queryLoggedUser = UserProfile::find();
         $queryLoggedUser->andWhere(['user_id' => $requestedUserId]);
@@ -273,21 +273,21 @@ class ChangeUserController extends CrudController
         $queryLoggedUser->andWhere(['attivo' => UserProfile::STATUS_ACTIVE]);
         $queryLoggedUser->andWhere(['<>', 'nome', UserProfileUtility::DELETED_ACCOUNT_NAME]);
         $sameCfRequestedUserAndLoggedUser = $queryLoggedUser->exists();
-        
+
         if (!$sameCfRequestedUserAndLoggedUser) {
             \Yii::$app->getSession()->addFlash('danger', AmosAdmin::t('amosadmin', '#change_user_error_not_your_user'));
             return $this->redirectAfterError();
         }
-        
+
         $loginTimeout = \Yii::$app->params['loginTimeout'] ?: 3600;
         \Yii::$app->user->logout();
         \Yii::$app->user->login($requestedUser, $loginTimeout);
-        
+
         \Yii::$app->getSession()->addFlash('success', AmosAdmin::t('amosadmin', '#change_user_success'));
-        
+
         return $this->goHome();
     }
-    
+
     /**
      * @param string $email
      * @return false|string
@@ -307,37 +307,37 @@ class ChangeUserController extends CrudController
         }
         return json_encode($responseArray);
     }
-    
+
     /**
      * This action creates a new profile as a copy of the logged user.
      */
     public function actionCreateYourNewProfile()
     {
         $this->setUpLayout('form');
-        
+
         /** @var ChangeUserCreateForm $model */
         $model = $this->adminModule->createModel('ChangeUserCreateForm');
-        
+
         if ($model->load(\Yii::$app->request->post()) && $model->validate()) {
             /** @var User $loggedUser */
             $loggedUser = \Yii::$app->user->identity;
             $loggedUserId = $loggedUser->id;
             $loggedUserProfile = $loggedUser->userProfile;
             $loggedUserProfileId = $loggedUserProfile->id;
-            
+
             $this->attachmentsModule = FileModule::instance();
             $this->cwhModule = AmosCwh::instance();
             $this->notifyModule = AmosNotify::instance();
-            
+
             $this->beforeCreateYourNewProfile($model, $loggedUser);
-            
+
             $retVal = UserProfileUtility::createNewAccount(
                 $loggedUserProfile->nome,
                 $loggedUserProfile->cognome,
                 $model->email,
                 $loggedUserProfile->privacy
             );
-            
+
             if (isset($retVal['error'])) {
                 \Yii::$app->getSession()->addFlash('danger', AmosAdmin::t('amosadmin', '#create_your_new_profile_error_creating_user'));
                 $this->rollBackOperations(self::ERROR_POINT_CREATE_NEW_ACCOUNT, $retVal);
@@ -345,11 +345,11 @@ class ChangeUserController extends CrudController
                     'model' => $model
                 ]);
             }
-            
+
             /** @var User $newUser */
             $newUser = $retVal['user'];
             $userId = $newUser->id;
-            
+
             $userProfileClassName = $this->adminModule->model('UserProfile');
             /** @var UserProfile $userProfileModel */
             $userProfileModel = $this->adminModule->createModel('UserProfile');
@@ -362,12 +362,12 @@ class ChangeUserController extends CrudController
             $now = date('Y-m-d H:i:s');
             $newUserProfile->created_at = $now;
             $newUserProfile->updated_at = $now;
-            
+
             // !empty means that the logged user is not the main user, then replicate in this new user the correct main user profile id.
             $mainUserProfileId = (!empty($loggedUserProfile->main_user_profile_id) ? $loggedUserProfile->main_user_profile_id : $loggedUserProfileId);
             $newUserProfile->main_user_profile_id = $mainUserProfileId;
             $newUserProfile->save(false);
-            
+
             $ok = $this->duplicateUserInterests($loggedUserProfileId, $newUserProfile->id, $userProfileClassName);
             if (!$ok) {
                 \Yii::$app->getSession()->addFlash('danger', AmosAdmin::t('amosadmin', '#create_your_new_profile_error_copy_user_interests'));
@@ -380,7 +380,7 @@ class ChangeUserController extends CrudController
                     'model' => $model
                 ]);
             }
-            
+
             $ok = $this->duplicateUserAvatar($loggedUserProfile, $newUserProfile, $userProfileClassName);
             if (!$ok) {
                 \Yii::$app->getSession()->addFlash('danger', AmosAdmin::t('amosadmin', '#create_your_new_profile_error_copy_user_avatar'));
@@ -394,7 +394,7 @@ class ChangeUserController extends CrudController
                     'model' => $model
                 ]);
             }
-            
+
             $ok = $this->duplicateNotificationConf($loggedUserId, $userId);
             if (!$ok) {
                 \Yii::$app->getSession()->addFlash('danger', AmosAdmin::t('amosadmin', '#create_your_new_profile_error_copy_notification_conf'));
@@ -409,7 +409,7 @@ class ChangeUserController extends CrudController
                     'model' => $model
                 ]);
             }
-            
+
             $ok = $this->afterCreateYourNewProfile($model, $loggedUser, $newUser);
             if (!$ok) {
                 \Yii::getLogger()->log(AmosAdmin::t('amosadmin', '#create_your_new_profile_error_post_copy_operations'), Logger::LEVEL_ERROR);
@@ -426,17 +426,17 @@ class ChangeUserController extends CrudController
                     'model' => $model
                 ]);
             }
-            
+
             \Yii::$app->getSession()->addFlash('success', AmosAdmin::t('amosadmin', '#create_your_new_profile_success'));
-            
+
             return $this->redirect(['/' . AmosAdmin::getModuleName() . '/change-user/my-users-list']);
         }
-        
+
         return $this->render('create-your-new-profile', [
             'model' => $model
         ]);
     }
-    
+
     /**
      * @param int $errorPoint
      * @param User $user
@@ -486,7 +486,7 @@ class ChangeUserController extends CrudController
                 break;
         }
     }
-    
+
     /**
      * @param int $errorPoint
      * @param array $params
@@ -506,19 +506,19 @@ class ChangeUserController extends CrudController
             $createNewAccountErrCode = $params['error'];
             $createUserSuccessful = false;
         }
-        
+
         // This means that the createNewAccount utility hasn't created the user record. Then nothing to revert.
         if ($createNewAccountErrCode == UserProfileUtility::UNABLE_TO_CREATE_USER_ERROR) {
             return true;
         }
-        
+
         if ($createUserSuccessful || ($createNewAccountErrCode == UserProfileUtility::UNABLE_TO_SAVE_USER_NOTIFICATIONS_CONFS)) {
             $ok = $this->removeDuplicatedNotificationConf($errorPoint, $newUserId);
             if (!$ok) {
                 return false;
             }
         }
-        
+
         if ($createUserSuccessful || in_array($createNewAccountErrCode, [
                 UserProfileUtility::UNABLE_TO_SAVE_USER_NOTIFICATIONS_CONFS,
                 UserProfileUtility::UNABLE_TO_ASSIGN_USER_ROLES_ERROR
@@ -528,13 +528,13 @@ class ChangeUserController extends CrudController
                 return false;
             }
         }
-        
+
         if ($createUserSuccessful || in_array($createNewAccountErrCode, [
                 UserProfileUtility::UNABLE_TO_SAVE_USER_NOTIFICATIONS_CONFS,
                 UserProfileUtility::UNABLE_TO_ASSIGN_USER_ROLES_ERROR,
                 UserProfileUtility::UNABLE_TO_CREATE_USER_PROFILE_ERROR
             ])) {
-            
+
             if (!is_null($newUser)) {
                 $profile = $newUser->userProfile;
             } else {
@@ -545,7 +545,7 @@ class ChangeUserController extends CrudController
                 $userProfileModel = $this->adminModule->createModel('UserProfile');
                 $profile = $userProfileModel::findOne(['user_id' => $newUserId]);
             }
-            
+
             if (!is_null($profile)) {
                 $profile = UserProfileUtility::maskProfileData($profile);
                 $profile->delete();
@@ -553,18 +553,18 @@ class ChangeUserController extends CrudController
                     return false;
                 }
             }
-            
+
             $newUser = UserProfileUtility::maskUserData($newUser);
             $newUser->delete();
-            
+
             if ($newUser->hasErrors()) {
                 return false;
             }
         }
-        
+
         return true;
     }
-    
+
     /**
      * @param int $userId
      * @return bool
@@ -586,7 +586,7 @@ class ChangeUserController extends CrudController
         }
         return true;
     }
-    
+
     /**
      * @param int $oldUserProfileId
      * @param int $newUserProfileId
@@ -615,7 +615,7 @@ class ChangeUserController extends CrudController
         }
         return true;
     }
-    
+
     /**
      * @param int $errorPoint
      * @param int $newUserProfileId
@@ -648,7 +648,7 @@ class ChangeUserController extends CrudController
         }
         return true;
     }
-    
+
     /**
      * @param UserProfile $oldUserProfile
      * @param UserProfile $newUserProfile
@@ -687,7 +687,7 @@ class ChangeUserController extends CrudController
         }
         return $ok;
     }
-    
+
     /**
      * @param int $errorPoint
      * @param UserProfile $newUserProfile
@@ -699,7 +699,7 @@ class ChangeUserController extends CrudController
             $this->attachmentsModule->detachFile($newAvatar->id);
         }
     }
-    
+
     /**
      * @param int $oldUserId
      * @param int $newUserId
@@ -724,7 +724,7 @@ class ChangeUserController extends CrudController
         }
         return $ok;
     }
-    
+
     /**
      * @param int $errorPoint
      * @param int $newUserId
@@ -750,7 +750,7 @@ class ChangeUserController extends CrudController
         }
         return true;
     }
-    
+
     /**
      * This method is called at the beginning of the copy operations.
      * @param ChangeUserCreateForm $model
@@ -758,9 +758,9 @@ class ChangeUserController extends CrudController
      */
     protected function beforeCreateYourNewProfile($model, $loggedUser)
     {
-    
+
     }
-    
+
     /**
      * This method is called at the end of the copy operations and it must returns a boolean.
      * @param ChangeUserCreateForm $model
@@ -772,7 +772,7 @@ class ChangeUserController extends CrudController
     {
         return true;
     }
-    
+
     /**
      * @param int $errorPoint
      * @param array $params

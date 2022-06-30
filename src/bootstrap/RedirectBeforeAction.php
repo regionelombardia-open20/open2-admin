@@ -43,17 +43,20 @@ class RedirectBeforeAction implements BootstrapInterface
             if (!is_null($adminModule)) {
                 //redirect for dl semplificazione
                 if (UserProfileUtility::mandatoryReconciliationPage()) {
-                    $userProfileWizard = new RedirectBeforeActionComponent();
-                    if (Yii::$app->controller->action->id != 'reconciliation'
-                        && Yii::$app->controller->action->id != 'connect-spid'
-                        && Yii::$app->controller->id != 'security'
-                        && Yii::$app->controller->module->id != 'socialauth'
-                        && (\Yii::$app->controller->action->id != 'logout')
-                        && (\Yii::$app->controller->action->id != 'privacy')
-                        && (\Yii::$app->controller->action->id != 'error')
-                    ) {
-                        $userProfileWizard->redirectToUrl("/" . AmosAdmin::getModuleName() . "/security/reconciliation");
-                        Yii::$app->response->send();
+                    if(!\Yii::$app->user->isGuest) {
+                        $userProfileWizard = new RedirectBeforeActionComponent();
+                        if (Yii::$app->controller->action->id != 'reconciliation'
+                            && Yii::$app->controller->action->id != 'connect-spid'
+                            && Yii::$app->controller->id != 'security'
+                            && Yii::$app->controller->module->id != 'socialauth'
+                            && (\Yii::$app->controller->action->id != 'logout')
+                            && (\Yii::$app->controller->action->id != 'login')
+                            && (\Yii::$app->controller->action->id != 'privacy')
+                            && (\Yii::$app->controller->action->id != 'error')
+                        ) {
+                            $userProfileWizard->redirectToUrl("/" . AmosAdmin::getModuleName() . "/security/reconciliation");
+                            Yii::$app->response->send();
+                        }
                     }
                 }
             }

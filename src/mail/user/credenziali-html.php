@@ -16,16 +16,15 @@ use yii\helpers\Html;
  * @var yii\web\View $this
  * @var \open20\amos\core\user\User $user
  * @var \open20\amos\admin\models\UserProfile $profile
+ * @var bool $socialAccount
  */
 
-/** @var AmosAdmin $adminModule */
-$adminModule = AmosAdmin::instance();
-
-$appLink = Yii::$app->params['platform']['backendUrl'];//Yii::$app->urlManager->createAbsoluteUrl(['/']);
+$appLink = Yii::$app->params['platform'] ['frontendUrl'];//Yii::$app->urlManager->createAbsoluteUrl(['/']);
 $appLink = substr($appLink, -1) == '/' ? $appLink : $appLink . '/';
-$appLinkPrivacy = Yii::$app->params['platform']['backendUrl'] . '/' . AmosAdmin::getModuleName() . '/user-profile/privacy'; //Yii::$app->urlManager->createAbsoluteUrl(['/'.AmosAdmin::getModuleName().'/user-profile/privacy']);
+$appLinkPrivacy = Yii::$app->params['platform'] ['frontendUrl'] .'/'.AmosAdmin::getModuleName().'/user-profile/privacy'; //Yii::$app->urlManager->createAbsoluteUrl(['/'.AmosAdmin::getModuleName().'/user-profile/privacy']);
 $appName = Yii::$app->name;
 
+$regWihSpid = \Yii::$app->request->post('reg_with_spid');
 $this->title = AmosAdmin::t('amosadmin', 'Registrazione {appName}', ['appName' => $appName]);
 $this->registerCssFile('http://fonts.googleapis.com/css?family=Roboto');
 
@@ -49,11 +48,31 @@ $this->registerCssFile('http://fonts.googleapis.com/css?family=Roboto');
                             <br/>
                             <?= AmosAdmin::t('amosadmin', "#welcome_email") . Yii::$app->name ?>.
                         </p>
-                        <?php if (!$adminModule->enableDlSemplification): ?>
+                        <?php if ($adminModule->enableDlSemplification || !empty($regWihSpid)): ?>
+                            <p style="margin-bottom: 20px;">
+                                <?= Html::a(
+                                    AmosAdmin::t('amosadmin', '#welcome_email_dl_semplification_click_here'),
+                                    $appLink . AmosAdmin::getModuleName() . '/security/login',
+                                    ['title' => AmosAdmin::t('amosadmin', 'Enter')]
+                                ) ?> <?= AmosAdmin::t('amosadmin', '#welcome_email_dl_semplification', [
+                                    'appName' => $appName
+                                ]); ?>
+                            </p>
+                        <?php elseif (isset($socialAccount) && $socialAccount): ?>
+                            <p style="margin-bottom: 20px;">
+                                <?= Html::a(
+                                    AmosAdmin::t('amosadmin', '#welcome_email_social_registration_click_here'),
+                                    $appLink . AmosAdmin::getModuleName() . '/security/login',
+                                    ['title' => AmosAdmin::t('amosadmin', 'Enter')]
+                                ) ?> <?= AmosAdmin::t('amosadmin', '#welcome_email_social_registration', [
+                                    'appName' => $appName
+                                ]); ?>
+                            </p>
+                        <?php else: ?>
                             <p style="margin-bottom: 20px;">
                                 <?php
                                 $seconds = Yii::$app->params['user.passwordResetTokenExpire'];
-                                
+
                                 if ($seconds >= 86400) {
                                     $passwordResetTokenExpire = floor($seconds / (3600 * 24));
                                     if ($passwordResetTokenExpire == 1) {
@@ -69,7 +88,7 @@ $this->registerCssFile('http://fonts.googleapis.com/css?family=Roboto');
                                         $textDay = 'minuti';
                                         $passwordResetTokenExpire = floor($seconds / 60);
                                     }
-                                    
+
                                 }
                                 $passwordResetTokenExpire = $passwordResetTokenExpire . ' ' . $textDay;
                                 ?>
@@ -77,8 +96,14 @@ $this->registerCssFile('http://fonts.googleapis.com/css?family=Roboto');
                                     'passwordResetTokenExpire' => $passwordResetTokenExpire,
                                     'supportEmail' => Yii::$app->params['supportEmail']
                                 ]); ?>
-                                
-                                <?php $link = $appLink . AmosAdmin::getModuleName() . '/security/insert-auth-data?token=' . $profile->user->password_reset_token;
+
+                                <?php
+                                if(\Yii::$app->params['befe']){
+                                    $link = $appLink . 'userauthfrontend' . '/default/insert-auth-data?token=' . $profile->user->password_reset_token;
+                                }
+                                else {
+                                    $link = $appLink . AmosAdmin::getModuleName() . '/security/insert-auth-data?token=' . $profile->user->password_reset_token;
+                                }
                                 if (!empty($community)) {
                                     $link .= '&community_id=' . $community->id . '&subscribe=1';
                                 }
@@ -89,20 +114,7 @@ $this->registerCssFile('http://fonts.googleapis.com/css?family=Roboto');
                             </p>
                             <p style="margin-bottom: 20px;">
                                 <?= AmosAdmin::t('amosadmin', '#welcome_email_error_link') ?>
-                                <?= AmosAdmin::t('amosadmin', $link) ?>
-                            </p>
-                        <?php else: ?>
-                            <?php
-                            $link = $appLink . AmosAdmin::getModuleName() . '/security/login';
-                            ?>
-                            <p style="margin-bottom: 20px;">
-                                <?= Html::a(
-                                        AmosAdmin::t('amosadmin', '#welcome_email_dl_semplification_click_here'),
-                                        $link,
-                                        ['title' => AmosAdmin::t('amosadmin', 'Enter')]
-                                ) ?> <?= AmosAdmin::t('amosadmin', '#welcome_email_dl_semplification', [
-                                    'appName' => $appName
-                                ]); ?>
+                                <?= $link; ?>
                             </p>
                         <?php endif; ?>
                         <?php

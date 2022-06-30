@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Aria S.p.A.
  * OPEN 2.0
@@ -102,7 +103,7 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
      */
     public function getViewUrl()
     {
-        return AmosAdmin::getModuleName()."/user-profile/view";
+        return ((!empty(\Yii::$app->params['befe']) && \Yii::$app->params['befe'] == true)? 'amosadmin' : AmosAdmin::getModuleName()) . "/user-profile/view";
     }
 
     /**
@@ -139,7 +140,8 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
      */
     public function rules()
     {
-        return ArrayHelper::merge(parent::rules(),
+        return ArrayHelper::merge(
+            parent::rules(),
             [
                 [['userProfileImage'], 'file', 'extensions' => $this->adminModule->whiteListProfileImageExts],
                 ['codice_fiscale', 'string', 'length' => 16],
@@ -147,11 +149,14 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
                 ['telefono', \open20\amos\core\validators\PhoneValidator::className()],
                 ['codice_fiscale', CfPivaValidator::className()],
                 [['avatar_id', 'listaRuoli', 'listaProgetti'], 'safe'],
-                [['privacy', 'domicilio_provincia_id', 'domicilio_cap', 'domicilio_comune_id', 'created_by', 'updated_by',
-                    'deleted_by'], 'default'],
+                [[
+                    'privacy', 'domicilio_provincia_id', 'domicilio_cap', 'domicilio_comune_id', 'created_by', 'updated_by',
+                    'deleted_by'
+                ], 'default'],
                 [['facebook', 'twitter', 'linkedin'], 'url'],
                 [['ruolos', 'insegnamentis', 'ruolos2', 'insegnamentis2', 'insegnamentis3', 'isProfileModified'], 'safe']
-            ]);
+            ]
+        );
     }
 
     /**
@@ -159,11 +164,13 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
      */
     public function attributeLabels()
     {
-        return ArrayHelper::merge(parent::attributeLabels(),
+        return ArrayHelper::merge(
+            parent::attributeLabels(),
             [
                 'userProfileImage' => AmosAdmin::t('amosadmin', 'Profile image'),
                 'tightCouplingField' => AmosAdmin::t('amosadmin', 'Gruppo di appartenenza'),
-            ]);
+            ]
+        );
     }
 
     /**
@@ -182,21 +189,23 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
      */
     public function behaviors()
     {
-        $behaviors = ArrayHelper::merge(parent::behaviors(),
+        $behaviors = ArrayHelper::merge(
+            parent::behaviors(),
             [
                 'workflow' =>
-                    [
-                        'class' => SimpleWorkflowBehavior::className(),
-                        'defaultWorkflowId' => self::USERPROFILE_WORKFLOW,
-                        'propagateErrorsToModel' => true,
-                    ],
+                [
+                    'class' => SimpleWorkflowBehavior::className(),
+                    'defaultWorkflowId' => self::USERPROFILE_WORKFLOW,
+                    'propagateErrorsToModel' => true,
+                ],
                 'fileBehavior' => [
                     'class' => FileBehavior::className()
                 ],
                 'WorkflowLogFunctionsBehavior' => [
                     'class' => WorkflowLogFunctionsBehavior::className(),
                 ]
-            ]);
+            ]
+        );
 
         $cwhModule = Yii::$app->getModule('cwh');
         $tagModule = Yii::$app->getModule('tag');
@@ -224,12 +233,11 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
                     'enabled' => true,
                     'userAttribute' => 'user_id',
                     'type' => self::LOG_TYPE_UPDATE_PROFILE,
-                    'name' => AmosAdmin::t('amosadmin','Aggiornamento profilo'),
-                    'description' => AmosAdmin::t('amosadmin','Aggiornamento profilo')
+                    'name' => AmosAdmin::t('amosadmin', 'Aggiornamento profilo'),
+                    'description' => AmosAdmin::t('amosadmin', 'Aggiornamento profilo')
                 ]
             ]];
             $behaviors = ArrayHelper::merge($behaviors, $attrChangeLog);
-
         }
         return $behaviors;
     }
@@ -247,27 +255,47 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
             $this->status = $this->getWorkflowSource()->getWorkflow(self::USERPROFILE_WORKFLOW)->getInitialStatusId();
         }
 
-        if (!$this->adminModule->confManager->isVisibleBox('box_prevalent_partnership',
-                ConfigurationManager::VIEW_TYPE_FORM) ||
-            !$this->adminModule->confManager->isVisibleField('prevalent_partnership_id',
-                ConfigurationManager::VIEW_TYPE_FORM)) {
+        if (
+            !$this->adminModule->confManager->isVisibleBox(
+                'box_prevalent_partnership',
+                ConfigurationManager::VIEW_TYPE_FORM
+            ) ||
+            !$this->adminModule->confManager->isVisibleField(
+                'prevalent_partnership_id',
+                ConfigurationManager::VIEW_TYPE_FORM
+            )
+        ) {
             if (isset($this->adminModule->params['orderParams']['user-profile']['fields'])) {
                 $orderField = $this->adminModule->params['orderParams']['user-profile']['fields'];
                 if (in_array('prevalentPartnership', $orderField)) {
-                    unset($this->adminModule->params['orderParams']['user-profile']['fields'][array_search('prevalentPartnership',
-                            $orderField)]);
+                    unset($this->adminModule->params['orderParams']['user-profile']['fields'][array_search(
+                        'prevalentPartnership',
+                        $orderField
+                    )]);
                 }
             }
         }
         if (!empty($this->adminModule) && !empty($this->adminModule->associateTutor)) {
             $this->on(self::EVENT_AFTER_INSERT, [new AssociateTutorToUserEvent(), 'afterCreateUser'], $this);
         }
+        
+        $this->on(
+                'afterEnterStatus{' . self::USERPROFILE_WORKFLOW_STATUS_VALIDATED . '}',
+                [new AdminWorkflowEvent(), 'afterEnterStatusValidated'],
+                $this
+        );
 
         if (!empty($this->adminModule) && !empty($this->adminModule->sendValidationRejectionEmail)) {
-            $this->on('afterEnterStatus{' . self::USERPROFILE_WORKFLOW_STATUS_NOTVALIDATED . '}',
-                [new AdminWorkflowEvent(), 'afterEnterStatusNotValidated'], $this);
-            $this->on('afterEnterStatus{' . self::USERPROFILE_WORKFLOW_STATUS_TOVALIDATE . '}',
-                [new AdminWorkflowEvent(), 'afterEnterStatusToValidate'], $this);
+            $this->on(
+                'afterEnterStatus{' . self::USERPROFILE_WORKFLOW_STATUS_NOTVALIDATED . '}',
+                [new AdminWorkflowEvent(), 'afterEnterStatusNotValidated'],
+                $this
+            );
+            $this->on(
+                'afterEnterStatus{' . self::USERPROFILE_WORKFLOW_STATUS_TOVALIDATE . '}',
+                [new AdminWorkflowEvent(), 'afterEnterStatusToValidate'],
+                $this
+            );
         }
     }
 
@@ -312,10 +340,14 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
                 }
             }
             if ($empty) {
-                \Yii::$app->session->addFlash('danger',
-                    AmosAdmin::t('amosadmin', "It's necessary to indicate at least one tag."));
-                $this->addError('interestTagValues',
-                    AmosAdmin::t('amosadmin', "It's necessary to indicate at least one tag."));
+                \Yii::$app->session->addFlash(
+                    'danger',
+                    AmosAdmin::t('amosadmin', "It's necessary to indicate at least one tag.")
+                );
+                $this->addError(
+                    'interestTagValues',
+                    AmosAdmin::t('amosadmin', "It's necessary to indicate at least one tag.")
+                );
                 return false;
             }
         }
@@ -336,9 +368,12 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
      */
     public function attributeHints()
     {
-        $IndirizzoCompleto = AmosAdmin::t('amosadmin',
-            'Senza indirizzo completo non si potr&agrave; usare la georeferenziazione');
-        return ArrayHelper::merge(parent::attributeHints(),
+        $IndirizzoCompleto = AmosAdmin::t(
+            'amosadmin',
+            'Senza indirizzo completo non si potr&agrave; usare la georeferenziazione'
+        );
+        return ArrayHelper::merge(
+            parent::attributeHints(),
             [
                 'domicilio_indirizzo' => $IndirizzoCompleto,
                 'domicilio_civico' => $IndirizzoCompleto,
@@ -346,7 +381,8 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
                 'domicilio_provincia_id' => $IndirizzoCompleto,
                 'domicilio_comune_id' => $IndirizzoCompleto,
                 'domicilio_localita' => $IndirizzoCompleto,
-            ]);
+            ]
+        );
     }
 
     /**
@@ -375,9 +411,9 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
                 'domicilio_coordinate'
             ];
 
-//            if ($variazioniCoordinate = $this->getDirtyAttributes($coordAttributes)) {
-//                Yii::$app->getSession()->addFlash('warning', AmosAdmin::t('amosadmin', 'Hai modificato le coordinate del tuo indirizzo!'));
-//            }
+            //            if ($variazioniCoordinate = $this->getDirtyAttributes($coordAttributes)) {
+            //                Yii::$app->getSession()->addFlash('warning', AmosAdmin::t('amosadmin', 'Hai modificato le coordinate del tuo indirizzo!'));
+            //            }
             if ($variazioniIndirizzo = $this->getDirtyAttributes($domicilioAttributes)) {
                 //Yii::$app->getSession()->addFlash('warning', AmosAdmin::t('amosadmin', 'Hai modificato l\'indirizzo!'));
                 $Comune = $this->getDomicilioComune()->one();
@@ -420,14 +456,22 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
                                 }
                             }
                         } elseif ($ResulGeocoding['status'] == 'ZERO_RESULTS') {
-                            Yii::$app->getSession()->addFlash('danger',
-                                AmosAdmin::t('amosadmin',
-                                    'Il tuo indirizzo non &egrave stato trovato. Verifica che sia completo, indica esattamente il nome della via, civico (nel campo apposito) e cap.'));
+                            Yii::$app->getSession()->addFlash(
+                                'danger',
+                                AmosAdmin::t(
+                                    'amosadmin',
+                                    'Il tuo indirizzo non &egrave stato trovato. Verifica che sia completo, indica esattamente il nome della via, civico (nel campo apposito) e cap.'
+                                )
+                            );
                         }
                     } else {
-                        Yii::$app->getSession()->addFlash('danger',
-                            AmosAdmin::t('amosadmin',
-                                'Si &egrave; verificato un errore durante il reperimento delle coordinate del tuo indirizzo, verifica la correttezza dei dati forniti.'));
+                        Yii::$app->getSession()->addFlash(
+                            'danger',
+                            AmosAdmin::t(
+                                'amosadmin',
+                                'Si &egrave; verificato un errore durante il reperimento delle coordinate del tuo indirizzo, verifica la correttezza dei dati forniti.'
+                            )
+                        );
                     }
                 }
             }
@@ -449,10 +493,10 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
         }
     }
 
-//    public function getTuttiRuoli()
-//    {
-//        return AmosAdmin::instance()->createModel('Ruoli')->find()->all()->distinct();
-//    }
+    //    public function getTuttiRuoli()
+    //    {
+    //        return AmosAdmin::instance()->createModel('Ruoli')->find()->all()->distinct();
+    //    }
 
     public function getContatti($id = NULL)
     {
@@ -572,7 +616,6 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
             if (isset($this->$campo) && strlen($this->$campo)) {
                 $compilati++;
             } else {
-
             }
         }
         $percentuale = 0;
@@ -650,12 +693,24 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
      */
     public function getAvatarUrl($dimension = 'original')
     {
-        if ($this->sesso == 'Maschio') {
-            $url = \Yii::$app->getUrlManager()->createAbsoluteUrl(Url::to('/img/defaultProfiloM.png'));
-        } elseif ($this->sesso == 'Femmina') {
-            $url = \Yii::$app->getUrlManager()->createAbsoluteUrl(Url::to('/img/defaultProfiloF.png'));
+        //fix per evitare accodamento lingua a url da FE
+        if (Yii::$app->get('menu', false)) {
+            if ($this->sesso == 'Maschio') {
+                $url = '/img/defaultProfiloM.png';
+            } elseif ($this->sesso == 'Femmina') {
+                $url = '/img/defaultProfiloF.png';
+            } else {
+                $url = '/img/defaultProfilo.png';
+            }
+            $url = Yii::$app->params['platform']['frontendUrl'] . $url;
         } else {
-            $url = \Yii::$app->getUrlManager()->createAbsoluteUrl(Url::to('/img/defaultProfilo.png'));
+            if ($this->sesso == 'Maschio') {
+                $url = \Yii::$app->getUrlManager()->createAbsoluteUrl(Url::to('/img/defaultProfiloM.png'));
+            } elseif ($this->sesso == 'Femmina') {
+                $url = \Yii::$app->getUrlManager()->createAbsoluteUrl(Url::to('/img/defaultProfiloF.png'));
+            } else {
+                $url = \Yii::$app->getUrlManager()->createAbsoluteUrl(Url::to('/img/defaultProfilo.png'));
+            }
         }
 
         if (!empty($this->getUserProfileImage())) {
@@ -733,8 +788,10 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
         // TODO verificare a cosa devono corrispondere e se questo metodo serve ancora.
         $width = null;
         $height = null;
-        return Html::img("/img/defaultProfilo.png",
-            ['width' => $width, 'height' => $height, 'class' => 'media-object avatar']);
+        return Html::img(
+            "/img/defaultProfilo.png",
+            ['width' => $width, 'height' => $height, 'class' => 'media-object avatar']
+        );
     }
 
     public function setAccettazionePrivacy()
@@ -930,8 +987,10 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
     public function getAllUtentiFacilitatori()
     {
         $NomeRuolo = 'FACILITATORE';
-        return AmosAdmin::instance()->createModel('UserProfile')->find()->leftJoin('auth_assignment',
-            'user_profile.user_id = auth_assignment.user_id')->andWhere(['auth_assignment.item_name' => $NomeRuolo]);
+        return AmosAdmin::instance()->createModel('UserProfile')->find()->leftJoin(
+            'auth_assignment',
+            'user_profile.user_id = auth_assignment.user_id'
+        )->andWhere(['auth_assignment.item_name' => $NomeRuolo]);
     }
 
     /**
@@ -1132,8 +1191,10 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
      */
     public function getRuolos()
     {
-        return $this->hasMany(AmosAdmin::instance()->createModel('Ruoli')->className(), ['id' => 'ruoli_id'])->viaTable('user_profile_ruoli_mm',
-            ['user_profile_id' => 'id']);
+        return $this->hasMany(AmosAdmin::instance()->createModel('Ruoli')->className(), ['id' => 'ruoli_id'])->viaTable(
+            'user_profile_ruoli_mm',
+            ['user_profile_id' => 'id']
+        );
     }
 
     /**
@@ -1142,8 +1203,10 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
      */
     public function getResidenzaComune()
     {
-        return $this->hasOne(AmosAdmin::instance()->createModel('IstatComuni')->className(),
-            ['id' => 'comune_residenza_id']);
+        return $this->hasOne(
+            AmosAdmin::instance()->createModel('IstatComuni')->className(),
+            ['id' => 'comune_residenza_id']
+        );
     }
 
     /**
@@ -1152,32 +1215,34 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
      */
     public function getResidenzaProvincia()
     {
-        return $this->hasOne(AmosAdmin::instance()->createModel('IstatProvince')->className(),
-            ['id' => 'provincia_residenza_id']);
+        return $this->hasOne(
+            AmosAdmin::instance()->createModel('IstatProvince')->className(),
+            ['id' => 'provincia_residenza_id']
+        );
     }
-//    /**
-//     * Restituisce tutti ruoli dell'utente
-//     */
-//    public function getRuoli()
-//    {
-//        $tuttiRuoli = $this->getTuttiRuoli();
-//        $RuoliDisponibili = [];
-//        foreach ($tuttiRuoli->select('ruolo')->all() as $Ruoli) {
-//            $RuoliDisponibili[] = $Ruoli['ruolo'];
-//        }
-//        $ruoliAssegnati = [];
-//        $ruoliUtente = (new \yii\db\Query())
-//            ->select('item_name')
-//            ->from('auth_assignment')
-//            ->andWhere(['user_id' => $this->user_id])
-//            ->andWhere(['IN', 'item_name', $RuoliDisponibili]);
-//
-//
-//        foreach ($ruoliUtente->all() as $RuoloUt) {
-//            $ruoliAssegnati[] = $RuoloUt['item_name'];
-//        }
-//        return $ruoliAssegnati;
-//    }
+    //    /**
+    //     * Restituisce tutti ruoli dell'utente
+    //     */
+    //    public function getRuoli()
+    //    {
+    //        $tuttiRuoli = $this->getTuttiRuoli();
+    //        $RuoliDisponibili = [];
+    //        foreach ($tuttiRuoli->select('ruolo')->all() as $Ruoli) {
+    //            $RuoliDisponibili[] = $Ruoli['ruolo'];
+    //        }
+    //        $ruoliAssegnati = [];
+    //        $ruoliUtente = (new \yii\db\Query())
+    //            ->select('item_name')
+    //            ->from('auth_assignment')
+    //            ->andWhere(['user_id' => $this->user_id])
+    //            ->andWhere(['IN', 'item_name', $RuoliDisponibili]);
+    //
+    //
+    //        foreach ($ruoliUtente->all() as $RuoloUt) {
+    //            $ruoliAssegnati[] = $RuoloUt['item_name'];
+    //        }
+    //        return $ruoliAssegnati;
+    //    }
 
     /**
      * Salva i ruoili
@@ -1289,6 +1354,7 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
     public function activateUserProfile()
     {
         $this->attivo = self::STATUS_ACTIVE;
+        $this->deactivated_at = null;
         $ok = $this->save(false);
         if ($ok) {
             $this->user->status = User::STATUS_ACTIVE;
@@ -1304,6 +1370,7 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
     public function deactivateUserProfile()
     {
         $this->attivo = self::STATUS_DEACTIVATED;
+        $this->deactivated_at = date('Y-m-d H:i:s');
         $ok = $this->save(false);
         if ($ok) {
             $this->user->status = User::STATUS_DELETED;
@@ -1328,6 +1395,54 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
     public function isDeactivated()
     {
         return (($this->attivo == self::STATUS_DEACTIVATED) && ($this->user->status == User::STATUS_DELETED));
+    }
+
+    /**
+     * This method checks if this profile is the main user profile.
+     * If the relation "mainUserProfile" is null it means that this profile is the main profile.
+     * If the relation is not null it contains the main profile of this profile.
+     * @return bool
+     */
+    public function isMainUserProfile()
+    {
+        $mainProfile = $this->mainUserProfile;
+        return (is_null($mainProfile));
+    }
+
+    /**
+     * @param int $mainUserProfileId
+     * @return array|ActiveRecord[]
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function getAllProfilesOfMainUserProfile($mainUserProfileId = 0)
+    {
+        /** @var UserProfile $userProfileModel */
+        $userProfileModel = $this->adminModule->createModel('UserProfile');
+        $isMainUserProfile = false;
+
+        if ($mainUserProfileId == 0) {
+            if ($this->isMainUserProfile()) {
+                $isMainUserProfile = true;
+                $mainUserProfileId = $this->id;
+            } else {
+                $mainUserProfileId = $this->main_user_profile_id;
+            }
+            $mainProfile = ($isMainUserProfile ? $this : $this->mainUserProfile);
+        } else {
+            $foundMainUserProfile = $userProfileModel::findOne(['id' => $mainUserProfileId]);
+            if ($foundMainUserProfile->isMainUserProfile()) {
+                $isMainUserProfile = true;
+            }
+            $mainProfile = ($isMainUserProfile ? $foundMainUserProfile : $foundMainUserProfile->mainUserProfile);
+        }
+
+        /** @var ActiveQuery $query */
+        $query = $userProfileModel::find();
+        $query->andWhere(['main_user_profile_id' => $mainUserProfileId]);
+        $userProfiles = $query->all();
+        $userProfiles[] = $mainProfile;
+
+        return $userProfiles;
     }
 
     /**
@@ -1688,9 +1803,13 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
 
         $facilitatore = $this->facilitatore;
 
-        if ($this->adminModule->confManager->isVisibleBox('box_facilitatori', ConfigurationManager::VIEW_TYPE_FORM) && $this->adminModule->confManager->isVisibleField('facilitatore_id',
-                ConfigurationManager::VIEW_TYPE_FORM) && !is_null($facilitatore) && $facilitatore->user_id != $this->user_id
-            && !$this->adminModule->bypassConfirmForFacilitator) {
+        if (
+            $this->adminModule->confManager->isVisibleBox('box_facilitatori', ConfigurationManager::VIEW_TYPE_FORM) && $this->adminModule->confManager->isVisibleField(
+                'facilitatore_id',
+                ConfigurationManager::VIEW_TYPE_FORM
+            ) && !is_null($facilitatore) && $facilitatore->user_id != $this->user_id
+            && !$this->adminModule->bypassConfirmForFacilitator
+        ) {
 
             if ($insert === true) {
                 $status = UserContact::STATUS_ACCEPTED;
@@ -1740,8 +1859,11 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
         $tos = [$facilitatore->user->email];
         $contactProfile = $facilitatore;
         $message = AmosAdmin::t('amosadmin', "#facilitator_assigned");
-        $subject = AmosAdmin::t('amosadmin', "#facilitator_assigned_obj",
-            ['nomecognome' => $this->getNomeCognome()]);
+        $subject = AmosAdmin::t(
+            'amosadmin',
+            "#facilitator_assigned_obj",
+            ['nomecognome' => $this->getNomeCognome()]
+        );
         $messageLink = AmosAdmin::t('amosadmin', 'to accept or refuse the invitation');
         $moduleMyActivities = Yii::$app->getModule('myactivities');
         if (isset($moduleMyActivities)) {
@@ -1750,13 +1872,15 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
 
         $url = Yii::$app->urlManager->createAbsoluteUrl('dashboard');
 
-        $text = Email::renderMailPartial('@vendor/open20/amos-admin/src/views/user-profile/email',
+        $text = Email::renderMailPartial(
+            '@vendor/open20/amos-admin/src/views/user-profile/email',
             [
                 'contactProfile' => $this,
                 'message' => $message,
                 'url' => $url,
                 'messageLink' => $messageLink
-            ]);
+            ]
+        );
 
         /** @var \open20\amos\emailmanager\AmosEmail $mailModule */
         $from = null;
@@ -1788,7 +1912,7 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
         $userProfileModel = AmosAdmin::instance()->createModel('UserProfile');
         $userProfileClassName = $userProfileModel::className();
         $userProfileTable = $userProfileModel::tableName();
-// All facilitators without the user profile in modify.
+        // All facilitators without the user profile in modify.
         $toSkipFacilitatorIds = [$model->user_id];
 
         if (!is_null($model->externalFacilitator)) {
@@ -1806,7 +1930,8 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
         $post = Yii::$app->request->post();
 
         if (isset($post['genericSearch'])) {
-            $query->andFilterWhere(['or',
+            $query->andFilterWhere([
+                'or',
                 ['like', "CONCAT( " . $userProfileTable . ".nome , ' ', " . $userProfileTable . ".cognome )", $post['genericSearch']],
                 ['like', "CONCAT( " . $userProfileTable . ".cognome , ' ', " . $userProfileTable . ".nome )", $post['genericSearch']],
                 ['like', $userProfileTable . '.cognome', $post['genericSearch']],
@@ -1838,11 +1963,11 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
     {
         $external_facilitator_id = $this->external_facilitator_id;
         $count = UserContact::find()
-            ->andWhere(['OR',
-                    ['user_id' => $this->user_id, 'contact_id' => $external_facilitator_id],
-                    ['user_id' => $external_facilitator_id, 'contact_id' => $this->user_id],
-                ]
-            )->count();
+            ->andWhere([
+                'OR',
+                ['user_id' => $this->user_id, 'contact_id' => $external_facilitator_id],
+                ['user_id' => $external_facilitator_id, 'contact_id' => $this->user_id],
+            ])->count();
 
         if ($count == 0) {
             $newContact = new UserContact();
@@ -1879,8 +2004,10 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
                 }
             }
 
-            return $this->hasMany($class::className(), ['id' => $tightCouplingField])->viaTable($tightCouplingModel::tableName(),
-                ['user_id' => 'user_id']);
+            return $this->hasMany($class::className(), ['id' => $tightCouplingField])->viaTable(
+                $tightCouplingModel::tableName(),
+                ['user_id' => 'user_id']
+            );
         }
         return null;
     }

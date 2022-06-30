@@ -41,8 +41,8 @@ class DefaultController extends DashboardController
      * @return mixed
      */
     public function actionIndex()
-    {
-        return $this->redirect(['/'.AmosAdmin::getModuleName().'/user-profile/validated-users']);
+    { 
+        return $this->redirect(['/'.AmosAdmin::getModuleName().'/user-profile/index']);
         Url::remember();
         $params = ['currentDashboard' => $this->getCurrentDashboard()];
         return $this->render('index', $params);

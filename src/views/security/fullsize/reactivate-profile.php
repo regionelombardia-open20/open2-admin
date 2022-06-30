@@ -45,15 +45,14 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?= $form->field($model, 'email')->textInput([
                             'maxlength' => true,
                             'placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_email_reactivate')
-                    ])->label('')?>
-                    <?= AmosIcons::show('mail', '', AmosIcons::IC) ?>
+                    ])?>
                 </div>
                 <div class="col-xs-12">
                     <?= $form->field($model, 'message')->textarea([
                             'maxlength' => true,
                             'rows' => 6,
                             'placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_msg_reactivate')
-                    ])->label('')?>
+                    ])?>
                 </div>
                 <div class="col-xs-12 action">
                     <?= Html::submitButton(AmosAdmin::t('amosadmin', '#reactivate_profile_send'), ['class' => 'btn btn-secondary', 'title' => AmosAdmin::t('amosadmin', '#reactivate_profile_send_title')]) ?>

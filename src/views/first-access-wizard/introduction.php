@@ -31,32 +31,33 @@ use open20\amos\core\forms\WizardPrevAndContinueButtonWidget;
     ]); ?>
     <?= $form->errorSummary($model, ['class' => 'alert-danger alert fade in', 'role' => 'alert']); ?>
     <section>
-        <div class="row">
-            <div class="col-xs-12">
-                <h2>
-                    <?= AmosAdmin::t('amosadmin', '#faw_intro_title', [
-                        'appName' => Yii::$app->name,
-                        'name' => $model->nome,
-                        'lastname' => $model->cognome
-                    ]) ?>
-                </h2>
-            </div>
+
+        <div class="m-t-35">
+            <h3>
+                <?= AmosAdmin::t('amosadmin', '#faw_intro_title', [
+                    'appName' => Yii::$app->name,
+                    'name' => $model->nome,
+                    'lastname' => $model->cognome
+                ]) ?>
+            </h3>
         </div>
-        <hr>
-        <div class="col-xs-12 nop">
-            <h4>
+
+
+        <div>
+            <p class="lead">
                 <?= AmosAdmin::t('amosadmin', '#faw_intro_text_1', [
                     'appName' => Yii::$app->name,
                 ]) ?>
-            </h4>
-            <h4>
+            </p>
+            <p>
                 <?= AmosAdmin::t('amosadmin', '#faw_intro_text_2') ?>
-            </h4>
-            <h4>
+            </p>
+            <p>
                 <?= AmosAdmin::t('amosadmin', '#faw_intro_text_3') ?>
-            </h4>
+            </p>
+        </div>
     </section>
-
+    
     <?= WizardPrevAndContinueButtonWidget::widget([
         'model' => $model,
         'viewPreviousBtn' => false

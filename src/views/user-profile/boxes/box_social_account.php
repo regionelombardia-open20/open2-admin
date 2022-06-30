@@ -25,7 +25,7 @@ use open20\amos\socialauth\models\SocialAuthUsers;
 /** @var AmosAdmin $adminModule */
 $adminModule = Yii::$app->controller->module;
 $adminModuleName = AmosAdmin::getModuleName();
-
+$this->registerCss(".hidden{ display:none !important;}");
 
 /**
  * @var $socialAuthModule \open20\amos\socialauth\Module
@@ -36,7 +36,10 @@ $js = <<<JS
 
 function isLinkedSocial(userProfileId, provider){
     var linkBtn = $('#link-'+provider);
+    var divlinkBtn = $('#div-link-'+provider);
     var unlinkBtn = $('#unlink-'+provider);
+    var divunlinkBtn = $('#div-unlink-'+provider);
+
     var boxServices = $('#'+provider+'-services');
 
     jQuery.getJSON( "/$adminModuleName/user-profile/get-social-user", {id: "$model->id", provider: provider}, function( data ) {
@@ -51,6 +54,7 @@ function isLinkedSocial(userProfileId, provider){
             if(linkBtn.hasClass('hidden')){
                 linkBtn.removeClass('hidden');
             }
+
             $(window).focus(function(){
                 $('#loader').show();
                 isLinkedSocial(userProfileId, provider);
@@ -66,6 +70,8 @@ function isLinkedSocial(userProfileId, provider){
             if(!linkBtn.hasClass('hidden')){
                 linkBtn.addClass('hidden');
             }
+      
+
             unlinkBtn.on('click', function(e) {
                 e.preventDefault();
                 $('#loader').show();
@@ -130,26 +136,27 @@ JS;
 
 ?>
 <?php
+$moduleName = AmosAdmin::getModuleName();
 if ($socialAuthModule->enableSpid) {
     ?>
     <section class="social-admin-section col-xs-12 nop">
         <h2 class="spid-title">
-            <?=AmosAdmin::t('amosadmin', '#fullsize_spid')?>
+            <?= AmosAdmin::t('amosadmin', '#fullsize_spid') ?>
         </h2>
         <?php
         $connected = false;
         $label = AmosAdmin::t('amosadmin', $socialAuthModule->shibbolethConfig['buttonLabel']);
-        $url = Yii::$app->urlManager->createAbsoluteUrl(['/admin/user-profile/connect-spid', 'id' => $model->id]);
+        $url = \Yii::$app->params['platform']['frontendUrl']."/$moduleName/user-profile/connect-spid?id=". $model->id;
         $idm = \open20\amos\socialauth\models\SocialIdmUser::find()->andWhere(['user_id' => $model->user_id])->one();
-        
+
         if ($idm) {
             $label = AmosAdmin::t('amosadmin', 'Disconnetti la tua identità digitale');
             $connected = true;
-            $url = Yii::$app->urlManager->createAbsoluteUrl(['/socialauth/shibboleth/remove-spid', 'urlRedirect' => '/admin/user-profile/update?id=' . $model->id . '#tab-settings']);
-            
+            $url = Yii::$app->urlManager->createAbsoluteUrl(['/socialauth/shibboleth/remove-spid', 'urlRedirect' => "/$moduleName/user-profile/update?id=" . $model->id . '#tab-settings']);
+
         }
         ?>
-        
+
         <?php if ($adminModule->enableDlSemplification && $idm) { ?>
             <p><?= AmosAdmin::t('amosadmin', 'Hai già associato la tua identità digitale') ?></p>
         <?php } else { ?>
@@ -168,7 +175,7 @@ if ($socialAuthModule->enableSpid) {
 <?php } ?>
 
 <?php if (!is_null($socialAuthModule) && $socialAuthModule->enableLink) {
-    
+
     $this->registerJs($js);
     $socialAuthUsers = [];
     ?>
@@ -179,7 +186,8 @@ if ($socialAuthModule->enableSpid) {
         </h2>
         <p><?= AmosAdmin::t('amosadmin', 'You can link your social accounts and then access the Open Innovation Platform with any of these accounts') . '.' ?></p>
         <p class="label-social"><strong><?= AmosAdmin::t('amosadmin', '#choose_social'); ?></strong></p>
-        <div class="wrap-btn-social">
+
+        <div class="wrap-btn-social flexbox">
             <?php foreach ($socialAuthModule->providers as $name => $config) {
                 $providerName = strtolower($name);
                 $this->registerJs(<<<JS
@@ -189,7 +197,7 @@ JS
                 ?>
                 <?php if ($adminModule->confManager->isVisibleField($providerName, ConfigurationManager::VIEW_TYPE_FORM)): ?>
                     <?php
-                    
+
                     $alreadyLinkedSocial = SocialAuthUsers::findOne([
                         'user_id' => $user->id,
                         'provider' => $providerName
@@ -199,31 +207,39 @@ JS
                         $socialAuthUsers[$providerName] = $alreadyLinkedSocial;
                     }
                     ?>
-                    <?= Html::a(
-                        AmosIcons::show($providerName) . AmosAdmin::t('amosadmin', 'Disconnect'),
-                        Yii::$app->urlManager->createAbsoluteUrl('/socialauth/social-auth/unlink-social-account?provider=' . $providerName),
-                        [
-                            'id' => 'unlink-' . $providerName,
-                            'class' => 'btn btn-' . $providerName . ($connected ? ' btn-' . $providerName . '-disconnect' : ' hidden'),
-                            'title' => AmosAdmin::t('amosadmin', 'Disconnect from your account')
-                        ]) ?>
-                    <?= Html::a(
-                        AmosIcons::show($providerName),
-                        Yii::$app->urlManager->createAbsoluteUrl('/socialauth/social-auth/link-social-account?provider=' . strtolower($name)),
-                        [
-                            'id' => 'link-' . $providerName,
-                            'class' => 'btn  btn-' . $providerName . ' btn-' . $providerName . '-square' . ($connected ? ' hidden' : ''),
-                            'title' => AmosAdmin::t('amosadmin', 'Connect with your account'),
-                            'onclick' => "window.open(this.href, '$providerName', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;"
-                        ]) ?>
+
+                    <?php $visibleClass = $connected ? '' : '' ?>
+                    <div id="div-unlink-<?=$providerName?>" class="m-t-5" style ="<?=$visibleClass?>">
+                        <?= Html::a(
+                            AmosIcons::show($providerName) . Html::tag('span', AmosAdmin::t('amosadmin', 'Disconnect')),
+                            Yii::$app->urlManager->createAbsoluteUrl('/socialauth/social-auth/unlink-social-account?provider=' . $providerName),
+                            [
+                                'id' => 'unlink-' . $providerName,
+                                'class' => 'btn btn-' . $providerName . ($connected ? ' btn-' . $providerName . '-disconnect' : ' hidden'),
+                                'title' => AmosAdmin::t('amosadmin', 'Disconnect from your account')
+                            ]) ?>
+                    </div>
+
+                    <?php $visibleClass = $connected ? '' : '' ?>
+                    <div id="div-link-<?=$providerName?>" style="<?= $visibleClass ?>">
+                        <?= Html::a(
+                            AmosIcons::show($providerName) . Html::tag('span', AmosAdmin::t('amosadmin', 'Connetti')),
+                            Yii::$app->urlManager->createAbsoluteUrl('/socialauth/social-auth/link-social-account?provider=' . strtolower($name)),
+                            [
+                                'id' => 'link-' . $providerName,
+                                'class' => 'btn  btn-' . $providerName . ' btn-' . ($connected ? ' hidden' : ''),
+                                'title' => AmosAdmin::t('amosadmin', 'Connect with your account'),
+                                'onclick' => "window.open(this.href, '$providerName', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;"
+                            ]) ?>
+                    </div>
                 <?php endif; ?>
             <?php } ?>
 
         </div>
 
     </section>
-    
-    
+
+
     <?php if ($socialAuthModule->providers && !empty($socialAuthModule->enableServices)) {
         $this->registerJs($jsServices);
         ?>

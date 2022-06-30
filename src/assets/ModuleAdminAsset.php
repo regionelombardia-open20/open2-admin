@@ -37,7 +37,7 @@ class ModuleAdminAsset extends AssetBundle
         $moduleL = \Yii::$app->getModule('layout');
 
         if(!empty(\Yii::$app->params['dashboardEngine']) && \Yii::$app->params['dashboardEngine'] == WidgetAbstract::ENGINE_ROWS){
-            $this->css = ['less/admin_fullsize.less','less/widget_users_list.less','less/dl_semplification.less'];
+            $this->css = ['less/admin_fullsize.less','less/widget_users_list.less','less/admin_design_bi.less','less/dl_semplification.less','less/registration-bi.less'];
             $this->js = ['js/widget_users_list.js'];
         }
 

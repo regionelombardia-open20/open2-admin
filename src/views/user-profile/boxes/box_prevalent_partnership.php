@@ -40,15 +40,12 @@ $adminModule = Yii::$app->controller->module;
         'class' => 'btn btn-secondary',
         'data-dismiss' => 'modal'
     ],
-]); ?>
+]);
+?>
 <?= ModalUtility::createConfirmModal([
     'id' => 'selectPrevalentPartnershipPopup',
     'modalDescriptionText' => AmosAdmin::t('amosadmin', '#select_prevalent_partnerhip_confirm'),
-    'confirmBtnLink' => Yii::$app->urlManager->createUrl([
-        '/'.AmosAdmin::getModuleName().'/user-profile/associate-prevalent-partnership',
-        'id' => $model->id,
-        'viewM2MWidgetGenericSearch' => true
-    ]),
+    'confirmBtnLink' => '/'.AmosAdmin::getModuleName().'/user-profile/associate-prevalent-partnership?id='.$model->id. '&viewM2MWidgetGenericSearch=1',
     'confirmBtnOptions' => ['id' => 'confirm-associate-pp-btn', 'class' => 'btn btn-primary'],
     'cancelBtnOptions' => ['title' => AmosAdmin::t('amosadmin', '#select_prevalent_partnerhip_cancel_title_link'),
         'class' => 'btn btn-secondary',
@@ -101,6 +98,7 @@ $this->registerJs($js);
                     <?= $model->prevalentPartnership->getTitle() ?>
                 </div>
             </div>
+
             <div class="col-xs-12 nop text-right">
                 <?= Html::a(AmosAdmin::t('amosadmin', '#delete_prevalent_partnership'), ['/'.AmosAdmin::getModuleName().'/user-profile/remove-prevalent-partnership', 'id' => $model->id], [
                     'data-toggle' => 'modal',

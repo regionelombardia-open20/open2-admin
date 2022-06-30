@@ -103,11 +103,11 @@ $redirectUrl = \Yii::$app->request->get('redirectUrl');
             <div class="row nom">
                 <div class="col-xs-12" style="padding:15px 0; border:1px solid;">
                     <div class="col-xs-12">
-                        <?= $form->field($model, 'nome')->textInput(['placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_name'), 'readonly' => true])->label('') ?>
+                        <?= $form->field($model, 'nome')->textInput(['placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_name'), 'readonly' => (!empty($model->nome))])->label('') ?>
                         <?= AmosIcons::show('user', '', AmosIcons::IC) ?>
                     </div>
                     <div class="col-xs-12">
-                        <?= $form->field($model, 'cognome')->textInput(['placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_surname'), 'readonly' => true])->label('') ?>
+                        <?= $form->field($model, 'cognome')->textInput(['placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_surname'), 'readonly' => (!empty($model->cognome))])->label('') ?>
                         <?= AmosIcons::show('user', '', AmosIcons::IC) ?>
                     </div>
                     <div class="col-xs-12">
@@ -119,6 +119,8 @@ $redirectUrl = \Yii::$app->request->get('redirectUrl');
                             <p><strong><?= AmosAdmin::t('amosadmin', 'Codice fiscale') . ': ' ?></strong> <?= $codiceFiscale ?></p>
                         </div>
                     <?php endif; ?>
+                    <?= Html::hiddenInput(Html::getInputName($model, 'moduleName'), $model->moduleName, ['id' => Html::getInputId($model, 'moduleName')]) ?>
+                    <?= Html::hiddenInput(Html::getInputName($model, 'contextModelId'), $model->contextModelId, ['id' => Html::getInputId($model, 'contextModelId')]) ?>
 
                     <div class="col-xs-12 cookie-privacy">
                         <?= Html::a(AmosAdmin::t('amosadmin', '#cookie_policy_message'), '/site/privacy', ['title' => AmosAdmin::t('amosadmin', '#cookie_policy_title'), 'target' => '_blank']) ?>

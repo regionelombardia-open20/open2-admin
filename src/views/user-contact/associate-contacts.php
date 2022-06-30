@@ -18,8 +18,17 @@ use open20\amos\core\helpers\Html;
  * @var \open20\amos\admin\models\UserProfile $model
  */
 
-$this->title = AmosAdmin::t('amosadmin', 'Add contacts');
+
 $this->params['breadcrumbs'][] = AmosAdmin::t('amosadmin', 'Add contacts');
+$this->params['breadcrumbs'][] = $this->title;
+$this->params['forceBreadcrumbs'][] = [
+    'label' => AmosAdmin::t('amosadmin', "Users"),
+    'url' => '/' .AmosAdmin::getModuleName() . '/user-profile/index',
+    'route' => '/' .AmosAdmin::getModuleName() . '/user-profile/index',
+];
+$this->params['forceBreadcrumbs'][] = [
+    'label' => $this->title,
+];
 
 $userProfileId = Yii::$app->request->get("id");
 $model = UserProfile::findOne($userProfileId);

@@ -25,7 +25,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 ?>
 <div class="loginContainerFullsize">
-    <div class="login-block security-message col-xs-12 nop">
+    <div class="login-block security-message">
         <div class="login-body">
                 <?php if (!isset($title_message)) { ?>
                     <?= Html::tag('h2', AmosAdmin::t('amosadmin', 'Errore'), ['class' => 'title-login']) ?>
@@ -38,18 +38,18 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?php if (is_array($result_message)) {
                         foreach ($result_message as $pos => $message) {
                             if ($pos == 0) { ?>
-                                <?= Html::tag('h3', $message, ['class' => 'title-login']) ?>
+                                <?= Html::tag('p', $message, ['class' => 'title-login lead']) ?>
                             <?php } else { ?>
-                                <?= Html::tag('p', $message, ['class' => '']) ?>
+                                <?= Html::tag('p', $message, ['class' => 'lead']) ?>
                             <?php }
                         }
                     } else { ?>
                         <!-- If the result message is not an array of errors, set the error in a h3 -->
-                        <?= Html::tag('h3', $result_message, ['class' => 'title-login']) ?>
+                        <?= Html::tag('p', $result_message, ['class' => 'title-login lead']) ?>
                     <?php } ?>
                     <!-- Otherwise, show a generic response message -->
                 <?php else : ?>
-                    <?= Html::tag('h3', AmosAdmin::t('amosadmin', '#generic_register_response_message'), ['class' => 'title-login']) ?>
+                    <?= Html::tag('p', AmosAdmin::t('amosadmin', '#generic_register_response_message'), ['class' => 'title-login lead']) ?>
                 <?php endif; ?>
             <div class="row">
                 <div class="col-xs-12 action">

@@ -30,11 +30,11 @@ class WidgetIconCommunityManagerUserProfiles extends WidgetIcon
     /**
      * @inheritdoc
      */
-    public function init()
+    public function init() 
     {
         parent::init();
 
-        $paramsClassSpan = [
+        $paramsClassSpan = [ 
             'bk-backgroundIcon',
             'color-darkGrey'
         ];
@@ -65,14 +65,7 @@ class WidgetIconCommunityManagerUserProfiles extends WidgetIcon
         $params = [];
         $query = new UserProfileSearch();
         $dataProvvider = $query->searchCommunityManagerUsers($params);
-
-        $this->setBulletCount(
-            $this->makeBulletCounter(
-                Yii::$app->getUser()->getId(),
-                AmosAdmin::instance()->model('UserProfile'),
-                $dataProvvider->query
-            )
-        );
+        
 
     }
 

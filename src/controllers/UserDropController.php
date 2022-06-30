@@ -17,6 +17,7 @@ use open20\amos\admin\models\UserProfile;
 use open20\amos\admin\utility\UserProfileUtility;
 use open20\amos\core\user\User;
 use open20\amos\core\utilities\Email;
+use open20\amos\socialauth\models\SocialAuthUsers;
 use open20\amos\socialauth\models\SocialIdmUser;
 use Yii;
 use yii\console\Application;
@@ -50,8 +51,20 @@ class UserDropController extends Controller
     }
 
     /**
+     * @param $user
+     */
+    public function dropEventsInvitation($user){
+        if(\Yii::$app->getModule('events')){
+            \open20\amos\events\models\EventInvitation::deleteAll(['user_id' => $user->id]);
+            \open20\amos\events\models\EventInvitation::deleteAll(['email' => $user->email]);
+        }
+    }
+
+    /**
      * Delete the user without deleting the contents
-     * @param $userID string
+     * @param $userID
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     public function softDropEverything($userID){
         //Security Policy
@@ -68,6 +81,8 @@ class UserDropController extends Controller
 
             $this->dropCommunity($user);
 
+            $this->dropEventsInvitation($user);
+
             //Drop friendships to avoid friendship zombies and similiar things
             $this->dropFriendshipsRelations($user);
 
@@ -81,17 +96,19 @@ class UserDropController extends Controller
             UserProfileUtility::deassignRoleFacilitator($user->userProfile);
 
             $user->userProfile->deactivateUserProfile();
-            
-            $this->dropSPIDLink($user->id);
+    
+            // Drop social links
+            $this->dropSocialLinks($user->id);
         }
     }
 
 
     /**
      * This is a one way function to destroy all user datas on db keeping integrity
-     * @param $userID integer
+     * @param $userID
      * @return bool
-     * @throws \Exception
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     public function dropEverything($userID) {
         //Security Policy
@@ -106,6 +123,9 @@ class UserDropController extends Controller
             //Delete all contents created by user
             $this->dropContents($user);
 
+            // delete invitation of event
+            $this->dropEventsInvitation($user);
+
             //Delete private messages
             $this->dropMessages($user);
 
@@ -117,11 +137,12 @@ class UserDropController extends Controller
 
             //Mask the user data
             $user = $this->maskUserData($user);
+            
+            // Drop social links
+            $this->dropSocialLinks($user->id);
 
             //And finally drop profile, this is the end of the user on the platform
             $this->dropUser($user);
-    
-            $this->dropSPIDLink($user->id);
         }
 
         return true;
@@ -186,21 +207,25 @@ class UserDropController extends Controller
      * @throws \yii\base\InvalidConfigException
      */
     public function dropMessages($userRecord) {
-        $q = \open20\amos\chat\models\Message::find();
-        $q->where(['sender_id' => $userRecord->id]);
-        $q->orWhere(['receiver_id' => $userRecord->id]);
 
-        /**
-         * All received and sended messages
-         * @var Message[] $messages
-         */
-        $messages = $q->all();
+        if( !is_null(\Yii::$app->getModule('chat')) ){
+            
+            $q = \open20\amos\chat\models\Message::find();
+            $q->where(['sender_id' => $userRecord->id]);
+            $q->orWhere(['receiver_id' => $userRecord->id]);
 
-        /**
-         * Dropping all the messages the conversation never exists anymore
-         */
-        foreach ($messages as $message) {
-            $message->delete();
+            /**
+             * All received and sended messages
+             * @var Message[] $messages
+             */
+            $messages = $q->all();
+
+            /**
+             * Dropping all the messages the conversation never exists anymore
+             */
+            foreach ($messages as $message) {
+                $message->delete();
+            }
         }
 
         return true;
@@ -339,17 +364,46 @@ class UserDropController extends Controller
      * @throws \Throwable
      * @throws \yii\db\StaleObjectException
      */
+    public function dropSocialLinks($userId)
+    {
+        $this->dropSocialUsersLink($userId);
+        $this->dropSPIDLink($userId);
+    }
+    
+    /**
+     * @param int $userId
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
+    public function dropSocialUsersLink($userId)
+    {
+        /** @var \open20\amos\socialauth\Module $socialModule */
+        $socialModule = Yii::$app->getModule('socialauth');
+        if (!is_null($socialModule)) {
+            /** @var SocialAuthUsers[] $socialUsers */
+            $socialUsers = SocialAuthUsers::find()->andWhere(['user_id' => $userId])->all();
+            if (!empty($socialUsers)) {
+                foreach ($socialUsers as $socialUser) {
+                    $socialUser->delete();
+                }
+            }
+        }
+    }
+    
+    /**
+     * @param int $userId
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
     public function dropSPIDLink($userId)
     {
         /** @var \open20\amos\socialauth\Module $socialModule */
         $socialModule = Yii::$app->getModule('socialauth');
-        if ($this->adminModule->enableDlSemplification) {
-            if (!is_null($socialModule)) {
-                /** @var SocialIdmUser $socialIdmUser */
-                $socialIdmUser = $socialModule->findSocialIdmByUserId($userId);
-                if (!is_null($socialIdmUser)) {
-                    $socialIdmUser->delete();
-                }
+        if (!is_null($socialModule)) {
+            /** @var SocialIdmUser $socialIdmUser */
+            $socialIdmUser = $socialModule->findSocialIdmByUserId($userId);
+            if (!is_null($socialIdmUser)) {
+                $socialIdmUser->delete();
             }
         }
     }

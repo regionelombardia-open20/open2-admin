@@ -25,7 +25,7 @@ if(!$model->isNewRecord) {
 CSS
     );
 
-    $facilitatorRolesRemovesMessage = \open20\amos\admin\AmosAdmin::t('amosadmin', '#facilitator_roles_removed');
+    $facilitatorRolesRemovesMessage = \open20\amos\admin\AmosAdmin::t('amosadmin', '#facilitator_roles_removed_and_save');
     /*
      <div id="flash-facilitator-roles-removed" class="alert-success alert fade" role="alert">
             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
@@ -109,15 +109,15 @@ JS
                 <?= \open20\amos\admin\AmosAdmin::t('amosadmin', 'Utente facilitatore') ?>
             </label>
 
-            <?= \yii\helpers\Html::button('Abilita', [
-                'class' => 'btn btn-navigation-primary facilitator-roles-enabled',
-                'id' => 'enable-facilitator-button',
-            ]); ?>
-
-            <?= \yii\helpers\Html::button('Disabilita', [
+            <?php if($model->isFacilitator()) {
+                echo \yii\helpers\Html::button('Disabilita', [
                 'class' => 'btn btn-danger facilitator-roles-disabled',
                 'id' => 'disable-facilitator-button',
-            ]); ?>
+            ]); }else{ 
+                echo \yii\helpers\Html::button('Abilita', [
+                'class' => 'btn btn-navigation-primary facilitator-roles-enabled',
+                'id' => 'enable-facilitator-button',
+            ]);  } ?>
 
             <?= $form->field($model, 'enable_facilitator_box')->hiddenInput()->label(false); ?>
         </div>

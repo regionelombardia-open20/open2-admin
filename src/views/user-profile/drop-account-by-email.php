@@ -9,12 +9,9 @@
  * @category   CategoryName
  */
 
-use kartik\password\PasswordInput;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use open20\amos\admin\AmosAdmin;
-
-//use open20\amos\core\forms\ActiveForm;
 
 /**
  * @var yii\web\View $this
@@ -30,7 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="user-profile-index row nom">
     <div class="tab-content">
         <h1 class="sr-only"><?= $this->title ?></h1>
-        <h3><?= AmosAdmin::t('amosadmin', "Attenzione, se confermi riceverai una email con un link per la cancellazione del tuo account e di tutti i dati a te associati. Confermi?") ?></h3>
+        <p class="h5 m-b-30"><?= AmosAdmin::t('amosadmin', "Attenzione, se confermi riceverai una email con un link per la cancellazione del tuo account e di tutti i dati a te associati. Confermi?") ?></p>
         <?php
         $form = ActiveForm::begin([
             'id' => 'drop-form',

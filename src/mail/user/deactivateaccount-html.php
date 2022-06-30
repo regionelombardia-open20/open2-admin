@@ -42,7 +42,7 @@ $this->registerCssFile('http://fonts.googleapis.com/css?family=Roboto');
                         </p>
                         <p style="margin-bottom: 20px;">
                             <?php 
-                            $link = $appLink . 'admin/security/reactivate-profile';
+                            $link = $appLink . AmosAdmin::getModuleName() . '/security/reactivate-profile';
                             ?>
                             <?= AmosAdmin::tHtml('amosadmin', "#reactivation_text") ?>
                             <?= Html::beginTag('a', ['href' => $link]) ?>

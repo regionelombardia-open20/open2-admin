@@ -24,6 +24,7 @@ use open20\amos\core\user\User;
 ModuleAdminAsset::register(Yii::$app->view);
 
 $assetBundle = \open20\amos\admin\assets\ModuleUserProfileAsset::register($this);
+$moduleName = AmosAdmin::getModuleName();
 
 $this->title = AmosAdmin::t('amosadmin', "Associazione IDPC");
 
@@ -93,11 +94,12 @@ $user = $model->user;
                     <h2 class="single-section-title"><?= AmosAdmin::t('amosadmin', "#reconciliation_enter_with_idpc") ?></h2>
                     <?php
                     $spidBtnTitle = AmosAdmin::t("amosadmin", '#reconciliation_access_digital_identity');
+                    $moduleName = AmosAdmin::getModuleName();
                     ?>
                     <?= Html::a($spidBtnTitle, [
-                        '/admin/user-profile/connect-spid',
+                        '/'.$moduleName.'/user-profile/connect-spid',
                         'id' => $model->id,
-                        'redirectUrl' => \Yii::$app->params['platform']['backendUrl'] . '/admin/security/reconciliation?done=true'
+                        'redirectUrl' => \Yii::$app->urlManager->createUrl('/'.$moduleName.'/security/reconciliation?done=true')
                     ], [
                         'class' => 'btn btn-spid',
                         'title' => $spidBtnTitle

@@ -19,6 +19,8 @@ use open20\amos\core\forms\editors\m2mWidget\M2MWidget;
  * @var \open20\amos\admin\models\UserProfile $model
  */
 
+$this->registerJs($js);
+
 $this->title = AmosAdmin::t('amosadmin', 'Select prevalent partnership');
 
 $admin =  AmosAdmin::getInstance();
@@ -41,7 +43,9 @@ $organizationsModule = \Yii::$app->getModule($admin->getOrganizationModuleName()
         ]);
     }
     ?>
-    <h4><?= AmosAdmin::t('amosadmin', '#faw_ass_prev_part_text') ?></h4>
+    <?php if (!\Yii::$app->request->isAjax): ?>
+        <h4><?= AmosAdmin::t('amosadmin', '#faw_ass_prev_part_text') ?></h4>
+    <?php endif; ?>
     <?= M2MWidget::widget([
         'model' => $model,
         'modelId' => $model->id,
@@ -64,6 +68,7 @@ $organizationsModule = \Yii::$app->getModule($admin->getOrganizationModuleName()
         'targetUrlParams' => [
             'viewM2MWidgetGenericSearch' => true
         ],
+        'showSpinner' => true,
         'targetColumnsToView' => [
             'logo_id' => [
                 'headerOptions' => [

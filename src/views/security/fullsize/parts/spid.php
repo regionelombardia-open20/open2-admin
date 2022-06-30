@@ -23,15 +23,15 @@ ModuleAdminAsset::register(Yii::$app->view);
 /** @var $socialAuthModule \open20\amos\socialauth\Module */
 $socialAuthModule = \open20\amos\socialauth\Module::getInstance();
 ?>
-<?= Html::tag('h2', AmosAdmin::t('amosadmin', '#fullsize_spid'), ['class' => 'title-login']) ?>
-<div class="col-sm-12 col-xs-12 nop">
+<?= Html::tag('h5', AmosAdmin::t('amosadmin', '#fullsize_spid'), ['class' => 'title-login']) ?>
+<div class="m-t-20 m-b-30">
     <?=
     Html::a(
         //AmosIcons::show('account-circle') . AmosAdmin::t('amosadmin', $socialAuthModule->shibbolethConfig['buttonLabel']),
         AmosAdmin::t('amosadmin', $socialAuthModule->shibbolethConfig['buttonLabel']),
         Url::to("/{$socialAuthModule->id}/shibboleth/endpoint", 'https'),
         [
-            'class' => 'btn btn-spid',
+            'class' => 'btn btn-spid btn-block btn-lg',
             'title' => AmosAdmin::t('amosadmin', $socialAuthModule->shibbolethConfig['buttonLabel']),
             //'target' => '_blank'
         ]

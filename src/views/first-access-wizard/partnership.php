@@ -43,15 +43,15 @@ $moduleTag = \Yii::$app->getModule('tag');
     <?= $this->render('parts/header', ['model' => $model]) ?>
 
     <section>
-        <div class="col-xs-12 nop">
-            <h4><?= AmosAdmin::t('amosadmin', '#faw_partnership_text') ?></h4>
+        <div>
+            <p class="lead"><?= AmosAdmin::t('amosadmin', '#faw_partnership_text') ?></p>
         </div>
     </section>
     <section>
-        <div class="col-xs-12 nop">
-            <div>
+        <div >
+            <div class="row">
                 <?php if (!is_null($model->prevalentPartnership)): ?>
-                    <div class="col-xs-3 col-md-2">
+                    <div class="col-xs-3 col-md-2 img-wizard-partnership">
                         <?php
                         $admin =  AmosAdmin::getInstance();
                         /** @var  $organizationsModule OrganizationsModuleInterface*/
@@ -61,12 +61,12 @@ $moduleTag = \Yii::$app->getModule('tag');
                         ?>
                     </div>
                     <div class="col-xs-4">
-                        <div><?= $model->prevalentPartnership->getTitle() ?></div>
+                        <div><h4><?= $model->prevalentPartnership->getTitle() ?></h4></div>
                         <div><?= Html::a(AmosAdmin::t('amosadmin', 'Change prevalent partnership'), $partnershipUrl, ['class' => 'btn btn-primary']) ?></div>
                     </div>
                 <?php else: ?>
-                    <div class="col-xs-12 text-center nop">
-                        <div><?= AmosAdmin::tHtml('amosadmin', 'Prevalent partnership not selected') ?></div>
+                    <div class="col-xs-12 m-t-35">
+                        <p><?= AmosAdmin::tHtml('amosadmin', 'Prevalent partnership not selected') ?></p>
                         <div><?= Html::a(AmosAdmin::t('amosadmin', 'Select prevalent partnership'), $partnershipUrl, ['class' => 'btn btn-primary']) ?></div>
                     </div>
                 <?php endif; ?>

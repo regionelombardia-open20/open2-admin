@@ -19,9 +19,13 @@ use open20\amos\admin\AmosAdmin;
  * @var string $permissionSave
  */
 
-$this->title = AmosAdmin::t('amosadmin', 'Aggiorna') . ' ' . $model->nomeCognome;
-$this->params['breadcrumbs'][] = ['label' => Yii::$app->session->get('previousTitle'), 'url' => Yii::$app->session->get('previousUrl')];
-$this->params['breadcrumbs'][] = $this->title;
+$this->title = $model;
+$this->params['titleSection'] = AmosAdmin::t('amosadmin', 'Il mio profilo');
+$this->params['breadcrumbs'][] = ['label' => AmosAdmin::t('amosadmin', 'Partecipanti'), 'url' => ['/'.AmosAdmin::getModuleName().'/user-profile/validated-users']];
+$this->params['breadcrumbs'][] = ['label' => AmosAdmin::t('amosadmin', 'Il mio profilo'), 'url' => ['/'.AmosAdmin::getModuleName().'/user-profile/view','id' => $model->id]];
+$this->params['breadcrumbs'][] = AmosAdmin::t('amosadmin', 'Aggiorna');
+
+//$this->params['breadcrumbs'][] = ['label' => $model, 'url' => ['view', 'id' => $model->id]];
 
 ?>
 

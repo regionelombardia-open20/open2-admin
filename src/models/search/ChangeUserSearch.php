@@ -102,7 +102,7 @@ class ChangeUserSearch extends UserProfile
         } else {
             $query->where('0');
         }
-        
+
         
         $dataProvider = new ActiveDataProvider([
             'query' => $query

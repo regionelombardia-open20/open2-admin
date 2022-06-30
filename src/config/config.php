@@ -39,7 +39,7 @@ return [
                     'cognome',
                     'surnameName',
                     'prevalentPartnership',
-                    'created_at'
+                    'user_profile.created_at'
                 ],
                 'default_field' => 'surnameName',
                 'order_type' => SORT_ASC

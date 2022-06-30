@@ -68,9 +68,16 @@ class UserProfileAjaxController extends Controller
                             'actions' => [
                                 'ajax-user-list',
                                 'ajax-contact-list',
-                                'ajax-share-with'
+                                'ajax-share-with',
+                                'my-profile-widget-ajax'
                             ],
                             'roles' => ['@']
+                        ],
+                        [
+                            'allow' => true,
+                            'actions' => [
+                                'ajax-user-list',
+                            ],
                         ],
                     ],
                 ],
@@ -194,6 +201,16 @@ class UserProfileAjaxController extends Controller
         return true;
     }
 
+    /**
+     * @param $id
+     * @return string
+     */
+    public function actionMyProfileWidgetAjax($id){
+        $model = UserProfile::findOne($id);
+        return $this->renderPartial('@vendor/open20/amos-admin/src/widgets/views/widget_my_profile',[
+            'model' => $model
+        ]);
+    }
 
 
 }

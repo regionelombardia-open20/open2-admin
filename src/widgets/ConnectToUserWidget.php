@@ -29,12 +29,12 @@ use yii\redactor\widgets\Redactor;
  */
 class ConnectToUserWidget extends Widget
 {
-    const MODAL_CONFIRM_BTN_OPTIONS = ['class' => 'btn btn-navigation-primary m-r-5'];
+    const MODAL_CONFIRM_BTN_OPTIONS = ['class' => 'btn btn-primary btn-connect-to-user btn-connect-to-user-confirm'];
     const MODAL_CANCEL_BTN_OPTIONS = [
-        'class' => 'btn btn-secondary m-r-5',
+        'class' => 'btn btn-secondary btn-connect-to-user btn-connect-to-user-cancel',
         'data-dismiss' => 'modal'
     ];
-    const BTN_CLASS_DFL = 'btn btn-navigation-primary btn-connect-to-user';
+    const BTN_CLASS_DFL = 'btn btn-primary btn-connect-to-user';
 
     /**
      * @var int $userId
@@ -112,6 +112,10 @@ class ConnectToUserWidget extends Widget
      */
     public function run()
     {
+        if (!Yii::$app->user->can('ASSOCIATE_CONTACTS')) {
+            return '';
+        }
+        
         //Register javascript to send private message to connected users
         $js = <<<JS
   
@@ -207,7 +211,7 @@ JS;
                         . Html::a(AmosAdmin::t('amosadmin', 'Invite contact'),
                             ['/'.AmosAdmin::getModuleName().'/user-contact/connect', 'contactId' => $model->user_id],
                             $this->modalButtonConfirmationOptions),
-                        ['class' => 'm-15-0']
+                        ['class' => 'pull-right m-15-0']
                     );
                     Modal::end();
                 }
@@ -221,7 +225,7 @@ JS;
                 if ($userContact->status == UserContact::STATUS_INVITED) {
                     if (!$invited) {
                         //logged user invited another user to join is contact list, but the request is still pending. It is possible to send a reminder
-                        $title = AmosAdmin::t('amosadmin', 'Pending invitation') . AmosIcons::show('account-box-mail');
+                        $title = AmosAdmin::t('amosadmin', 'Pending invitation');
                         $titleLink = AmosAdmin::t('amosadmin', 'Pending invitation');
                         $dataToggle = 'modal';
                         $idModal = ($isUserContactModel ? $userContact->contact_id : $model->id);
@@ -274,23 +278,31 @@ JS;
                             $invitedBy = User::findOne($userContact->created_by)->getProfile()->getNomeCognome();
                             echo Html::tag('div', AmosAdmin::t('amosadmin',
                                     "Do you wish to join the contact network of") . " <strong>" . $invitedBy . " </strong>?");
+                            
+                            $urlReject = [
+                                '/'.AmosAdmin::getModuleName().'/user-contact/connect',
+                                'contactId' => $loggedUserId,
+                                'userId' => $userContact->user_id,
+                                'accept' => false
+                            ];
+                            $urlAccept = [
+                                '/'.AmosAdmin::getModuleName().'/user-contact/connect',
+                                'contactId' => $loggedUserId,
+                                'userId' => $userContact->user_id,
+                                'accept' => true
+                            ];
+                            if ($this->isProfileView) {
+                                $urlReject['fromView'] = true;
+                                $urlAccept['fromView'] = true;
+                            }
+                            
                             echo Html::tag('div',
                                 Html::a(AmosAdmin::t('amosadmin', 'Reject invitation'),
-                                    [
-                                        '/'.AmosAdmin::getModuleName().'/user-contact/connect',
-                                        'contactId' => $loggedUserId,
-                                        'userId' => $userContact->user_id,
-                                        'accept' => false
-                                    ],
+                                    $urlReject,
                                     $btnRejectOpts
                                 )
                                 . Html::a(AmosAdmin::t('amosadmin', 'Accept invitation'),
-                                    [
-                                        '/'.AmosAdmin::getModuleName().'/user-contact/connect',
-                                        'contactId' => $loggedUserId,
-                                        'userId' => $userContact->user_id,
-                                        'accept' => true
-                                    ],
+                                    $urlAccept,
                                     $this->modalButtonConfirmationOptions),
                                 ['class' => 'pull-right m-15-0']
                             );

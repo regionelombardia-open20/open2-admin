@@ -23,6 +23,7 @@ use yii\db\ActiveQuery;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\data\Pagination;
+use open20\amos\admin\models\UserContact;
 
 /**
  * Class UserProfileSearch
@@ -59,6 +60,7 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
      * @var string $userProfileStatus
      */
     public $userProfileStatus = '';
+    public $tags;
 
     /**
      * @inheritdoc
@@ -75,12 +77,16 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
                 'sesso',
                 'codice_fiscale',
                 'prevalent_partnership_id',
+                'user_profile_role_id',
+                'user_profile_area_id',
+                'user_profile_area_other',
                 'facilitatore_id',
                 'status',
                 'isFacilitator',
                 'isOperatingReferent',
                 'userProfileStatus',
                 'validato_almeno_una_volta',
+                'tags',
                 ], 'safe'],
         ];
     }
@@ -118,6 +124,7 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
         /** @var AmosAdmin $adminModule */
         $adminModule = \Yii::$app->getModule(AmosAdmin::getModuleName());
 
+
         if (
             !is_null(Yii::$app->getModule($adminModule->getOrganizationModuleName())) &&
             $this->adminModule->confManager->isVisibleBox('box_prevalent_partnership',
@@ -151,6 +158,7 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
 
         // Check params to get orders value
         $this->setOrderVars($params);
+
 
         //INIZIO ACCOPPIAMENTO STRETTO CON ALTRA ENTITA'
         if ($adminModule->tightCoupling == true && !\Yii::$app->user->can($adminModule->tightCouplingRoleAdmin)) {
@@ -191,6 +199,12 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
             UserProfile::tableName().'.status' => $this->userProfileStatus,
             UserProfile::tableName().'.validato_almeno_una_volta' => $this->validato_almeno_una_volta,
         ]);
+
+        if (!empty($this->tags)) {
+            $query->innerJoin('cwh_tag_owner_interest_mm',
+                    'cwh_tag_owner_interest_mm.record_id = '.UserProfile::tableName().'.id and cwh_tag_owner_interest_mm.deleted_at is null')
+                ->andFilterWhere(['cwh_tag_owner_interest_mm.tag_id' => $this->tags]);
+        }
 
         $query->andFilterWhere(['like', UserProfile::tableName().'.nome', $this->nome])
             ->andFilterWhere(['like', UserProfile::tableName().'.cognome', $this->cognome])
@@ -265,12 +279,12 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
         if ($this->canUseModuleOrder()) {
             $dataProvider->setSort([
                 'attributes' => [
-                    'nome' => [
+                    'user_profile.nome' => [
                         'asc' => ['nome' => SORT_ASC, 'cognome' => SORT_ASC],
                         'desc' => ['nome' => SORT_DESC, 'cognome' => SORT_DESC],
                         'default' => SORT_ASC
                     ],
-                    'cognome' => [
+                    'user_profile.cognome' => [
                         'asc' => ['cognome' => SORT_ASC, 'nome' => SORT_ASC],
                         'desc' => ['cognome' => SORT_DESC, 'nome' => SORT_DESC],
                         'default' => SORT_ASC
@@ -285,7 +299,7 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
                         'desc' => ['organizations.name' => SORT_DESC, 'cognome' => SORT_DESC, 'nome' => SORT_DESC],
                         'default' => SORT_ASC
                     ],
-                    'created_at'
+                    'user_profile.created_at'
                 ],
                 'defaultOrder' => [
                     $this->orderAttribute => (int) $this->orderType
@@ -448,6 +462,23 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
         return $dataProvider;
     }
 
+    public static function isCommunityManagerOfAtLeastOne($userId = null)
+    {
+        if (\Yii::$app->user->isGuest || class_exists(\Yii::getAlias('@vendor/open20/amos-community/src/AmosCommunity'))
+            && !empty(\Yii::$app->getModule(\open20\amos\community\AmosCommunity::getModuleName()))) {
+            return 0;
+        }
+        if (empty($userId)) {
+            $userId = \Yii::$app->user->id;
+        }
+        $count = \open20\amos\community\models\CommunityUserMm::find()
+            ->andWhere(['user_id' => $userId])
+            ->andWhere(['role' => \open20\amos\community\models\CommunityUserMm::ROLE_COMMUNITY_MANAGER])
+            ->limit(1)
+            ->count();
+        return $count;
+    }
+
     /**
      * Search all active users with "FACILITATOR" role.
      * @param array $params
@@ -472,6 +503,38 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
             return $dataProvider;
         }
 
+        $this->baseFilter($query);
+
+        return $dataProvider;
+    }
+
+    /**
+     * Search all active users with "FACILITATOR" role.
+     * @param array $params
+     * @return ActiveDataProvider
+     */
+    public function searchMyNetwork($params)
+    {
+        $userId = \Yii::$app->user->id;
+        $query  = $this->baseSearch($params);
+        $query->andWhere([UserProfile::tableName().'.attivo' => 1]);
+
+        $contacts = UserContact::find()->andWhere(['or',
+                ['user_id' => $userId],
+                ['contact_id' => $userId],
+            ])
+            ->andWhere(['status' => [UserContact::STATUS_ACCEPTED, UserContact::STATUS_INVITED]])
+            ->select(new \yii\db\Expression("IF(user_id = $userId, contact_id, user_id) as id"));
+        $query->andWhere(['in', UserProfile::tableName().'.user_id', $contacts]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query
+        ]);
+        $this->setUserProfileSort($dataProvider);
+
+        if (!($this->load($params) && $this->validate())) {
+            return $dataProvider;
+        }
         $this->baseFilter($query);
 
         return $dataProvider;
