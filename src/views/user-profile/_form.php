@@ -113,7 +113,7 @@ $jsIsProfileModified = "
         isProfileModified = 1;
         $('#isProfileModified').val('1');
     });
-    
+
     $('.saveBtn').on('click', function(e) {
         e.preventDefault();
         $('.has-error').each(function() {
@@ -125,17 +125,17 @@ $jsIsProfileModified = "
         var required = $('.required input, .required textarea');
         var haserror = $('.has-error');
         var haserrorRequired = false;
-        $(required).each(function() {      
+        $(required).each(function() {
             if ($(this).val().length <= 0) {
                 haserrorRequired = true;
-            } 
+            }
         });
         if (haserror.length <= 0 && haserrorRequired) {
             $('#user-profile-form').yiiActiveForm('submitForm');
         }
         if (haserror.length <= 0 && !haserrorRequired) {
             if (isProfileModified == 1) {
-                $(modalId).modal('show'); 
+                $(modalId).modal('show');
             } else {
                 $('#user-profile-form').yiiActiveForm('submitForm');
             }
@@ -306,7 +306,7 @@ $form = ActiveForm::begin([
             ?>
 
             <!-- NETWORK -->
-            <?php if ($model->isNewRecord || ($enableUserContacts && $model->validato_almeno_una_volta) || isset($moduleCwh)): ?>
+            <?php if ($model->isNewRecord || ($enableUserContacts && ($model->validato_almeno_una_volta || $adminModule->showContactsForInvalid)) || isset($moduleCwh)): ?>
                 <?php $this->beginBlock($idTabNetwork); ?>
                 <div>
                     <?php if ($model->isNewRecord): ?>
@@ -317,7 +317,7 @@ $form = ActiveForm::begin([
                         ]); ?>
                     <?php else: ?>
                         <?php
-                        if ($enableUserContacts && $model->validato_almeno_una_volta) {
+                        if ($enableUserContacts && ($model->validato_almeno_una_volta || $adminModule->showContactsForInvalid)) {
                             echo \open20\amos\admin\widgets\UserContacsWidget::widget([
                                 'userId' => $model->user_id,
                                 'isUpdate' => true

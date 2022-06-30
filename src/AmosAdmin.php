@@ -335,7 +335,7 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
 
     /**
      * Is set true the validate basic user can create contents only in his/her own Communities
-     * 
+     *
      * @var bool $createContentInMyOwnCommunityOnly
      */
     public $createContentInMyOwnCommunityOnly = false;
@@ -408,6 +408,14 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
      * @var Array
      */
     public $enableAttributeChangeLog = [];
+
+    /**
+     * Shows linked contacts even if main contact has not been validated. This parameter has been created for ARTER,
+     * where it is required to show the linked mentor in the contacts pane even if the user has not been validated first.
+     * THE USER STILL CANNOT ADD CONTACTS OR SEE THE "MESSAGE" BUTTON IF NOT VALIDATED.
+     * @var boolean $showContactsForInvalid
+     */
+    public $showContactsForInvalid = false;
 
     /**
      * @return string

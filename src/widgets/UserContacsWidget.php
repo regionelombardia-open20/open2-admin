@@ -71,7 +71,7 @@ class UserContacsWidget extends Widget
     public function run()
     {
         $confirm = $this->getConfirm();
-        $canAssociateContact = \Yii::$app->user->can('ASSOCIATE_CONTACTS');
+        $canAssociateContact = \Yii::$app->user->can('ASSOCIATE_CONTACTS') && (\Yii::$app->getUser()->identity->profile->validato_almeno_una_volta);
 
         $gridId = $this->gridId;
         $url = \Yii::$app->urlManager->createUrl([
@@ -230,7 +230,9 @@ class UserContacsWidget extends Widget
                     return GoogleContactWidget::widget(['model' => $model->getInvitingUserProfile()]).'&nbsp;';
                 },
                 'connect' => function ($url, $model) {
-                    $btn = ConnectToUserWidget::widget(['model' => $model, 'isGridView' => true ]);
+                    if (\Yii::$app->getUser()->identity->profile->validato_almeno_una_volta)
+                        $btn = ConnectToUserWidget::widget(['model' => $model, 'isGridView' => true ]);
+                    else $btn = '';
                     return $btn;
                 },
 

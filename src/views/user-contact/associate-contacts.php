@@ -110,8 +110,10 @@ if (isset($post['genericSearch'])) {
                     return \open20\amos\admin\widgets\GoogleContactWidget::widget(['model' => $model]).'&nbsp;';
                 },
                 'connect' =>  function ($url, $model) {
-                    /** @var UserProfile $model */
-                    return \open20\amos\admin\widgets\ConnectToUserWidget::widget([ 'model' => $model, 'isGridView' => true ]);
+                    if (\Yii::$app->getUser()->identity->profile->validato_almeno_una_volta)
+                        /** @var UserProfile $model */
+                        return \open20\amos\admin\widgets\ConnectToUserWidget::widget([ 'model' => $model, 'isGridView' => true ]);
+                    return '';
                 }
             ]
         ]

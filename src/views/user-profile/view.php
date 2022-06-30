@@ -114,7 +114,7 @@ JS;
                     <?php endif; ?>
 
 
-                    <?php if ($model->validato_almeno_una_volta): ?>
+                    <?php if (($model->validato_almeno_una_volta || $adminModule->showContactsForInvalid)): ?>
                         <div class="container-info-icons">
                             <?php
                             if ($model->isFacilitator()) {
@@ -238,7 +238,7 @@ JS;
             </section>
             <!-- end SCHEDA -->
 
-            <?php if ($enableUserContacts && Yii::$app->user->id != $model->user_id && !$hideContactsInView): ?>
+            <?php if ($enableUserContacts && Yii::$app->user->id != $model->user_id && \Yii::$app->getUser()->identity->profile->validato_almeno_una_volta && !$hideContactsInView): ?>
                 <?= \open20\amos\admin\widgets\ConnectToUserWidget::widget([
                     'model' => $model,
                     'isProfileView' => true,
@@ -257,7 +257,7 @@ JS;
             $accordionNetwork = '';
 
             $moduleCwh = Yii::$app->getModule('cwh');
-            if ($enableUserContacts && $model->validato_almeno_una_volta && !$hideContactsInView) {
+            if ($enableUserContacts && ($model->validato_almeno_una_volta || $adminModule->showContactsForInvalid) && !$hideContactsInView) {
                 $accordionUserContacts = \open20\amos\admin\widgets\UserContacsWidget::widget([
                     'userId' => $model->user_id,
                     'isUpdate' => false
@@ -290,7 +290,7 @@ JS;
                     'userId' => $model->user_id,
                     'isUpdate' => false
                 ]);
-            
+
                 echo AccordionWidget::widget([
                 'items' => [
                     [
@@ -322,7 +322,7 @@ JS;
                 if (!empty($privilegesModule)) {
                     $accordionAdmin = \open20\amos\privileges\widgets\UserPrivilegesWidget::widget(['userId' => $model->user_id]);
                 }
-                
+
                 echo AccordionWidget::widget([
                     'items' => [
                         [

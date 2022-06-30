@@ -149,10 +149,10 @@ if (!is_null($model->prevalentPartnership)) {
         <?= $googleContactIcon; ?>
         <?php if (Yii::$app->user->id != $model->user_id): ?>
             <div class="col-xs-12 icon-btn-action">
-                <?php if ($adminModule->enableUserContacts && !$adminModule->enableSendMessage): ?>
+                <?php if ($adminModule->enableUserContacts && !$adminModule->enableSendMessage && \Yii::$app->getUser()->identity->profile->validato_almeno_una_volta): ?>
                     <?= ConnectToUserWidget::widget(['model' => $model, 'divClassBtnContainer' => '']) ?>
                 <?php endif; ?>
-                <?php if (!$adminModule->enableUserContacts && $adminModule->enableSendMessage): ?>
+                <?php if (!$adminModule->enableUserContacts && $adminModule->enableSendMessage && \Yii::$app->getUser()->identity->profile->validato_almeno_una_volta): ?>
                     <?= SendMessageToUserWidget::widget(['model' => $model, 'divClassBtnContainer' => '']) ?>
                 <?php endif; ?>
                 <?php if ($adminModule->enableInviteUserToEvent): ?>

@@ -220,7 +220,7 @@ JS;
             </section>
             <!-- end SCHEDA -->
 
-            <?php if ($enableUserContacts && Yii::$app->user->id != $model->user_id && !$hideContactsInView): ?>
+            <?php if ($enableUserContacts && Yii::$app->user->id != $model->user_id && !$hideContactsInView && \Yii::$app->getUser()->identity->profile->validato_almeno_una_volta): ?>
                 <?= \open20\amos\admin\widgets\ConnectToUserWidget::widget([
                     'model' => $model,
                     'isProfileView' => true,
@@ -239,7 +239,7 @@ JS;
             $accordionNetwork = '';
 
             $moduleCwh = Yii::$app->getModule('cwh');
-            if ($enableUserContacts && $model->validato_almeno_una_volta && !$hideContactsInView) {
+            if ($enableUserContacts && ($model->validato_almeno_una_volta || $adminModule->showContactsForInvalid) && !$hideContactsInView) {
                 $accordionUserContacts = \open20\amos\admin\widgets\UserContacsWidget::widget([
                     'userId' => $model->user_id,
                     'isUpdate' => false
