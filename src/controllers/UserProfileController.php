@@ -18,6 +18,7 @@ use open20\amos\admin\models\CambiaPasswordForm;
 use open20\amos\admin\models\DropAccountForm;
 use open20\amos\admin\models\search\UserProfileAreaSearch;
 use open20\amos\admin\models\search\UserProfileRoleSearch;
+use open20\amos\admin\models\UserContact;
 use open20\amos\admin\models\UserProfile;
 use open20\amos\admin\models\UserProfileReactivationRequest;
 use open20\amos\admin\utility\UserProfileMailUtility;
@@ -47,6 +48,9 @@ use yii\helpers\Url;
 use yii\log\Logger;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
+use open20\amos\cwh\query\CwhActiveQuery;
+use open20\amos\tag\AmosTag;
+use open20\amos\tag\models\Tag;
 
 /**
  * Class UserProfileController
@@ -109,7 +113,9 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
                                 'get-social-service-status',
                                 'get-social-user',
                                 'complete-profile',
-                                'send-request-external-facilitator'
+                                'send-request-external-facilitator',
+                                'find-name',
+                                'find-name-user-by-cwh'
                             ],
                             'roles' => ['BASIC_USER']
                         ],
@@ -1564,4 +1570,176 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
         }
         return $this->redirect(Url::previous());
     }
+
+
+    // // /**
+    // //  * Method to get UserProfile name and surname
+    // //  *
+    // //  * @param string $name
+    // //  * @return json | UserProfile | name and surname
+    // //  */ 
+    // // public function actionFindName($name = "") {
+
+    // //     $className = \Yii::$app->request->get('className');
+	// //     $model_id = \Yii::$app->request->get('model_id');
+
+    // //     // get cwh scope
+    // //     $scope = \open20\amos\cwh\AmosCwh::getInstance()->getCwhScope();
+    // //     // get tags
+	// //     $tags = $this->getTags($className, $model_id);
+
+    // //     $model = $className::find($model->id)->one();
+    // //     $cwh_active_query = new CwhActiveQuery($className);
+    // //     $cwh_active_query->modelObject = $model;
+
+    // //     // get all Users filtered by cwh
+    // //     $query_users = $cwh_active_query::getRecipients(RULE_NETWORK_TAG, $tags, $scope)->all();
+    // // 	$tmp =[];
+    // //     foreach ($query_users as $key => $user) {
+    // // 		$tmp[] = $user->id;
+    // //     }
+
+    // //     $users = UserProfile::find();
+    // //     $users->asArray();
+    // //     $users->limit(5);
+    // //     $users->select(new \yii\db\Expression('user_id, CONCAT(nome," ",cognome) as name, CONCAT("/'.AmosAdmin::getModuleName().'/user-profile/view?id=",id) as url, user_id as user_id'));
+        
+    // //     $users->andHaving(new \yii\db\Expression("name LIKE \"%{$name}%\""));
+	// //     $users->andWhere(['user_id' => $tmp]);
+
+    // //     return json_encode($users->all());
+    // // }
+
+    /**
+     * Method to get query tags for specific model namespace and id model
+     *
+     * @param string $className
+     * @param int $record_id
+     * @return query | Tags | $query
+     */
+    protected function getTags($className, $record_id){
+        
+        $tagsMm = \open20\amos\tag\models\EntitysTagsMm::find()
+                    ->joinWith('tag')
+                    ->andWhere([
+                        'classname' => $className,
+                        'record_id' => $record_id,
+                    ])
+                    ->orderBy([
+                        'tag.nome' => SORT_DESC
+                    ])->all();
+    
+        $tagListId = [];
+        foreach ($tagsMm as $elem) {
+            $tagListId [] = $elem->tag_id;
+        }
+
+        $query = Tag::find()->andWhere(['id' => $tagListId]);
+
+        return $query;
+    }
+
+
+    /**
+     * Method to get UserProfile name and surname
+     *
+     * @param string $name
+     * @return json | UserProfile | name and surname
+     */
+    public function actionFindNameUserByCwh($name = ""){
+
+        $className = \Yii::$app->request->get('className');
+        $model_id = \Yii::$app->request->get('model_id');
+
+        if( (null != $className) || (!empty($className)) ){
+            $model = $className::find($model->id)->one();
+        }
+
+        // get cwh scope
+        $scope = \open20\amos\cwh\AmosCwh::getInstance()->getCwhScope();
+        // get tags
+        $tags = $this->getTags($className, $model_id);
+
+
+        // check if exist scope 
+        if( ((null != $scope) || (!empty($scope))) && ((null != $className) || (!empty($className))) ){
+
+            foreach ($scope as $key => $value) {
+
+                if( strcmp($key, "community") == 0 ){
+
+                    // extract community of scope 
+                    $community = Community::find()->andWhere(['id' => $value])->one();
+
+
+                    // check if community type not is 1 (Open)
+                    if( (null != $community) && ($community->community_type_id != 1) ){
+
+                        // extract only user for specific scope from cwh
+                        $cwh_active_query = new CwhActiveQuery($className);
+                        $cwh_active_query->modelObject = $model;
+
+                        // get all Users filtered by cwh
+                        $cwh_users = $cwh_active_query::getRecipients(RULE_NETWORK, $tags, $scope)->all();
+
+                        if( $this->adminModule->enableUserContacts == true && $this->adminModule->enableTagOnlyNetwork == true ) {
+                            $cwh_users = \open20\amos\community\models\CommunityUserMm::find()->select('user_id')->distinct()->andWhere(['community_id' => $community->id])->all();
+                        }
+                        $cwh_user_id = [];
+                        foreach ($cwh_users as $key => $user) {
+                            $cwh_user_id[] = $user->user_id;
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+        /** @var UserProfile $userProfileModel */
+        $userProfileModel = $this->adminModule->createModel('UserProfile');
+
+        /** @var ActiveQuery $users */
+        $users = $userProfileModel::find();
+        $users->asArray();
+        $users->limit(5);
+        $users->select(new \yii\db\Expression('distinct(user_profile.user_id), CONCAT(nome," ",cognome) as name, CONCAT("/'.AmosAdmin::getModuleName().'/user-profile/view?id=",user_profile.id) as url, user_profile.user_id as user_id'));
+
+        $users->andHaving(new \yii\db\Expression("name LIKE \"%{$name}%\""));
+        if( $this->adminModule->enableUserContacts == true && $this->adminModule->enableTagOnlyNetwork == true ){
+            //Persone della mia rete
+            $users->innerJoin('user', 'user.id = user_profile.user_id');
+            $users->innerJoin('user_contact', 'user.id = user_contact.contact_id or user.id = user_contact.user_id ');
+            $users->andWhere('user_contact.deleted_at IS NULL');
+            $users->andWhere(['OR',
+                ['user_contact.user_id'=> Yii::$app->user->id],
+                ['user_contact.contact_id'=> Yii::$app->user->id]
+            ]);
+            $users->andWhere(['user_contact.status' => UserContact::STATUS_ACCEPTED]);
+            $users->andWhere(['attivo' => 1]);
+        }
+
+        if(array_key_exists( 'notify_tagging_user_in_content',$userProfileModel->attributes)){
+            $users->andWhere(['notify_tagging_user_in_content' => true]);
+        }
+
+
+        // $users->andWhere(['!=','id' , Yii::$app->user->id]);
+
+        // check if not exist a cwh user id for filter
+        if( isset($cwh_user_id) && (!empty($cwh_user_id)) ){
+            $users->andWhere(['user_profile.user_id' => $cwh_user_id]);
+        }
+
+        // clausole to remove all user profile deleted (for privacy)
+        $users->andWhere(['not like', 'nome', UserProfileUtility::DELETED_ACCOUNT_NAME]);
+
+        return json_encode($users->all());
+    }
+
+
+
+
+
+
 }

@@ -262,6 +262,10 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
     public $dontCheckOneTagPresent = false;
 
     /**
+     * @var bool $enableTagOnlyNetwork If true i can tag only my network members.
+     */
+    public $enableTagOnlyNetwork = false;
+    /**
      * @var bool $enableMultiUsersSameCF If true the model validation doesn't check the unique of che fiscal code.
      */
     public $enableMultiUsersSameCF = false;

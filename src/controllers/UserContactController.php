@@ -245,7 +245,7 @@ class UserContactController extends CrudController
             } else {
                 /** @var AmosNotify $notifyModule */
                 $notifyModule = Yii::$app->getModule('notify');
-                if ($notifyModule && $notifyModule->hasMethod('contactAccepted')) {
+                if ($notifyModule && $notifyModule->hasMethod('contactAccepted') &&  $notifyModule->hasProperty('enableSuggestions') &&   !empty($notifyModule->enableSuggestions) ) {
                     $notifyModule->contactAccepted($user, $invitedUser);
                     return;                    
                 } else {
