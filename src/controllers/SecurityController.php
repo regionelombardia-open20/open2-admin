@@ -235,6 +235,7 @@ class SecurityController extends BackendController
                         $this->createSocialUser($userProfile, $socialProfile, $provider);
                     }
                 }
+                $this->afterLogin(Yii::$app->getUser());
 
                 /** @var  $response  Response */
 //                $response = $this->goBack();
@@ -447,6 +448,15 @@ class SecurityController extends BackendController
      * @param UserProfile $userProfile
      */
     protected function afterRegisterNewUser($model, $userProfile)
+    {
+
+    }
+    
+    /**
+     * 
+     * @param User $model
+     */
+    protected function afterLogin($model)
     {
 
     }

@@ -114,6 +114,7 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
                                 'get-social-user',
                                 'complete-profile',
                                 'send-request-external-facilitator',
+                                'connect-spid',
                                 'find-name',
                                 'find-name-user-by-cwh'
                             ],
@@ -1737,9 +1738,19 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
         return json_encode($users->all());
     }
 
-
-
-
-
-
+    /**
+     * @param $id
+     * @param null $redirectUrl
+     * @return \yii\web\Response
+     */
+    public function actionConnectSpid($id, $redirectUrl = null)
+    {
+        $moduleName = AmosAdmin::getModuleName();
+        if (empty($redirectUrl)) {
+            $redirectUrl = \Yii::$app->params['platform']['frontendUrl'] . "/$moduleName/user-profile/update?id=" . $id . '#tab-settings';
+        }
+        \Yii::$app->session->set('connectSpidToProfile', 1);
+        \Yii::$app->session->set('redirect_url_spid', $redirectUrl);
+        return $this->redirect(['/socialauth/shibboleth/endpoint', 'confirm' => true]);
+    }
 }

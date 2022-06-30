@@ -127,6 +127,45 @@ function isEnabledService(userProfileId, provider, serviceName){
 JS;
 
 ?>
+<?php
+$moduleName = AmosAdmin::getModuleName();
+if ($socialAuthModule->enableSpid) {
+    ?>
+    <section class="social-admin-section col-xs-12 nop">
+        <h2 class="spid-title">
+            <?= AmosAdmin::t('amosadmin', '#fullsize_spid') ?>
+        </h2>
+        <?php
+        $connected = false;
+        $label = AmosAdmin::t('amosadmin', $socialAuthModule->shibbolethConfig['buttonLabel']);
+        $url = \Yii::$app->params['platform']['frontendUrl']."/$moduleName/user-profile/connect-spid?id=". $model->id;
+        $idm = \open20\amos\socialauth\models\SocialIdmUser::find()->andWhere(['user_id' => $model->user_id])->one();
+
+        if ($idm) {
+            $label = AmosAdmin::t('amosadmin', 'Disconnetti la tua identità digitale');
+            $connected = true;
+            $url = Yii::$app->urlManager->createAbsoluteUrl(['/socialauth/shibboleth/remove-spid', 'urlRedirect' => "/$moduleName/user-profile/update?id=" . $model->id . '#tab-settings']);
+
+        }
+        ?>
+
+        <?php if ($idm) { ?>
+            <p><?= AmosAdmin::t('amosadmin', 'Hai già associato la tua identità digitale') ?></p>
+        <?php } else { ?>
+            <div class="wrap-btn-social spid-container nop">
+                <?= Html::a(
+                    $label,
+                    $url,
+                    [
+                        'id' => 'link-spid',
+                        'class' => 'btn btn-spid',
+                        'title' => $label,
+                    ]) ?>
+            </div>
+        <?php } ?>
+    </section>
+<?php } ?>
+
 <?php if (!is_null($socialAuthModule) && $socialAuthModule->enableLink) {
 
     $this->registerJs($js);
