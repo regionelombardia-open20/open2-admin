@@ -523,7 +523,7 @@ class SecurityController extends BackendController
             $model->cognome = $socialProfile->lastName;
             $model->email = $socialProfile->email;
             $socialAccount = true;
-        } elseif ($spidData && $spidData['emailAddress']) {
+        } elseif (!empty($spidData)) {
             $model->nome = $spidData['nome'];
             $model->cognome = $spidData['cognome'];
             $model->email = $spidData['emailAddress'];
