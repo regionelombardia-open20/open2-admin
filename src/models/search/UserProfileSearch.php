@@ -116,7 +116,7 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
         $query = AmosAdmin::instance()->createModel('UserProfile')->find()->innerJoinWith(['user']);
 
         /** @var AmosAdmin $adminModule */
-        $adminModule = \Yii::$app->getModule('admin');
+        $adminModule = \Yii::$app->getModule(AmosAdmin::getModuleName());
 
         if (
             !is_null(Yii::$app->getModule($adminModule->getOrganizationModuleName())) &&
@@ -175,6 +175,7 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
             }
         }
 
+        $query->groupBy('user_profile.id');
         //FINE ACCOPPIAMENTO STRETTO CON ALTRA ENTITA'
 
         return $query;

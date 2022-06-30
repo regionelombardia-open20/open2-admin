@@ -22,7 +22,7 @@ use kartik\alert\Alert;
  * @var bool $external
  */
 
-$adminModule = \Yii::$app->getModule('admin');
+$adminModule = \Yii::$app->getModule(AmosAdmin::getModuleName());
 $enableExternalFacilitator = $adminModule->enableExternalFacilitator;
 
 /** @var \open20\amos\admin\models\UserProfile $facilitatorUserProfile */

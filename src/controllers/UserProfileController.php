@@ -1066,7 +1066,7 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
                 //New drop instance
                 $dropController = new UserDropController('user_drop', $this->module);
 
-                $moduleAdmin = \Yii::$app->getModule('admin');
+                $moduleAdmin = \Yii::$app->getModule(AmosAdmin::getModuleName());
 
                 // Send a report of user's assignments via mail if he/she has many of them
                 if (!empty($moduleAdmin) && $moduleAdmin->sendUserAssignmentsReportOnDelete) {

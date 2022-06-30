@@ -81,7 +81,7 @@ class UserCardWidget extends Widget
             throw new \Exception(AmosAdmin::t('amosadmin', 'Missing model'));
         }
 
-        $this->adminModule = Yii::$app->getModule('admin');
+        $this->adminModule = Yii::$app->getModule(AmosAdmin::getModuleName());
     }
 
     /**

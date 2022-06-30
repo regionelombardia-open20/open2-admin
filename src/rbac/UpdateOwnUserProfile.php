@@ -47,7 +47,7 @@ class UpdateOwnUserProfile extends Rule
 
         //INIZIO ACCOPPIAMENTO STRETTO CON ALTRA ENTITA'
         /** @var AmosAdmin $adminModule */
-        $adminModule = \Yii::$app->getModule('admin');
+        $adminModule = \Yii::$app->getModule(AmosAdmin::getModuleName());
         if ($adminModule->tightCoupling == true && !\Yii::$app->user->can($adminModule->tightCouplingRoleAdmin)) {
             $tightCouplingModel = null;
             $tightCouplingField = null;

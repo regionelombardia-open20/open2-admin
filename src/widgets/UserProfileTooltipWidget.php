@@ -51,7 +51,7 @@ class UserProfileTooltipWidget extends Widget
      */
     public function fieldsProfile($model){
         $enabledFields = [];
-        $adminModule = \Yii::$app->getModule('admin');
+        $adminModule = \Yii::$app->getModule(AmosAdmin::getModuleName());
         $enabledFields []=  [
             'label' => AmosAdmin::t('amosadmin', 'Cognome e nome'),
             'value' => $model->surnameName

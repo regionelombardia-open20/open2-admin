@@ -282,6 +282,12 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
     public $disableFirstAccesWizard = false;
 
     /**
+     *
+     * @var array
+     */
+    public $excludeWizardByMails = ['demo@example.com'];
+
+    /**
      * @var bool
      */
     public $disableSendValidationRequestAuto = false;
@@ -392,6 +398,12 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
      * @var type $tightCouplingRoleAdmin
      */
     public $tightCouplingRoleAdmin = 'ADMIN';
+
+
+    /**
+     * @var Array
+     */
+    public $enableAttributeChangeLog = [];
 
     /**
      * @return string
