@@ -30,8 +30,8 @@ use yii\helpers\ArrayHelper;
  */
 class AmosAdmin extends AmosModule implements SearchModuleInterface
 {
-    const site_key_param = 'google_recaptcha_site_key';
-    const secret_param = 'google_recaptcha_secret';
+    const site_key_param               = 'google_recaptcha_site_key';
+    const secret_param                 = 'google_recaptcha_secret';
     //google contacts session keys
     const GOOGLE_CONTACTS = 'contacts';
     const GOOGLE_CONTACTS_PLATFORM = 'contacts_platform';

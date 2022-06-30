@@ -544,7 +544,7 @@ class SecurityController extends BackendController
         // Invitation User id
         $iuid = isset($getParams['iuid']) ? $getParams['iuid'] : null;
 
-        if ($model->load(Yii::$app->request->post())) {
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $this->beforeRegisterNewUser($model);
             /**
              * @var $newUser integer False or UserId
