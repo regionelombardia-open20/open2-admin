@@ -11,6 +11,7 @@
 namespace open20\amos\admin\controllers;
 
 use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\exceptions\AdminException;
 use open20\amos\admin\models\ForgotPasswordForm;
 use open20\amos\admin\models\LoginForm;
 use open20\amos\admin\models\ProfileReactivationForm;
@@ -1288,6 +1289,10 @@ class SecurityController extends BackendController
     
     public function actionSetDlSemplificationModalCookie()
     {
+        $dlSemplificationExpired = UserProfileUtility::isExpiredDateDlSemplification();
+        if ($dlSemplificationExpired) {
+            throw new AdminException('Dl Semplification Expired');
+        }
         if (!\Yii::$app->request->isAjax || !\Yii::$app->request->isPost) {
             throw new ForbiddenHttpException(Yii::t('amoscore', 'Non sei autorizzato a visualizzare questa pagina'));
         }

@@ -95,15 +95,16 @@ if ($isDemoLogin) {
 
 Yii::$app->trigger('BEFORE_LOGIN_FORM');
 
+$dlSemplificationExpired = UserProfileUtility::isExpiredDateDlSemplification();
 $viewLogin = (
     CoreCommonUtility::platformSeenFromHeadquarter() ||
-    (!$adminModule->hideStandardLoginPageSection && !UserProfileUtility::isExpiredDateDlSemplification())
+    (!$adminModule->hideStandardLoginPageSection && !$dlSemplificationExpired)
 );
 
 ?>
 
 <?php
-if (!Yii::$app->getRequest()->getCookies()->has('dl_semplification_modal_cookie')) {
+if (!$dlSemplificationExpired && !Yii::$app->getRequest()->getCookies()->has('dl_semplification_modal_cookie')) {
     $js = <<<JS
     $('#modal-dl-semplification').modal('show');
     $('#modal-dl-semplification-dont-show-again-link').on('click', function(event) {
