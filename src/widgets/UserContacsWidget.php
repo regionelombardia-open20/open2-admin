@@ -124,7 +124,7 @@ class UserContacsWidget extends Widget
                         $userProfile = User::findOne($model->user_id)->getProfile();
                         $name = $userProfile->getNomeCognome();
                     }
-                    return Html::a($name, ['/'.AmosAdmin::getModuleName().'/user-profile/view', 'id' => $userProfile->id ], [
+                    return Html::a($name, ['/'.((!empty(\Yii::$app->params['befe']) && \Yii::$app->params['befe'] == true)? 'amosadmin' : AmosAdmin::getModuleName()).'/user-profile/view', 'id' => $userProfile->id ], [
                         'title' => AmosAdmin::t('amoscommunity', 'Apri il profilo di {nome_profilo}', ['nome_profilo' => $name]),
                         'data' => $confirm
                     ]);

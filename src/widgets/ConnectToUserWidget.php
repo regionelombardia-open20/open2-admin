@@ -29,10 +29,11 @@ use yii\redactor\widgets\Redactor;
  */
 class ConnectToUserWidget extends Widget
 {
-    const MODAL_CONFIRM_BTN_OPTIONS = ['class' => 'btn btn-primary btn-connect-to-user btn-connect-to-user-confirm'];
+    const MODAL_CONFIRM_BTN_OPTIONS = ['class' => 'btn btn-primary btn-connect-to-user btn-connect-to-user-confirm', 'tabindex' => 1];
     const MODAL_CANCEL_BTN_OPTIONS = [
         'class' => 'btn btn-secondary btn-connect-to-user btn-connect-to-user-cancel',
-        'data-dismiss' => 'modal'
+        'data-dismiss' => 'modal',
+        'tabindex' => 1
     ];
     const BTN_CLASS_DFL = 'btn btn-primary btn-connect-to-user';
 
@@ -99,7 +100,7 @@ class ConnectToUserWidget extends Widget
                     $this->btnClass = self::BTN_CLASS_DFL;
                 }
             }
-            $this->btnOptions = ['class' => $this->btnClass . ($this->isGridView ? ' font08' : '')];
+            $this->btnOptions = ['href'=> '#', 'class' =>  $this->btnClass . ($this->isGridView ? ' font08' : '')];
             if (!empty($this->btnStyle)) {
                 $this->btnOptions = ArrayHelper::merge($this->btnOptions, ['style' => $this->btnStyle]);
             }
@@ -201,7 +202,8 @@ JS;
                 if (!$this->onlyButton) {
                     Modal::begin([
                         'id' => 'invitationPopup-' . $model->id,
-                        'header' => AmosAdmin::t('amosadmin', "Contact request")
+                        'header' => AmosAdmin::t('amosadmin', "Contact request"),
+                       
                     ]);
                     echo Html::tag('div', AmosAdmin::t('amosadmin', "Do you wish to invite") . " <strong>"
                         . $model->getNomeCognome() . "</strong> " . AmosAdmin::t('amosadmin',
@@ -368,7 +370,8 @@ JS;
         if (!empty($dataTarget) && !empty($dataToggle)) {
             $this->btnOptions = ArrayHelper::merge($this->btnOptions, [
                 'data-target' => $dataTarget,
-                'data-toggle' => $dataToggle
+                'data-toggle' => $dataToggle,
+                'href' =>'#'
             ]);
         }
         $btn = Html::a($title, $buttonUrl, $this->btnOptions);

@@ -243,7 +243,9 @@ $this->registerJs($jsReadMore);
         </div>
         <div class="second-row m-t-5 m-b-5">  
             <?php if ($isVisibleEmail): ?>
-                <?= AmosIcons::show('email'); ?>
+                
+                <span class="am am-email" title="Email"></span>
+                
                 <a class="user-mail small" href="mailto:<?= $model->user->email ?>" title="Invia una mail a <?= $nomeCognome?>">
                     <span><?= $model->user->email; ?></span>
                 </a>

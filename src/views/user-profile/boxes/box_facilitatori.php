@@ -28,7 +28,7 @@ $enableExternalFacilitator = $adminModule->enableExternalFacilitator;
 /** @var \open20\amos\admin\models\UserProfile $facilitatorUserProfile */
 $facilitatorUserProfile = $model->facilitatore; // Non modificare! Dev'essere usata la relazione!!!
 $titleBox = AmosAdmin::t('amosadmin', 'The facilitator');
-$url = '/'.AmosAdmin::getModuleName().'/user-profile/associate-facilitator';
+$url = '/' . AmosAdmin::getModuleName() . '/user-profile/associate-facilitator';
 $isRequestPending = false;
 $facilitatorRequest = null;
 
@@ -91,32 +91,34 @@ $facilitatorRequest = null;
                         <p><?= Html::tag('span', AmosAdmin::t('amosadmin', 'Prevalent partnership')) . $prevalentPartnershipName ?></p>
                         <?php if (!$enableExternalFacilitator || ($enableExternalFacilitator && \Yii::$app->user->can('ADMIN'))) { ?>
                             <p>
-                            <?= Html::a(
-                                    AmosIcons::show('comments') . 
-                                    Html::tag('span', AmosAdmin::t('amosadmin', 'Send message'),['class'=> 'sr-only']),
+                                <?= Html::a(
+                                    AmosIcons::show('comments') .
+                                    Html::tag('span', AmosAdmin::t('amosadmin', 'Send message'), ['class' => 'sr-only']),
                                     ['/messages/' . $facilitatorUserProfile->id],
-                                ['class' => 'btn btn-secondary', 'title'=>AmosAdmin::t('amosadmin','Apri la chat diretta con il tuo facilitatore')]
-                                    );
+                                    ['class' => 'btn btn-secondary', 'title' => AmosAdmin::t('amosadmin', 'Apri la chat diretta con il tuo facilitatore')]
+                                );
                                 ?>
                             </p>
                             <!--                        </div>-->
                         <?php } ?>
                         <?php if (!$enableExternalFacilitator || ($enableExternalFacilitator && \Yii::$app->user->can('ADMIN'))) { ?>
-                           
-                            <!--                        </div>-->
-                            <p>
-                            <?= Html::a(
-                                    AmosIcons::show('refresh') . 
-                                    Html::tag('span', AmosAdmin::t('amosadmin', 'Change facilitator'),['class'=> 'sr-only']),
-                                    [$url, 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true, 'external' => $external] ,
-                                ['class' => 'btn btn-secondary', 'title'=> AmosAdmin::t('amosadmin', 'Change facilitator')]
-                                    );
+                            <?php if (\Yii::$app->user->id == $model->user->id || \Yii::$app->user->can('ADMIN') || \Yii::$app->user->can('AMMINISTRATORE_UTENTI')) { ?>
+                                <!--                        </div>-->
+                                <p>
+                                <?= Html::a(
+                                    AmosIcons::show('refresh') .
+                                    Html::tag('span', AmosAdmin::t('amosadmin', 'Change facilitator'), ['class' => 'sr-only']),
+                                    [$url, 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true, 'external' => $external],
+                                    ['class' => 'btn btn-secondary', 'title' => AmosAdmin::t('amosadmin', 'Change facilitator')]
+                                );
                                 ?>
+                            <?php } ?>
+
                             </p>
                         <?php } ?>
                     <?php else: ?>
-                            <p><?= AmosAdmin::tHtml('amosadmin', 'Facilitator not selected') ?></p>
-                            <p><?= Html::a(AmosAdmin::t('amosadmin', 'Select facilitator'), [$url, 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true, 'external' => $external]) ?></p>
+                        <p><?= AmosAdmin::tHtml('amosadmin', 'Facilitator not selected') ?></p>
+                        <p><?= Html::a(AmosAdmin::t('amosadmin', 'Select facilitator'), [$url, 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true, 'external' => $external]) ?></p>
                     <?php endif; ?>
                 <?php endif; ?>
             </div>

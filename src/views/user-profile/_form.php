@@ -231,6 +231,7 @@ $form = ActiveForm::begin([
 <?php } ?>
 
 <div class="loading" id="loader" hidden></div>
+<input type="hidden" name="_csrf" value="<?=\Yii::$app->request->csrfToken;?>">
 <div class="user-form col-xs-12">
     <div id="card-section" class="row">
         <div class="col-xs-12">

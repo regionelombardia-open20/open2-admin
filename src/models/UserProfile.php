@@ -103,7 +103,7 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
      */
     public function getViewUrl()
     {
-        return AmosAdmin::getModuleName() . "/user-profile/view";
+        return ((!empty(\Yii::$app->params['befe']) && \Yii::$app->params['befe'] == true)? 'amosadmin' : AmosAdmin::getModuleName()) . "/user-profile/view";
     }
 
     /**
