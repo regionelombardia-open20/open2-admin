@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Aria S.p.A.
  * OPEN 2.0
@@ -24,7 +23,6 @@ use yii\helpers\Url;
 use yii\web\User;
 use yii\widgets\Breadcrumbs;
 
-
 class RedirectAfterLogin implements BootstrapInterface
 {
 
@@ -38,16 +36,18 @@ class RedirectAfterLogin implements BootstrapInterface
 
     public function startUpRedirect($event)
     {
-        $adminModule = \Yii::$app->getModule('admin');
-        if (!is_null($adminModule)) {
-            $actionId = \Yii::$app->controller->action->id;
-            // is set the redirect url you skip the  profile wizard,  and go to the url, at the secondo login you kskip the wizard and go in dashboard
-            $userProfile = UserProfile::find()->andWhere(['user_id' => \Yii::$app->user->id])->one();
-            if (!empty($userProfile) && $actionId != 'send-event-mail') {
-                if (!empty($userProfile->first_access_redirect_url)) {
-                    $component = new  ReDirectAfterLoginComponent();
-                    $component->redirectToUrl($userProfile->first_access_redirect_url);
-                    \Yii::$app->response->send();
+        if (!(\Yii::$app->controller instanceof \yii\rest\Controller)) {
+            $adminModule = \Yii::$app->getModule('admin');
+            if (!is_null($adminModule)) {
+                $actionId    = \Yii::$app->controller->action->id;
+                // is set the redirect url you skip the  profile wizard,  and go to the url, at the secondo login you kskip the wizard and go in dashboard
+                $userProfile = UserProfile::find()->andWhere(['user_id' => \Yii::$app->user->id])->one();
+                if (!empty($userProfile) && $actionId != 'send-event-mail') {
+                    if (!empty($userProfile->first_access_redirect_url)) {
+                        $component = new ReDirectAfterLoginComponent();
+                        $component->redirectToUrl($userProfile->first_access_redirect_url);
+                        \Yii::$app->response->send();
+                    }
                 }
             }
         }
