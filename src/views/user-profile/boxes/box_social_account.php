@@ -208,11 +208,11 @@ JS
                             'title' => AmosAdmin::t('amosadmin', 'Disconnect from your account')
                         ]) ?>
                     <?= Html::a(
-                        AmosIcons::show($providerName),
+                        AmosIcons::show($providerName) . ' ' . $providerName,
                         Yii::$app->urlManager->createAbsoluteUrl('/socialauth/social-auth/link-social-account?provider=' . strtolower($name)),
                         [
                             'id' => 'link-' . $providerName,
-                            'class' => 'btn  btn-' . $providerName . ' btn-' . $providerName . '-square' . ($connected ? ' hidden' : ''),
+                            'class' => 'btn  btn-' . $providerName . ($connected ? ' hidden' : ''),
                             'title' => AmosAdmin::t('amosadmin', 'Connect with your account'),
                             'onclick' => "window.open(this.href, '$providerName', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;"
                         ]) ?>

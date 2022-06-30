@@ -719,6 +719,8 @@ return [
     'upload ' => 'carica',
     '#user_context_association_error' => 'Errore durante associazione utente a elemento',
     'User deactivated. To log in again, request reactivation of the profile.' => 'Utente disattivato. Per accedere nuovamente, richiedi la riattivazione del profilo.',
+    'User deactivated. To log in again, request {reactivation_of_the_profile}.' => 'Utente disattivato. Per accedere nuovamente, richiedi la {reactivation_of_the_profile}.',
+    'reactivation of the profile' => 'riattivazione del profilo',
     '#userdisabled_profile_subtitle' => 'Utente disattivato. Per accedere nuovamente, richiedi la riattivazione del profilo.',
     'User ID' => 'ID Utente',
     '#username_label' => 'Nome utente',

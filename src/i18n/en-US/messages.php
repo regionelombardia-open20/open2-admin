@@ -714,6 +714,8 @@ return [
     'upload ' => 'upload',
     '#user_context_association_error' => 'Error while associating user to element',
     'User deactivated. To log in again, request reactivation of the profile.' => 'User deactivated. To log in again, request reactivation of the profile.',
+    'User deactivated. To log in again, request {reactivation_of_the_profile}.' => 'User deactivated. To log in again, request {reactivation_of_the_profile}.',
+    'reactivation of the profile' => 'reactivation of the profile',
     '#userdisabled_profile_subtitle' => 'User deactivated. To log in again, request reactivation of the profile',
     'User ID' => 'User ID',
     '#username_label' => 'Username',
