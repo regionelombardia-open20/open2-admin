@@ -432,7 +432,7 @@ class SecurityController extends BackendController
         }
 
         return $this->render('reactivate-profile', [
-                'model' => $model,
+            'model' => $model,
         ]);
     }
 
@@ -450,7 +450,7 @@ class SecurityController extends BackendController
      */
     protected function afterRegisterNewUser($model, $userProfile)
     {
-
+        UserProfileUtility::updateTagTreesAfterUserCreation($userProfile);
     }
 
     /**
@@ -592,6 +592,7 @@ class SecurityController extends BackendController
                 //If is set social match i nett to link user
                 if ($provider) {
                     $this->createSocialUser($newUserProfile, $socialProfile, $provider);
+                    
                 }
             }
 
@@ -780,7 +781,7 @@ class SecurityController extends BackendController
         //Set Current admin user in session
         Yii::$app->session->set('IMPERSONATOR', $impersonator);
 
-        return $this->redirect(['/']);
+        return $this->redirect(['/dashboard']);
     }
 
     /**
@@ -811,7 +812,7 @@ class SecurityController extends BackendController
             Yii::$app->user->login($identity, $loginTimeout);
         }
 
-        return $this->redirect(['/']);
+        return $this->redirect(['/dashboard']);
     }
 
     /**
@@ -1119,7 +1120,7 @@ class SecurityController extends BackendController
      * @param $provider
      * @return bool|SocialAuthUsers
      */
-    protected function createSocialUser($userProfile, Profile $socialProfile, $provider)
+    protected function createSocialUser($userProfile, $socialProfile, $provider)
     {
         try {
             /**

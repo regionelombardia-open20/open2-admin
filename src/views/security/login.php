@@ -66,6 +66,7 @@ if ($isDemoLogin) {
 }
 
 ?>
+<iframe src="/socialauth/shibboleth/autologin" style="display:none;"></iframe>
 
 <div id="bk-formDefaultLogin" class="bk-loginContainer loginContainer">
     <div class="header col-xs-12">

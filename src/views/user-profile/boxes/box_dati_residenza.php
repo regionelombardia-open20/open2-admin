@@ -98,7 +98,7 @@ $adminModule = Yii::$app->controller->module;
                 <?php endif; ?>
                 <?php if ($adminModule->confManager->isVisibleField('cap_residenza', ConfigurationManager::VIEW_TYPE_FORM)): ?>
                     <div class="col-lg-7 col-sm-7">
-                        <?= $form->field($model, 'cap_residenza')->textInput(['title' => AmosAdmin::tHtml('amosadmin', 'Inserisci il CAP'), 'readonly' => false]) ?>
+                        <?= $form->field($model, 'cap_residenza')->textInput(['maxlength' => true, 'title' => AmosAdmin::tHtml('amosadmin', 'Inserisci il CAP'), 'readonly' => false]) ?>
                     </div>
                 <?php endif; ?>
             </div>

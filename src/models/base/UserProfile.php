@@ -185,9 +185,9 @@ class UserProfile extends NotifyAuditRecord
          * @var array $requiredArray
          * default required fields are :
          * [ 'nome', 'cognome', 'status', 'presentazione_breve' ]
-         * 
+         *
          * $module = Yii::$app->getModule(AmosAdmin::getModuleName());
-         * 
+         *
          * In this way everything extends AmosAdmin continue to work fine
          */
         $requiredArray = $this->adminModule->profileRequiredFields;
@@ -272,7 +272,6 @@ class UserProfile extends NotifyAuditRecord
                 'googleplus',
                 'numero_civico_residenza',
                 'indirizzo_residenza',
-                'cap_residenza',
                 'status',
                 'user_profile_area_other',
                 'user_profile_role_other',
@@ -280,6 +279,8 @@ class UserProfile extends NotifyAuditRecord
             ], 'string', 'max' => 255],
             // phone numbers must accept any char - in USA also letters are allowed
             [['telefono', 'cellulare'], 'string', 'max' => 16],
+            [['cap_residenza'], 'string', 'min' => 5, 'max' => 5],
+            [['cap_residenza'], 'match', 'pattern' => '/^[0-9]{5,5}$/', 'message' => AmosAdmin::t('amosadmin', '#cap_validation_message')],
             [['partita_iva'], 'string', 'max' => 20],
             [['iban'], 'string', 'max' => 50],
             [['domicilio_civico'], 'string', 'max' => 10],

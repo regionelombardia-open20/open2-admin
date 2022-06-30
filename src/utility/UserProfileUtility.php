@@ -17,6 +17,9 @@ use open20\amos\admin\models\UserProfile;
 use open20\amos\core\user\User;
 use open20\amos\core\utilities\Email;
 use open20\amos\notificationmanager\AmosNotify;
+use open20\amos\cwh\utility\CwhUtil;
+use open20\amos\tag\models\Tag;
+
 use raoul2000\workflow\base\SimpleWorkflowBehavior;
 use Yii;
 use yii\db\Expression;
@@ -118,6 +121,9 @@ class UserProfileUtility
         if ($sendCredentials) {
             self::sendCredentialsMail($userProfile, $community, $module_name);
         }
+
+        // It is a social auth user?
+        self::updateTagTreesAfterUserCreation($userProfile);
 
         return ['user' => $user];
     }
@@ -595,4 +601,69 @@ class UserProfileUtility
             }
         }
     }
+
+    /**
+     * A social-aut is on and someone ask for a sign-in or sign-up action?
+     * 
+     * @param type $model
+     * @param type $userProfile
+     * @return boolean
+     */
+    public static function updateTagTreesAfterUserCreation($userProfile)
+    {
+        // Cwh module is on?
+        $cwhModule = Yii::$app->getModule('cwh');
+        
+        // Tag module is on?
+        $tagModule = Yii::$app->getModule('tag');
+        
+        // Social Auth is on?
+        $socialModule = Yii::$app->getModule('socialauth');
+        
+        //Get current provider from session
+        $provider = Yii::$app->session->get('social-pending');
+        
+        if ((empty($provider)) || (empty($tagModule)) || (empty($socialModule)) || (empty($cwhModule))) {
+            return false;
+        }
+
+        //Social Auth trigger
+        $socialProfile = \Yii::$app->session->get('social-profile');
+
+        // If the module is enabled and it is OpenInnovation import tags tree
+        if ($socialModule && $socialModule->id) {
+            // Find all providers for social auth
+            $providers = array_change_key_case($socialModule->providers);
+
+            $tagsTreeCodes = $providers[$provider]['syncronizeTagsTreeCodes'];
+
+            $rootTagNode = Tag::find()
+                ->select(['root', 'codice', 'deleted_at'])
+                ->where([
+                    'codice' => $tagsTreeCodes,
+                    'deleted_at' => null
+                ])
+                ->one();
+
+            if (!empty($rootTagNode)) {
+                $tagTable = Tag::tableName();
+                $tagsCode = $socialProfile->tagscode;
+
+                foreach($tagsCode as $code) {
+                    $tag = Tag::find()
+                        ->andWhere(['codice' => $code])
+                        ->andWhere(['root' => $rootTagNode->root])
+                        ->one();
+
+                    if (!(empty($tag))) {
+                        CwhUtil::addNewUserInterest(
+                            $tag,
+                            $userProfile->id
+                        );
+                    }
+                }
+            }
+        }
+    }
+    
 }

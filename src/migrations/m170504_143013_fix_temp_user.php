@@ -38,16 +38,14 @@ class m170504_143013_fix_temp_user extends Migration
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Don't care about the weird layout of this section
         $table = \Yii::$app->db->schema->getTableSchema(self::TABLE_NAME);
-        if (isset($table->columns['created_at']) && ($table->columns['created_at']->dbType == 'int(11)'
-                || $table->columns['created_at']->dbType == 'int')) {
+        if (isset($table->columns['created_at']) && ($table->columns['created_at']->dbType == 'int(11)')) {
             // Backup column
             $this->renameColumn(self::TABLE_NAME, 'created_at', 'created_at_int');
             // Add new column
             $this->addColumn(self::TABLE_NAME, 'created_at',
                 $this->dateTime()->defaultValue(null)->after('status')->comment('Created at'));
         }
-        if (isset($table->columns['updated_at']) && ($table->columns['updated_at']->dbType == 'int(11)'
-                || $table->columns['updated_at']->dbType == 'int')) {
+        if (isset($table->columns['updated_at']) && ($table->columns['updated_at']->dbType == 'int(11)')) {
             // Backup column
             $this->renameColumn(self::TABLE_NAME, 'updated_at', 'updated_at_int');
             // Add new column
@@ -67,12 +65,8 @@ class m170504_143013_fix_temp_user extends Migration
             }
             $user2upd->detachBehaviors();
             /** @var \open20\amos\core\user\User $user */
-            if(isset($user['created_at_int'])){
-                $user2upd->created_at = date('Y-m-d H:i:s', $user['created_at_int']);
-            }
-            if(isset($user['updated_at_int'])){
-		$user2upd->updated_at = date('Y-m-d H:i:s', $user['updated_at_int']);
-            }
+            $user2upd->created_at = date('Y-m-d H:i:s', $user['created_at_int']);
+            $user2upd->updated_at = date('Y-m-d H:i:s', $user['updated_at_int']);
             $user2upd->created_by = 1;
             $user2upd->updated_by = 1;
             if (!$user2upd->save(false)) {

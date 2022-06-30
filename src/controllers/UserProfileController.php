@@ -112,7 +112,8 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
                                 'send-request-external-facilitator',
                                 'connect-spid',
                                 'drop-account-by-email',
-                                'drop-account'
+                                'drop-account',
+                                'find-name'
                             ],
                             'roles' => ['BASIC_USER']
                         ],
@@ -255,7 +256,7 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
      * @return array
      */
     public function getRoles()
-    {
+    { 
         return ArrayUtility::translateArrayValues(
                 ArrayHelper::map(UserProfileRoleSearch::searchAll(), 'id', 'name'), 'amosadmin', AmosAdmin::className()
         );
@@ -270,6 +271,17 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
         return ArrayUtility::translateArrayValues(
                 ArrayHelper::map(UserProfileAreaSearch::searchAll(), 'id', 'name'), 'amosadmin', AmosAdmin::className()
         );
+    }
+
+    public function actionFindName($name = "") {
+        $users = UserProfile::find();
+        $users->asArray();
+        $users->limit(5);
+        $users->select(new \yii\db\Expression('CONCAT(nome," ",cognome) as name, CONCAT("/'.AmosAdmin::getModuleName().'/user-profile/view?id=",id) as url, user_id as user_id'));
+        //TODO fix this shit
+        $users->andHaving(new \yii\db\Expression("name LIKE \"%{$name}%\""));
+
+        return json_encode($users->all());
     }
 
 
@@ -1117,7 +1129,7 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
         if(\Yii::$app->request->isPost){
             $ok = UserProfileMailUtility::sendEmailDropAccountRequest($this->model);
             if($ok){
-                \Yii::$app->session->addFlash('success', AmosAdmin::t('amosadmin', "Ti abbiamo inviato una email per completare la cancellazione dalla piattaforma, hai a disposizione 24 ore per completare l'operazione"));
+                \Yii::$app->session->addFlash('success', AmosAdmin::t('amosadmin', "Ti è stata inviata un email, per completare l'eliminazione del tuo account clicca il link al suo interno."));
 
             }
             return $this->redirect(['update', 'id' => $id]);
@@ -1138,20 +1150,12 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
     {
 
         $authorized = false;
-        $confirm = \Yii::$app->request->post('confirm');
-
 
         //check if the token is valid
         if(!empty($token)){
             $id = UserProfile::checkDeleteToken($token);
             if(!empty($id)){
                 $authorized = true;
-                if(!$confirm){
-                    $model = $this->findModel($id);
-                    $this->setUpLayout('main');
-                    return $this->render('confirm-drop-account-by-email',['model' => $model]);
-                }
-
             }
         }
 
@@ -1169,7 +1173,7 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
         $model = new DropAccountForm();
 
         if ($authorized || Yii::$app->request->isPost) {
-            if (($authorized && $confirm)|| ($model->load(Yii::$app->request->post()) && $model->validate())) {
+            if ($authorized|| ($model->load(Yii::$app->request->post()) && $model->validate())) {
                 //New drop instance
                 $dropController = new UserDropController('user_drop', $this->module);
 

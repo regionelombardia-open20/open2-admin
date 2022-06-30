@@ -81,6 +81,7 @@ return [
     'Cancella utente' => 'Cancella utente',
     'Can\'t Send Reminder' => 'Impossibile inviare il promemoria',
     'Cap' => 'Cap',
+    '#cap_validation_message' => 'Il CAP deve contenere solo 5 cifre numeriche',
     'Card' => 'Scheda',
     'Categoria' => 'Categoria',
     'Categorie allegati ' => 'Categorie allegati',
@@ -613,7 +614,7 @@ return [
     '#sex' => 'Sesso',
     '#short_presentation' => 'Lunghezza massima {maxlength} caratteri',
     '#short_presentation_placeholder' => 'Inserisci una breve presentazione di max 140 caratteri, che apparirà sotto al tuo nome',
-    "#showAll" => "Visualizza tutto",
+	"#showAll" => "Visualizza tutto",
     'Show privacy informations' => 'Visualizza informativa',
     'si è cancellato dalla piattaforma <br> Inserire un nuovo community manager alla community con id: ' => 'si è cancellato dalla piattaforma <br> Inserire un nuovo community manager alla community con id: ',
     'Si &egrave; verificato un errore durante il reperimento delle coordinate del tuo indirizzo, verifica la correttezza dei dati forniti.' => 'Si è verificato un errore durante il reperimento delle coordinate del tuo indirizzo, verifica la correttezza dei dati forniti.',
@@ -634,7 +635,7 @@ return [
     'Stato' => 'Stato',
     'Status:' => 'Stato:',
     'Status' => 'Stato',
-    '#subject_deactivate_user' => ' - il profilo utente è stato disabilitato',
+    '#subject_deactivate_user' =>  ' - il profilo utente è stato disabilitato',
     '#subject_notification_from_editorial_staff' => 'News dalla redazione disabilitate',
     '#subtitle_login' => 'se sei già un Utente registrato',
     '#subtitle_register' => 'con il tuo indirizzo email',
@@ -834,7 +835,5 @@ return [
     'External facilitator in platform' => 'Il tuo facilitatore in piattaforma',
     '#menu_front_events' => 'Utenti',
     'Drop your account' => 'Cancella il tuo account',
-    "Access denied" => "Accesso negato",
-    "Attenzione, stai per completare l'operazione di cancellazione del tuo account. Se confermi, il tuo account e tutti i dati a te associati verranno eliminati. L'operazione è irreversibile, confermi?" => "Attenzione, stai per completare l'operazione di cancellazione del tuo account. Se confermi, il tuo account e tutti i dati a te associati verranno eliminati. L'operazione è irreversibile, confermi?",
-    "Confirm delete" => "Conferma cancellazione",
-];
+    "Access denied" => "Accesso negato"
+ ];

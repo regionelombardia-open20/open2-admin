@@ -30,7 +30,8 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="user-profile-index row nom">
     <div class="tab-content">
         <h1 class="sr-only"><?= $this->title ?></h1>
-        <h3><?= AmosAdmin::t('amosadmin', "Attenzione, stai per completare l'operazione di cancellazione del tuo account. Se confermi, il tuo account e tutti i dati a te associati verranno eliminati. L'operazione è irreversibile, confermi?") ?></h3>
+        <h3><?= AmosAdmin::t('amosadmin', 'Irreversible operation, if you confirm your account and all associated data will be dropped'); ?></h3>
+        <h3><?= AmosAdmin::t('amosadmin', "Ti verrà inviata un email per completare l'eliminazione del tuo account, clicca il link al suo interno per completare l'operazione.") ?></h3>
         <?php
         $form = ActiveForm::begin([
             'id' => 'drop-form',
@@ -42,10 +43,8 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="clearfix"></div>
 
         <div class="bk-btnFormContainer">
-            <?= Html::a(AmosAdmin::t('amosadmin', 'Cancel'),['update' ,'id' => $model->id] ,['class' => 'btn btn-secondary pull-left', 'title' =>  AmosAdmin::t('amosadmin', 'Cancel')]) ?>
-
             <!--        <div class="col-lg-12 col-sm-12">-->
-            <?= Html::submitButton(AmosAdmin::t('amosadmin', 'Confirm delete'), ['class' => 'btn btn-danger pull-right', 'title' =>  AmosAdmin::t('amosadmin', 'Drop your account')]) ?>
+            <?= Html::submitButton(AmosAdmin::t('amosadmin', 'Delete Account'), ['class' => 'btn btn-danger', 'title' =>  AmosAdmin::t('amosadmin', 'Drop your account')]) ?>
             <!--        </div>-->
         </div>
         <?php ActiveForm::end() ?>

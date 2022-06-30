@@ -81,6 +81,7 @@ return [
     'Cancella utente' => 'Delete user',
     'Can\'t Send Reminder' => 'Can\'t Send Reminder',
     'Cap' => 'Postal code',
+    '#cap_validation_message' => 'Postal Code standard format is 5 numerical characters only',
     'Card' => 'Card',
     'Categoria' => 'Category',
     'Categorie allegati ' => 'Attachment category',
@@ -821,7 +822,7 @@ return [
     '#fullsize_field_reset_pwd_2' => 'repeat the new password',
     '#view-all-profile' => 'view profile',
     'Gestisci inviti' => 'Manage invitations',
-    
+
     '#subject_notification_accepted_request' => 'Invitation to access the platform',
     '#text_notification_accepted_request' => 'has accepted your request to register on the platform.',
     'Cognome e nome' => 'Surname and name',
@@ -829,6 +830,4 @@ return [
     '#facilitator_assigned_obj' => '{nomecognome} chose you as a facilitator',
     '#yours_validated_users' => '',
     '#menu_front_events' => 'Users',
-    "Attenzione, stai per completare l'operazione di cancellazione del tuo account. Se confermi, il tuo account e tutti i dati a te associati verranno eliminati. L'operazione è irreversibile, confermi?" => "Warning, You are finializing the elimination of youur account, if you confirm, your account and all your datas will be deleted. The operation is irreversible, confirm?",
-
 ];
