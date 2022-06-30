@@ -44,7 +44,7 @@ class RedirectAfterLogin implements BootstrapInterface
             $adminModule = Yii::$app->getModule(AmosAdmin::getModuleName());
             if (!is_null($adminModule)) {
                 //redirect for dl semplificazione
-                if (!UserProfileUtility::isSpidConnected()) {
+                if ($adminModule->enableDlSemplification && !UserProfileUtility::isSpidConnected()) {
                     $userProfileWizard = new ReDirectAfterLoginComponent();
                     $userProfileWizard->redirectToUrl("/" . AmosAdmin::getModuleName() . "/security/reconciliation");
                     Yii::$app->response->send();
