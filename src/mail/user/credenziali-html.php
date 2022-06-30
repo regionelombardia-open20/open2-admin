@@ -10,6 +10,7 @@
  */
 
 use open20\amos\admin\AmosAdmin;
+use open20\amos\core\utilities\CoreCommonUtility;
 use yii\helpers\Html;
 
 /**
@@ -23,6 +24,9 @@ $appLink = Yii::$app->params['platform'] ['frontendUrl'];//Yii::$app->urlManager
 $appLink = substr($appLink, -1) == '/' ? $appLink : $appLink . '/';
 $appLinkPrivacy = Yii::$app->params['platform'] ['frontendUrl'] .'/'.AmosAdmin::getModuleName().'/user-profile/privacy'; //Yii::$app->urlManager->createAbsoluteUrl(['/'.AmosAdmin::getModuleName().'/user-profile/privacy']);
 $appName = Yii::$app->name;
+$loginLink = CoreCommonUtility::getLoginLink();
+$loginLink = substr($loginLink, 0) == '/' ? substr($loginLink, 1) : $loginLink;
+
 
 $regWihSpid = \Yii::$app->request->post('reg_with_spid');
 $this->title = AmosAdmin::t('amosadmin', 'Registrazione {appName}', ['appName' => $appName]);
@@ -52,7 +56,7 @@ $this->registerCssFile('http://fonts.googleapis.com/css?family=Roboto');
                             <p style="margin-bottom: 20px;">
                                 <?= Html::a(
                                     AmosAdmin::t('amosadmin', '#welcome_email_dl_semplification_click_here'),
-                                    $appLink . AmosAdmin::getModuleName() . '/security/login',
+                                    $appLink . $loginLink,
                                     ['title' => AmosAdmin::t('amosadmin', 'Enter')]
                                 ) ?> <?= AmosAdmin::t('amosadmin', '#welcome_email_dl_semplification', [
                                     'appName' => $appName
@@ -62,7 +66,7 @@ $this->registerCssFile('http://fonts.googleapis.com/css?family=Roboto');
                             <p style="margin-bottom: 20px;">
                                 <?= Html::a(
                                     AmosAdmin::t('amosadmin', '#welcome_email_social_registration_click_here'),
-                                    $appLink . AmosAdmin::getModuleName() . '/security/login',
+                                    $appLink . $loginLink,
                                     ['title' => AmosAdmin::t('amosadmin', 'Enter')]
                                 ) ?> <?= AmosAdmin::t('amosadmin', '#welcome_email_social_registration', [
                                     'appName' => $appName
