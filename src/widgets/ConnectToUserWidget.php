@@ -29,9 +29,9 @@ use yii\redactor\widgets\Redactor;
  */
 class ConnectToUserWidget extends Widget
 {
-    const MODAL_CONFIRM_BTN_OPTIONS = ['class' => 'btn btn-navigation-primary btn-connect-to-user btn-connect-to-user-confirm'];
+    const MODAL_CONFIRM_BTN_OPTIONS = ['class' => 'btn btn-navigation-primary m-r-5'];
     const MODAL_CANCEL_BTN_OPTIONS = [
-        'class' => 'btn btn-secondary btn-connect-to-user btn-connect-to-user-cancel',
+        'class' => 'btn btn-secondary m-r-5',
         'data-dismiss' => 'modal'
     ];
     const BTN_CLASS_DFL = 'btn btn-navigation-primary btn-connect-to-user';
@@ -207,7 +207,7 @@ JS;
                         . Html::a(AmosAdmin::t('amosadmin', 'Invite contact'),
                             ['/'.AmosAdmin::getModuleName().'/user-contact/connect', 'contactId' => $model->user_id],
                             $this->modalButtonConfirmationOptions),
-                        ['class' => 'pull-right m-15-0']
+                        ['class' => 'm-15-0']
                     );
                     Modal::end();
                 }

@@ -128,7 +128,7 @@ class TokenUsers extends \open20\amos\admin\models\base\TokenUsers
         $url = '';
         $backendUrl = \Yii::$app->params['platform']['backendUrl'];
         if(!empty($backendUrl)) {
-            $url = $backendUrl . '/'.AmosAdmin::getModuleName().'/security/login?token=' . $this->token;
+            $url = $backendUrl . '/admin/security/login?token=' . $this->token;
         }
         return $url;
     }

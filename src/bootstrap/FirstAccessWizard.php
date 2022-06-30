@@ -14,6 +14,7 @@ use DateTime;
 use open20\amos\admin\AmosAdmin;
 use open20\amos\admin\components\FirstAccessWizardComponent;
 use open20\amos\admin\models\UserProfile;
+use open20\amos\admin\utility\UserProfileUtility;
 use Yii;
 use yii\base\BootstrapInterface;
 use yii\base\Event;
@@ -80,4 +81,6 @@ class FirstAccessWizard implements BootstrapInterface
             }
         }
     }
+
+
 }

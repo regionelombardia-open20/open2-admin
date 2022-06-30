@@ -15,9 +15,9 @@ use open20\amos\admin\AmosAdmin;
 use open20\amos\admin\models\UserContact;
 use open20\amos\admin\models\UserProfile;
 use open20\amos\admin\utility\UserProfileUtility;
-use open20\amos\core\record\Record;
 use open20\amos\core\user\User;
 use open20\amos\core\utilities\Email;
+use open20\amos\socialauth\models\SocialIdmUser;
 use Yii;
 use yii\console\Application;
 use yii\db\ActiveRecord;
@@ -30,12 +30,19 @@ class UserDropController extends Controller
 {
     //Configuration array of models
     public $models = [];
+    
+    /**
+     * @var AmosAdmin $adminModule
+     */
+    protected $adminModule;
 
     /**
      * @inheritdoc
      */
     public function init()
     {
+        $this->adminModule = AmosAdmin::instance();
+        
         parent::init();
 
         //Pull configuration array
@@ -74,6 +81,8 @@ class UserDropController extends Controller
             UserProfileUtility::deassignRoleFacilitator($user->userProfile);
 
             $user->userProfile->deactivateUserProfile();
+            
+            $this->dropSPIDLink($user->id);
         }
     }
 
@@ -111,6 +120,8 @@ class UserDropController extends Controller
 
             //And finally drop profile, this is the end of the user on the platform
             $this->dropUser($user);
+    
+            $this->dropSPIDLink($user->id);
         }
 
         return true;
@@ -322,6 +333,26 @@ class UserDropController extends Controller
             }
         }
     }
+    
+    /**
+     * @param int $userId
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
+    public function dropSPIDLink($userId)
+    {
+        /** @var \open20\amos\socialauth\Module $socialModule */
+        $socialModule = Yii::$app->getModule('socialauth');
+        if ($this->adminModule->enableDlSemplification) {
+            if (!is_null($socialModule)) {
+                /** @var SocialIdmUser $socialIdmUser */
+                $socialIdmUser = $socialModule->findSocialIdmByUserId($userId);
+                if (!is_null($socialIdmUser)) {
+                    $socialIdmUser->delete();
+                }
+            }
+        }
+    }
 
     /**
      * @param $community_id
@@ -355,7 +386,6 @@ class UserDropController extends Controller
      */
     public function sendMailYouHaveToChangeCM($communityId, $user)
     {
-
         $subject = AmosAdmin::t('amosadmin',"E' necessario assegnare un nuovo community manager");
         $text = "<p>".AmosAdmin::t('amosadmin',"L'utente") . " {$user->userProfile->nomeCognome} con ID: {$user->id} " . AmosAdmin::t('amosadmin',"si è cancellato dalla piattaforma <br> Inserire un nuovo community manager alla community con id: ") . "$communityId</p>";
         /** @var \open20\amos\emailmanager\AmosEmail $mailModule */

@@ -16,10 +16,9 @@ use open20\amos\admin\models\UserContact;
 use open20\amos\admin\models\UserProfile;
 use open20\amos\core\user\User;
 use open20\amos\core\utilities\Email;
-use open20\amos\notificationmanager\AmosNotify;
 use open20\amos\cwh\utility\CwhUtil;
+use open20\amos\notificationmanager\AmosNotify;
 use open20\amos\tag\models\Tag;
-
 use raoul2000\workflow\base\SimpleWorkflowBehavior;
 use Yii;
 use yii\db\Expression;
@@ -665,5 +664,88 @@ class UserProfileUtility
             }
         }
     }
-    
+
+
+
+    /**
+     * @param null $user_id
+     * @return bool
+     */
+    public static function isSpidConnected($user_id = null)
+    {
+        if(empty($user_id)){
+            $user_id = \Yii::$app->user->id;
+        }
+        $module = \Yii::$app->getModule('socialauth');
+        if ($module) {
+            $count =  \open20\amos\socialauth\models\SocialIdmUser::find()->andWhere(['user_id' => $user_id])->count();
+            return $count > 0;
+        }
+        return false;
+    }
+
+    /**
+     * @param $user_id
+     * @return bool
+     */
+    public static function isPasswordExpired($user_id)
+    {
+        // admin password never expire
+        if ($user_id == 1) {
+            return false;
+        }
+        /** @var AmosAdmin $adminModule */
+        $adminModule = AmosAdmin::instance();
+        if ($adminModule) {
+            /** @var UserProfile $userProfileModel */
+            $userProfileModel = $adminModule->createModel('UserProfile');
+            /** @var UserProfile $userProfile */
+            $userProfile = $userProfileModel::find()->andWhere(['user_id' => $user_id])->one();
+            $dataScadenza = date('Y-m-d', strtotime((isset(\Yii::$app->params['days-expiration-password'])) ? '+' . \Yii::$app->params['days-expiration-password'] . ' days' : '+90 days', strtotime(date('Y-m-d', strtotime($userProfile->ultimo_logout)))));
+            $dataOdierna = date('Y-m-d');
+            if ($dataScadenza <= $dataOdierna) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public static function isExpiredDateDlSemplification(){
+        $expireDate = new \DateTime('2021-10-01 00:00:00');
+        $now = new \DateTime();
+        if($now >= $expireDate){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public static function mandatoryReconciliationPage()
+    {
+        /** @var AmosAdmin $adminModule */
+        $adminModule = AmosAdmin::instance();
+        if ($adminModule) {
+            if ($adminModule->enableDlSemplification) {
+                // admin skip
+                if (\Yii::$app->user->id == 1) {
+                    return false;
+                }
+                if (!UserProfileUtility::isSpidConnected()) {
+                    $pwdExpired = UserProfileUtility::isPasswordExpired(Yii::$app->user->id);
+                    $dateDlExpired = UserProfileUtility::isExpiredDateDlSemplification();
+                    
+                    if ($pwdExpired || $dateDlExpired) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        return false;
+    }
 }

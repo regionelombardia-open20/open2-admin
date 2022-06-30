@@ -24,10 +24,11 @@ ModuleAdminAsset::register(Yii::$app->view);
 $socialAuthModule = \open20\amos\socialauth\Module::getInstance();
 ?>
 <?= Html::tag('h2', AmosAdmin::t('amosadmin', '#fullsize_spid'), ['class' => 'title-login']) ?>
-<div class="col-sm-6 col-xs-12 nop">
+<div class="col-sm-12 col-xs-12 nop">
     <?=
     Html::a(
-        AmosIcons::show('account-circle') . AmosAdmin::t('amosadmin', $socialAuthModule->shibbolethConfig['buttonLabel']),
+        //AmosIcons::show('account-circle') . AmosAdmin::t('amosadmin', $socialAuthModule->shibbolethConfig['buttonLabel']),
+        AmosAdmin::t('amosadmin', $socialAuthModule->shibbolethConfig['buttonLabel']),
         Url::to("/{$socialAuthModule->id}/shibboleth/endpoint", 'https'),
         [
             'class' => 'btn btn-spid',
@@ -37,6 +38,6 @@ $socialAuthModule = \open20\amos\socialauth\Module::getInstance();
     )
     ?>
 </div>
-<div class="col-xs-12 nop">
-    <p class="spid-text"><?= AmosAdmin::t('amosadmin', $socialAuthModule->shibbolethConfig['buttonDescription']) ?></p>
-</div>
+<!--<div class="col-xs-12 nop">
+    <p class="spid-text">< ?= AmosAdmin::t('amosadmin', $socialAuthModule->shibbolethConfig['buttonDescription']) ?></p>
+</div>-->

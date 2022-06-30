@@ -15,6 +15,7 @@ use open20\amos\core\forms\ActiveForm;
 use open20\amos\core\helpers\Html;
 use open20\amos\core\icons\AmosIcons;
 use open20\amos\core\utilities\CoreCommonUtility;
+use yii\bootstrap\Modal;
 
 ModuleAdminAsset::register(Yii::$app->view);
 
@@ -40,7 +41,7 @@ $communityId = null;
 $previousUrl = Yii::$app->getUser()->getReturnUrl();
 $enableRedirect = false;
 
-if(strpos($previousUrl, 'enableRedirect')){
+if (strpos($previousUrl, 'enableRedirect')) {
     $enableRedirect = true;
 }
 
@@ -94,19 +95,65 @@ if ($isDemoLogin) {
 Yii::$app->trigger('BEFORE_LOGIN_FORM');
 ?>
 
+<?php
+if (!Yii::$app->getRequest()->getCookies()->has('dl_semplification_modal_cookie')) {
+    $js = <<<JS
+    $('#modal-dl-semplification').modal('show');
+    $('#modal-dl-semplification-dont-show-again-link').on('click', function(event) {
+        event.preventDefault();
+        $.ajax({
+            url: '/admin/security/set-dl-semplification-modal-cookie',
+            type: 'post',
+            success: function (data) {
+                $('#modal-dl-semplification').modal('hide');
+            }
+        });
+    });
+JS;
+    $this->registerJs($js);
+}
+$btnLabel = AmosAdmin::t('amosadmin', '#dl_semplification_modal_btn_label');
+Modal::begin([
+    'id' => 'modal-dl-semplification',
+    'header' => '<h2 class="nom modal-title">'.AmosAdmin::t('amosadmin', '#dl_semplification_modal_header').'</h2>',
+]);
+echo Html::tag('div',
+    Html::tag('p', AmosAdmin::t('amosadmin', '#dl_semplification_modal_text'))
+);
+echo Html::tag('div', Html::a($btnLabel, null, ['class' => 'btn btn-primary', 'data-dismiss' => 'modal']), ['class' => 'text-right m-15-0']);
+echo Html::a(
+    AmosAdmin::t('amosadmin', '#dl_semplification_modal_dont_show_again'), null,
+    [
+        'id' => 'modal-dl-semplification-dont-show-again-link',
+        'title' => AmosAdmin::t('amosadmin', '#dl_semplification_modal_dont_show_again'),
+        'target' => '_blank',
+        'class' => 'pull-right',
+    ]);
+Modal::end();
+?>
+
 <div id="bk-formDefaultLogin" class="loginContainerFullsize">
+    
+    <?php if ($socialAuthModule && $socialAuthModule->enableSpid) : ?>
+        <div class="spid-block col-xs-12 nop">
+            <?= $this->render('parts' . DIRECTORY_SEPARATOR . 'spid'); ?>
+        </div>
+    <?php endif; ?>
+
     <div class="login-block col-xs-12 nop">
         <?php if (!isset(Yii::$app->params['logo']) || !Yii::$app->params['logo']) : ?>
             <p class="welcome-message"><?= AmosAdmin::t('amosadmin', '#login_welcome_message') ?></p>
         <?php endif; ?>
-
+        
         <?php if (CoreCommonUtility::platformSeenFromHeadquarter() || !$adminModule->hideStandardLoginPageSection): ?>
             <?php $form = ActiveForm::begin(['id' => 'login-form']); ?>
             <div class="login-body">
-                <?= Html::tag('h2', AmosAdmin::t('amosadmin', '#fullsize_login'), ['class' => 'title-login col-xs-12 nop']) ?>
-                <div class="row">
+                <?= Html::tag('h2', AmosAdmin::t('amosadmin', '#fullsize_login'), ['class' => 'title-login col-xs-12 nop nom-b']) ?>
+                <?= Html::tag('p', '(' . AmosAdmin::t('amosadmin', '#fullsize_login_dl_semplification_valid_until') . ')') ?>
+
+                <div class="row nom">
                     <?php if (CoreCommonUtility::platformSeenFromHeadquarter() || !$adminModule->hideStandardLoginPageSection) : ?>
-                        <div class="col-xs-12 nop">
+                        <div class="col-xs-12" style="padding:15px 0; border:1px solid;">
                             <?php if (isset(\Yii::$app->params['template-amos']) && \Yii::$app->params['template-amos']): ?>
                                 <div class="col-xs-12">
                                     <?=
@@ -117,7 +164,7 @@ Yii::$app->trigger('BEFORE_LOGIN_FORM');
                                     ?>
                                 </div>
                             <?php endif; ?>
-
+                            
                             <?php if ($adminModule->allowLoginWithEmailOrUsername): ?>
                                 <div class="col-xs-12">
                                     <?= $form->field($model, 'usernameOrEmail', $usernameOrEmailFieldOptions)->textInput($usernameOrEmailInputOptions)->label('') ?>
@@ -139,13 +186,13 @@ Yii::$app->trigger('BEFORE_LOGIN_FORM');
                                 <div>
                                     <?= Html::submitButton(AmosAdmin::t('amosadmin', '#text_button_login'),
                                         [
-                                            'class' => 'btn btn-secondary',
+                                            'class' => 'btn btn-primary',
                                             'name' => 'login-button',
                                             'title' => AmosAdmin::t('amosadmin', '#text_button_login_title')
                                         ]) ?>
                                 </div>
                                 <div class="forgot-password">
-                                    <?= Html::a(AmosAdmin::t('amosadmin', '#forgot_password'), ['/'.AmosAdmin::getModuleName().'/security/forgot-password'],
+                                    <?= Html::a(AmosAdmin::t('amosadmin', '#forgot_password'), ['/' . AmosAdmin::getModuleName() . '/security/forgot-password'],
                                         ['title' => AmosAdmin::t('amosadmin', '#forgot_password_title_link'), 'target' => '_self'])
                                     ?>
                                 </div>
@@ -161,7 +208,7 @@ Yii::$app->trigger('BEFORE_LOGIN_FORM');
             <?php ActiveForm::end(); ?>
         <?php endif; ?>
     </div>
-
+    
     <?php if ($socialAuthModule && $socialAuthModule->enableLogin && !$socialMatch) : ?>
         <div class="social-block col-xs-12 nop">
             <?= $this->render('parts' . DIRECTORY_SEPARATOR . 'social', [
@@ -170,7 +217,7 @@ Yii::$app->trigger('BEFORE_LOGIN_FORM');
             ]); ?>
         </div>
     <?php endif; ?>
-
+    
     <?php if ($socialProfile) :
         echo Html::tag('div',
             Html::tag('p',
@@ -180,33 +227,4 @@ Yii::$app->trigger('BEFORE_LOGIN_FORM');
         );
     endif;
     ?>
-
-    <?php if ($socialAuthModule && $socialAuthModule->enableSpid) : ?>
-        <div class="spid-block col-xs-12 nop">
-            <?= $this->render('parts' . DIRECTORY_SEPARATOR . 'spid'); ?>
-        </div>
-    <?php endif; ?>
-
-    <?php if (($adminModule->enableRegister && $adminModule->showLogInRegisterButton) || (!$adminModule->enableRegister && !empty($adminModule->textWarningForRegisterDisabled))): ?>
-        <div class="register-block col-xs-12 nop">
-            <?php
-            $urlRegister = ['/'.AmosAdmin::getModuleName().'/security/register'];
-            if ($communityId) {
-                $urlRegister['community'] = $communityId;
-            } else if ($enableRedirect) {
-                $urlRegister['redirectUrl'] = $previousUrl;
-            }
-            echo Html::tag('h2',
-                AmosAdmin::t('amosadmin', '#fullsize_register_now') .
-                ' ' .
-                Html::a(AmosAdmin::t('amosadmin', '#fullsize_register_now_title_link'), $urlRegister,
-                    [
-                        'title' => AmosAdmin::t('amosadmin', '#fullsize_register_now_title_link', ['appName' => Yii::$app->name]),
-                        'target' => '_self'
-                    ]),
-                ['class' => 'title-login']
-            );
-            ?>
-        </div>
-    <?php endif; ?>
 </div>

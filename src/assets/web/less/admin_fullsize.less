@@ -365,6 +365,9 @@ IMPORT STYLE-CUSTOM
 }
 
 .social-admin-section {
+  h2.spid-title{
+    font-size: 1.3em;
+  }
   .google-services {
     > div:not(:first-child) {
       margin-top: @margin-default;
@@ -372,15 +375,24 @@ IMPORT STYLE-CUSTOM
   }
   .label-social {
     margin-top: 15px;
-    float: left;
+    
   }
   .wrap-btn-social {
-    float: left;
-    margin-left: @margin-medium;
+    //float: left;
+    //margin-left: @margin-medium;
+    display: flex;
+    flex-direction: column;
     .btn {
-      height: 40px;
-      min-width: 40px;
+      //height: 40px;
+      //min-width: 40px;
       border: 0;
+      height: 37px;
+      width: 200px;
+      border: 0;
+      display: block;
+      
+      padding: 6px 12px;
+      
       &[class*='-square'] {
         font-size: 2em;
         padding: 3px 0;
@@ -403,9 +415,22 @@ IMPORT STYLE-CUSTOM
           font-size: 2em;
         }
       }
-      + .btn {
-        margin-left: @margin-min;
+      &.btn-spid {
+        background: #0462C5;
+        color: #FFF;
+        padding: 7px 0;
+        width: 50%;
+        font-size: 1em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        @media (max-width:575px){
+          width: 100%;
+        }
       }
+      + .btn {
+        margin-top: @margin-min;
+      }      
     }
   }
 }

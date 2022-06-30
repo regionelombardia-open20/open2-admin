@@ -9,7 +9,7 @@ use open20\amos\attachments\components\FileImport;
  */
 class m200317_100612_create_userProfile_default_img extends Migration
 {
-    const BASE_IMPORT_PATH = "@backend/web/img/defaultProfilo.png";
+    const BASE_IMPORT_PATH = "@app/web/img/defaultProfilo.png";
 
     /**
      * {@inheritdoc}

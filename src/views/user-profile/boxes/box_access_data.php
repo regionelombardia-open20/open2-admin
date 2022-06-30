@@ -26,6 +26,7 @@ use yii\web\View;
 
 /** @var AmosAdmin $adminModule */
 $adminModule = Yii::$app->controller->module;
+$enableDlSemplification = $adminModule->enableDlSemplification;
 
 $js = "
 $('#deactivate-account-btn').on('click', function(event) {
@@ -100,35 +101,39 @@ $this->registerJs($js, View::POS_READY);
     </div>
     <div class="col-xs-6 col-sm-4 nop">
 
-        <?php if (!$model->isNewRecord && isset($user['email']) && strlen(trim($user['email']))): ?>
-            <?php if (Yii::$app->getUser()->can("GESTIONE_UTENTI")): ?>
-                <?php if ($spediscicredenzialienable): ?>
-                    <?php echo $this->renderPhpFile(
-                        FileHelper::localize(
-                            $this->context->getViewPath() . DIRECTORY_SEPARATOR . 'help' . DIRECTORY_SEPARATOR . 'send-recovery-password.php'
-                        ), ['model' => $model]); ?>
-                <?php else: ?>
-                    <div id="info-spedisci" class="btn btn-action-primary disabled" data-toggle="tooltip" data-placement="left"
-                         title="<?= AmosAdmin::t('amosadmin', 'Per spedire le credenziali occorre impostare il Ruolo nella sezione AMMINISTRAZIONE'); ?>">
-                        <?= AmosAdmin::t('amosadmin', 'Spedisci credenziali'); ?>
-                    </div>
-                    <div class=""><?= AmosAdmin::tHtml('amosadmin', 'Per spedire le credenziali occorre impostare il Ruolo nella sezione AMMINISTRAZIONE') ?></div>
-                    <div class="btn btn-action-primary disabled"><?= AmosAdmin::t('amosadmin', 'Spedisci credenziali'); ?></div>
+        <?php if (!$enableDlSemplification) { ?>
+
+            <?php if (!$model->isNewRecord && isset($user['email']) && strlen(trim($user['email']))): ?>
+                <?php if (Yii::$app->getUser()->can("GESTIONE_UTENTI")): ?>
+                    <?php if ($spediscicredenzialienable): ?>
+                        <?php echo $this->renderPhpFile(
+                            FileHelper::localize(
+                                $this->context->getViewPath() . DIRECTORY_SEPARATOR . 'help' . DIRECTORY_SEPARATOR . 'send-recovery-password.php'
+                            ), ['model' => $model]); ?>
+                    <?php else: ?>
+                        <div id="info-spedisci" class="btn btn-action-primary disabled" data-toggle="tooltip"
+                             data-placement="left"
+                             title="<?= AmosAdmin::t('amosadmin', 'Per spedire le credenziali occorre impostare il Ruolo nella sezione AMMINISTRAZIONE'); ?>">
+                            <?= AmosAdmin::t('amosadmin', 'Spedisci credenziali'); ?>
+                        </div>
+                        <div class=""><?= AmosAdmin::tHtml('amosadmin', 'Per spedire le credenziali occorre impostare il Ruolo nella sezione AMMINISTRAZIONE') ?></div>
+                        <div class="btn btn-action-primary disabled"><?= AmosAdmin::t('amosadmin', 'Spedisci credenziali'); ?></div>
+                    <?php endif; ?>
+                <?php endif; ?>
+                <?php
+                /** @var \open20\amos\core\user\User $identity */
+                $identity = Yii::$app->user->identity
+                ?>
+                <?php if (Yii::$app->user->can('CHANGE_USER_PASSWORD') && ($user['id'] == $identity->id)): ?>
+                    <?= Html::a(AmosIcons::show('unlock') . AmosAdmin::t('amosadmin', 'Cambia password'), ['/' . AmosAdmin::getModuleName() . '/user-profile/cambia-password', 'id' => $model->id], [
+                        'class' => 'btn  btn-action-primary btn-cambia-password'
+                    ]); ?>
                 <?php endif; ?>
             <?php endif; ?>
-            <?php
-            /** @var \open20\amos\core\user\User $identity */
-            $identity = Yii::$app->user->identity
-            ?>
-            <?php if (Yii::$app->user->can('CHANGE_USER_PASSWORD') && ($user['id'] == $identity->id)): ?>
-                <?= Html::a(AmosIcons::show('unlock') . AmosAdmin::t('amosadmin', 'Cambia password'), ['/'.AmosAdmin::getModuleName().'/user-profile/cambia-password', 'id' => $model->id], [
-                    'class' => 'btn  btn-action-primary btn-cambia-password'
-                ]); ?>
-            <?php endif; ?>
-        <?php endif; ?>
+        <?php } ?>
 
         <?php if ($model->isActive() && Yii::$app->user->can('DeactivateAccount', ['model' => $model])): ?>
-            <?= Html::a(AmosAdmin::t('amosadmin', 'Deactivate user'), ['/'.AmosAdmin::getModuleName().'/user-profile/deactivate-account', 'id' => $model->id], [
+            <?= Html::a(AmosAdmin::t('amosadmin', 'Deactivate user'), ['/' . AmosAdmin::getModuleName() . '/user-profile/deactivate-account', 'id' => $model->id], [
                 'id' => 'deactivate-account-btn',
                 'class' => 'btn btn-danger',
                 'title' => AmosAdmin::t('amosadmin', 'Deactivate user'),
@@ -136,18 +141,18 @@ $this->registerJs($js, View::POS_READY);
             ]) ?>
         <?php endif; ?>
         <?php if ($model->isDeactivated() && (Yii::$app->user->can('ADMIN') || Yii::$app->user->can('AMMINISTRATORE_UTENTI'))): ?>
-            <?= Html::a(AmosAdmin::t('amosadmin', 'Reactivate this user'), ['/'.AmosAdmin::getModuleName().'/user-profile/reactivate-account', 'id' => $model->id], [
+            <?= Html::a(AmosAdmin::t('amosadmin', 'Reactivate this user'), ['/' . AmosAdmin::getModuleName() . '/user-profile/reactivate-account', 'id' => $model->id], [
                 'id' => 'reactivate-account-btn',
                 'class' => 'btn btn-navigation-primary',
                 'title' => AmosAdmin::t('amosadmin', 'Reactivate this user'),
 //                'data-confirm' => AmosAdmin::t('amosadmin', 'Do you really want to reactivate this user') . '?'
             ]) ?>
         <?php endif; ?>
-        <?php if(\Yii::$app->user->can('ADMIN')){
-            $urlDropAccount = ['/'.AmosAdmin::getModuleName().'/user-profile/drop-account', 'id' => $model->id];
+        <?php if (\Yii::$app->user->can('ADMIN')) {
+            $urlDropAccount = ['/' . AmosAdmin::getModuleName() . '/user-profile/drop-account', 'id' => $model->id];
         } else {
-            $urlDropAccount = ['/'.AmosAdmin::getModuleName().'/user-profile/drop-account-by-email', 'id' => $model->id];
-        }?>
+            $urlDropAccount = ['/' . AmosAdmin::getModuleName() . '/user-profile/drop-account-by-email', 'id' => $model->id];
+        } ?>
         <?= Html::a(AmosAdmin::t('amosadmin', '#delete_user'), $urlDropAccount, [
             'id' => 'drop-account-btn',
             'class' => 'btn btn-danger',

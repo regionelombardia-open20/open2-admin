@@ -75,6 +75,8 @@ class FirstAccessWizardComponent extends Component /* implements BootstrapInterf
     {
         return \Yii::$app->controller->redirect($url);
     }
+
+
 //    /**
 //     * @param \yii\web\Application $app
 //     */

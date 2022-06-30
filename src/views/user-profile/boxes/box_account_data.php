@@ -41,8 +41,6 @@ $('#reactivate-account-btn').on('click', function(event) {
 });
 ";
 $this->registerJs($js, View::POS_READY);
-
-die;
 ?>
 
 <section class="account-admin-section col-xs-12 nop">

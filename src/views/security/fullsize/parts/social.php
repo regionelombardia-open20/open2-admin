@@ -22,6 +22,7 @@ ModuleAdminAsset::register(Yii::$app->view);
  * @var $socialAuthModule \open20\amos\socialauth\Module
  */
 $socialAuthModule = Yii::$app->getModule('socialauth');
+$adminModule = Yii::$app->getModule(AmosAdmin::getModuleName());
 
 //change social url
 
@@ -37,6 +38,12 @@ if($communityId){
 }else if($redirectUrl){
     $paramsRedirectUrl = '';/**'&redirectUrl='.$redirectUrl;*/
 }
+
+if(!empty($adminModule) && $adminModule->enableDlSemplification){
+    $redirectTo = \Yii::$app->params['platform']['backendUrl'].'/'.AmosAdmin::getModuleName().'/security/reconciliation';
+    $paramsRedirectUrl.= '&redirectTo='.$redirectTo;
+}
+
 
 
 ?>

@@ -29,6 +29,7 @@ use open20\amos\core\interfaces\WorkflowModelInterface;
 use open20\amos\core\record\CachedActiveQuery;
 use open20\amos\core\user\User;
 use open20\amos\core\utilities\Email;
+use open20\amos\core\validators\CfPivaValidator;
 use open20\amos\workflow\behaviors\WorkflowLogFunctionsBehavior;
 use Exception;
 use raoul2000\workflow\base\SimpleWorkflowBehavior;
@@ -101,7 +102,7 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
      */
     public function getViewUrl()
     {
-        return "admin/user-profile/view";
+        return AmosAdmin::getModuleName()."/user-profile/view";
     }
 
     /**
@@ -144,7 +145,7 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
                 ['codice_fiscale', 'string', 'length' => 16],
                 ['tightCouplingField', 'safe'],
                 ['telefono', \open20\amos\core\validators\PhoneValidator::className()],
-                ['codice_fiscale', 'checkCodiceFiscale'],
+                ['codice_fiscale', CfPivaValidator::className()],
                 [['avatar_id', 'listaRuoli', 'listaProgetti'], 'safe'],
                 [['privacy', 'domicilio_provincia_id', 'domicilio_cap', 'domicilio_comune_id', 'created_by', 'updated_by',
                     'deleted_by'], 'default'],

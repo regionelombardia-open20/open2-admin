@@ -65,8 +65,8 @@ if ($isDemoLogin) {
     $passwordInputOptions = ['readonly' => true];
 }
 
+Yii::$app->trigger('BEFORE_LOGIN_FORM');
 ?>
-<iframe src="/socialauth/shibboleth/autologin" style="display:none;"></iframe>
 
 <div id="bk-formDefaultLogin" class="bk-loginContainer loginContainer">
     <div class="header col-xs-12">
