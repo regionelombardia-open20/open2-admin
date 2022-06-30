@@ -31,17 +31,19 @@ use yii\helpers\ArrayHelper;
 class AmosAdmin extends AmosModule implements SearchModuleInterface
 {
     const site_key_param               = 'google_recaptcha_site_key';
-    const secret_param               = 'google_recaptcha_secret';
+    const secret_param                 = 'google_recaptcha_secret';
     //google contacts session keys
     const GOOGLE_CONTACTS              = 'contacts';
     const GOOGLE_CONTACTS_PLATFORM     = 'contacts_platform';
     const GOOGLE_CONTACTS_NOT_PLATFORM = 'contacts_not_platform';
 
-    public $controllerNamespace = 'open20\amos\admin\controllers';
-    public $whiteListRoles      = [];
-    public $name                = 'Utenti';
-    public $searchListFields    = [];
-    public $hardDelete          = false;
+    public $controllerNamespace            = 'open20\amos\admin\controllers';
+    public $whiteListRoles                 = [];
+    public $name                           = 'Utenti';
+    public $searchListFields               = [];
+    public $hardDelete                     = false;
+    public $frontend_auto_login            = false;
+    public $frontend_autologin_token_group = '';
 
     /**
      * @var bool $enableRegister - set to true to enable user register to the application and create his own userprofile
@@ -120,6 +122,8 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
      * @var string
      */
     public $textMailContent = '@vendor/open20/amos-admin/src/mail/user/credenziali-text';
+    public $htmlMailForgotPasswordSubjectView = '@vendor/open20/amos-admin/src/mail/user/forgotpassword-subject';
+    public $htmlMailForgotPasswordView        = '@vendor/open20/amos-admin/src/mail/user/forgotpassword-html';
 
     /**
      * This is the html content used to render the message of the e-mail send to user that had invited someone
@@ -262,10 +266,6 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
     public $dontCheckOneTagPresent = false;
 
     /**
-     * @var bool $enableTagOnlyNetwork If true i can tag only my network members.
-     */
-    public $enableTagOnlyNetwork = false;
-    /**
      * @var bool $enableMultiUsersSameCF If true the model validation doesn't check the unique of che fiscal code.
      */
     public $enableMultiUsersSameCF = false;
@@ -335,7 +335,7 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
 
     /**
      * Is set true the validate basic user can create contents only in his/her own Communities
-     *
+     * 
      * @var bool $createContentInMyOwnCommunityOnly
      */
     public $createContentInMyOwnCommunityOnly = false;
@@ -403,19 +403,10 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
      */
     public $tightCouplingRoleAdmin = 'ADMIN';
 
-
     /**
      * @var Array
      */
     public $enableAttributeChangeLog = [];
-
-    /**
-     * Shows linked contacts even if main contact has not been validated. This parameter has been created for ARTER,
-     * where it is required to show the linked mentor in the contacts pane even if the user has not been validated first.
-     * THE USER STILL CANNOT ADD CONTACTS OR SEE THE "MESSAGE" BUTTON IF NOT VALIDATED.
-     * @var boolean $showContactsForInvalid
-     */
-    public $showContactsForInvalid = false;
 
     /**
      * @return string
@@ -471,9 +462,11 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
     {
         parent::init();
 
-        \Yii::setAlias('@open20/amos/'.static::getModuleName().'/controllers', __DIR__.'/controllers/');
+        \Yii::setAlias('@open20/amos/'.static::getModuleName().'/controllers',
+            __DIR__.'/controllers/');
         // initialize the module with the configuration loaded from config.php
-        \Yii::configure($this, require(__DIR__.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'config.php'));
+        \Yii::configure($this,
+            require(__DIR__.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'config.php'));
 
         $this->confManager = new ConfigurationManager([
             'fieldsConfigurations' => $this->fieldsConfigurations
@@ -524,7 +517,8 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
      */
     public function getWhiteListRules() // TODO change to getWhiteListRoles()
     {
-        trigger_error('Deprecated: this function is repleca by getWhiteListRoles', E_NOTICE);
+        trigger_error('Deprecated: this function is repleca by getWhiteListRoles',
+            E_NOTICE);
         return $this->whiteListRoles;
     }
 
@@ -575,10 +569,13 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
      * @param bool|false $sendCredentials if credential mail must be sent to the newly created user
      * @return array
      */
-    public function createNewAccount($name, $surname, $email, $privacy, $sendCredentials = false, $community = null,
+    public function createNewAccount($name, $surname, $email, $privacy,
+                                     $sendCredentials = false,
+                                     $community = null,
                                      $urlFirstAccessRedirectUrl = null)
     {
-        return UserProfileUtility::createNewAccount($name, $surname, $email, $privacy, $sendCredentials, $community,
+        return UserProfileUtility::createNewAccount($name, $surname, $email,
+                $privacy, $sendCredentials, $community,
                 $urlFirstAccessRedirectUrl);
     }
 
@@ -591,7 +588,8 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
         $connections = $serviceGoogle->people_connections->listPeopleConnections(
             'people/me', array('personFields' => 'photos,names,emailAddresses'));
         $items       = $connections->getTotalItems();
-        $message     = AmosAdmin::t('amosadmin', 'Google contacts: {count}', ['count' => $items]);
+        $message     = AmosAdmin::t('amosadmin', 'Google contacts: {count}',
+                ['count' => $items]);
         $session     = Yii::$app->session;
         if ($items) {
             $contacts      = [];
@@ -603,11 +601,16 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
                 $contact              = [];
                 $names                = [];
                 $photos               = [];
-                $names['displayName'] = ArrayHelper::getColumn($connection->getNames(), 'displayName');
-                $names['name']        = ArrayHelper::getColumn($connection->getNames(), 'givenName');
-                $names['surname']     = ArrayHelper::getColumn($connection->getNames(), 'familyName');
-                $photos['url']        = ArrayHelper::getColumn($connection->getPhotos(), 'url');
-                $emails               = ArrayHelper::getColumn($connection->getEmailAddresses(), 'value');
+                $names['displayName'] = ArrayHelper::getColumn($connection->getNames(),
+                        'displayName');
+                $names['name']        = ArrayHelper::getColumn($connection->getNames(),
+                        'givenName');
+                $names['surname']     = ArrayHelper::getColumn($connection->getNames(),
+                        'familyName');
+                $photos['url']        = ArrayHelper::getColumn($connection->getPhotos(),
+                        'url');
+                $emails               = ArrayHelper::getColumn($connection->getEmailAddresses(),
+                        'value');
                 $emails               = array_unique($emails);
                 foreach ($emails as $email) {
                     $contact['email']  = $email;
@@ -625,10 +628,12 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
 
                     $session->set(self::GOOGLE_CONTACTS, $contacts);
                     $session->set(self::GOOGLE_CONTACTS_PLATFORM, $inPlatform);
-                    $session->set(self::GOOGLE_CONTACTS_NOT_PLATFORM, $notInplatform);
+                    $session->set(self::GOOGLE_CONTACTS_NOT_PLATFORM,
+                        $notInplatform);
                 }
             }
-            $message .= '<br/>'.AmosAdmin::t('amosadmin', 'Registered in \'{appName}\': {count}',
+            $message .= '<br/>'.AmosAdmin::t('amosadmin',
+                    'Registered in \'{appName}\': {count}',
                     ['appName' => \Yii::$app->name, 'count' => count($inPlatform)]);
         }
         return $message;
@@ -683,6 +688,25 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
     //nuovo metodo controllo su blacklist
     public function checkManageInviteBlackList()
     {
-        return in_array(\Yii::$app->controller->action->id, $this->actionBlacklistManageInvite);
+        return in_array(\Yii::$app->controller->action->id,
+            $this->actionBlacklistManageInvite);
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getFrontEndMenu($dept = 1)
+    {
+        $menu = "";
+        $app  = \Yii::$app;
+        if (!$app->user->isGuest) {
+            if (Yii::$app->user->can('GESTIONE_UTENTI')) {
+                $menu .= $this->addFrontEndMenu(AmosAdmin::t('amos' . AmosAdmin::getModuleName(),
+                        '#menu_front_events'),
+                    AmosAdmin::toUrlModule('/user-profile/validated-users'), $dept);
+            }
+        }
+        return $menu;
     }
 }

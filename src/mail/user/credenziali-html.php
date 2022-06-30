@@ -20,7 +20,7 @@ use yii\helpers\Html;
 
 $appLink = Yii::$app->params['platform'] ['backendUrl'];//Yii::$app->urlManager->createAbsoluteUrl(['/']);
 $appLink = substr($appLink, -1) == '/' ? $appLink : $appLink . '/';
-$appLinkPrivacy = Yii::$app->params['platform'] ['backendUrl'] .'/admin/user-profile/privacy'; //Yii::$app->urlManager->createAbsoluteUrl(['/admin/user-profile/privacy']);
+$appLinkPrivacy = Yii::$app->params['platform'] ['backendUrl'] .'/'.AmosAdmin::getModuleName().'/user-profile/privacy'; //Yii::$app->urlManager->createAbsoluteUrl(['/'.AmosAdmin::getModuleName().'/user-profile/privacy']);
 $appName = Yii::$app->name;
 
 $this->title = AmosAdmin::t('amosadmin', 'Registrazione {appName}', ['appName' => $appName]);
@@ -74,7 +74,7 @@ $this->registerCssFile('http://fonts.googleapis.com/css?family=Roboto');
                                 'supportEmail' => Yii::$app->params['supportEmail']
                             ]); ?>
 
-                            <?php $link = $appLink . 'admin/security/insert-auth-data?token=' . $profile->user->password_reset_token;
+                            <?php $link = $appLink . AmosAdmin::getModuleName() .'/security/insert-auth-data?token=' . $profile->user->password_reset_token;
                             if(!empty($community)) {
                                 $link .= '&community_id='.$community->id.'&subscribe=1';
                             }

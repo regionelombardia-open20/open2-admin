@@ -254,7 +254,7 @@ class UserCardWidget extends Widget
         $tooltip = '<div class="icon-view"><div class="card-container col-xs-12 nop">' .
             ContextMenuWidget::widget([
                 'model' => $model,
-                'actionModify' => "/admin/user-profile/update?id=" . $model->id,
+                'actionModify' => "/'.AmosAdmin::getModuleName().'/user-profile/update?id=" . $model->id,
                 'disableDelete' => true
             ])
             . '<div class="icon-header grow-pict">

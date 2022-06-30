@@ -50,7 +50,7 @@ class WidgetIconCommunityManagerUserProfiles extends WidgetIcon
             $this->setIcon('users');
         }
 
-        $this->setUrl(['/admin/user-profile/community-manager-users']);
+        $this->setUrl([ '/'. AmosAdmin::getModuleName(). '/user-profile/community-manager-users']);
         $this->setCode('COMMUNITY_MANAGER_USERS');
         $this->setModuleName('admin');
         $this->setNamespace(__CLASS__);

@@ -30,7 +30,7 @@ class UserUtilityController  extends Controller
         $users = $userClass::find()->all();
         /** @var User $user */
         foreach ($users as $user){
-            $roles = Yii::$app->authManager->getAssignments($user->id);
+            $roles = Yii::$app->authManager->getAssignments((int) $user->id);
             if(empty($roles)) {
                 Yii::$app->getAuthManager()->assign(Yii::$app->getAuthManager()->getRole('BASIC_USER'), $user->id);
                 $this->log ('Add BASIC_USER to : id'. $user->id . "  username: " . $user->username);

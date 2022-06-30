@@ -19,7 +19,7 @@ use open20\amos\core\helpers\Html;
  * @var \open20\amos\admin\models\UserProfile $model
  */
 
-$partnershipUrl = ['/admin/first-access-wizard/associate-prevalent-partnership', 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true];
+$partnershipUrl = ['/'.AmosAdmin::getModuleName().'/first-access-wizard/associate-prevalent-partnership', 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true];
 
 /* @var \open20\amos\cwh\AmosCwh $moduleCwh */
 $moduleCwh = \Yii::$app->getModule('cwh');
@@ -77,7 +77,7 @@ $moduleTag = \Yii::$app->getModule('tag');
     
     <?= WizardPrevAndContinueButtonWidget::widget([
         'model' => $model,
-        'previousUrl' => (isset($moduleCwh) && isset($moduleTag)) ? Yii::$app->getUrlManager()->createUrl(['/admin/first-access-wizard/interests']) : Yii::$app->getUrlManager()->createUrl(['/admin/first-access-wizard/role-and-area']),
+        'previousUrl' => (isset($moduleCwh) && isset($moduleTag)) ? Yii::$app->getUrlManager()->createUrl(['/'.AmosAdmin::getModuleName().'/first-access-wizard/interests']) : Yii::$app->getUrlManager()->createUrl(['/'.AmosAdmin::getModuleName().'/first-access-wizard/role-and-area']),
     ]) ?>
     <?php ActiveForm::end(); ?>
 </div>

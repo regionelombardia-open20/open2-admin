@@ -39,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="col-xs-12 nop">
                 <?= Html::beginTag('div', ['class' => 'form-group field-firstaccessform-password']) ?>
                 <?= Html::tag('span', $model->getAttributeLabel('username')) ?>
-                <?= Html::tag('strong', $model->username) ?>
+                <?= Html::tag('strong', Html::encode($model->username)) ?>
                 <?= Html::endTag('div') ?>
                 <div class="level-security">
                     <span><?= Yii::t('amosadmin', 'Livello sicurezza') ?></span>
@@ -47,13 +47,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?=
                 $form->field($model, 'password')->widget(PasswordInput::classname(), [
                     'language' => 'it',
+                    'options' => [
+                        'autocomplete' => 'off'
+                    ],
                     'pluginOptions' => [
                         'showMeter' => true,
                         'toggleMask' => true,
                         'language' => 'it'
                     ]]);
                 ?>
-                <?= $form->field($model, 'ripetiPassword')->passwordInput() ?>
+                <?= $form->field($model, 'ripetiPassword')->passwordInput([
+                            'autocomplete' => 'off'
+                        ]) ?>
                 <?php if(!empty($isFirstAccess) && $isFirstAccess){ ?>
                     <div class="text-bottom col-xs-12 nop">
                         <?= Html::a(AmosAdmin::t('amosadmin', '#cookie_policy_message'), '/site/privacy', ['title' => AmosAdmin::t('amosadmin', '#cookie_policy_title'), 'target' => '_blank']) ?>

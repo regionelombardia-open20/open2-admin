@@ -49,14 +49,4 @@ $adminModule = Yii::$app->controller->module;
             'onchange' => "if(!$(this).is(':checked')){ $('#notify-uncheck').modal('show'); }"
         ]) ?>
     <div>
-
-    <div class="col-xs-12 nop">
-        <?= 
-            \open20\amos\core\helpers\Html::activeCheckbox($model, 'notify_tagging_user_in_content', [
-                'name' => 'notify_tagging_user_in_content',
-                'id' => 'id_notify_tagging_user_in_content',
-                // 'onchange' => "if(!$(this).is(':checked')){ $('#notify-uncheck').modal('show'); }"
-            ]) 
-        ?>
-    <div>
 </section>

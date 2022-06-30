@@ -301,7 +301,7 @@ class FirstAccessWizardController extends CrudController
         $this->model->setScenario(UserProfile::SCENARIO_INTRODUCING_MYSELF);
         if (Yii::$app->getRequest()->post() && $this->model->load(Yii::$app->getRequest()->post()) && $this->model->save()) {
             if(!empty(\Yii::$app->request->get('gotoFacilitator'))){
-                return $this->redirect(['/admin/first-access-wizard/associate-facilitator', 'id' => $this->model->id, 'viewM2MWidgetGenericSearch' => true]);
+                return $this->redirect(['/'.AmosAdmin::getModuleName().'/first-access-wizard/associate-facilitator', 'id' => $this->model->id, 'viewM2MWidgetGenericSearch' => true]);
             }
             return $this->goToNextPart();
         }

@@ -101,7 +101,7 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
      */
     public function getViewUrl()
     {
-        return "admin/user-profile/view";
+        return AmosAdmin::getModuleName()."/user-profile/view";
     }
 
     /**
@@ -143,6 +143,7 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
                 [['userProfileImage'], 'file', 'extensions' => $this->adminModule->whiteListProfileImageExts],
                 ['codice_fiscale', 'string', 'length' => 16],
                 ['tightCouplingField', 'safe'],
+                ['telefono', \open20\amos\core\validators\PhoneValidator::className()],
                 ['codice_fiscale', 'checkCodiceFiscale'],
                 [['avatar_id', 'listaRuoli', 'listaProgetti'], 'safe'],
                 [['privacy', 'domicilio_provincia_id', 'domicilio_cap', 'domicilio_comune_id', 'created_by', 'updated_by',
@@ -198,7 +199,7 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
 
         $cwhModule = Yii::$app->getModule('cwh');
         $tagModule = Yii::$app->getModule('tag');
-        $adminModule = Yii::$app->getModule('admin');
+        $adminModule = AmosAdmin::instance();
         if (isset($cwhModule) && isset($tagModule)) {
             $cwhTaggable = ['interestingTaggable' => [
                 'class' => \open20\amos\cwh\behaviors\TaggableInterestingBehavior::className(),
@@ -1882,4 +1883,41 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
         }
         return null;
     }
+
+
+    /**
+     * @return string
+     */
+    public function generateDeleteToken(){
+        $token = md5(uniqid($this->user_id, true));
+        $expire_at =  time()+(1 * 24 * 60 * 60); //  24 ore
+        $token .= "_".$expire_at;
+        $this->delete_token = $token;
+        $this->save(false);
+        return $token;
+
+    }
+
+    /**
+     * @param $token
+     * @return null
+     * @throws \yii\base\InvalidConfigException
+     */
+    public static function checkDeleteToken($token){
+        $explode = explode('_', $token);
+        $id = null;
+        if(count($explode)== 2){
+            $expire_time = $explode[1];
+            if(time() < $expire_time){
+                $userProfile = UserProfile::find()->andWhere(['delete_token' => $token])->one();
+                if($userProfile){
+                    $id = $userProfile->id;
+                }
+
+            }
+        }
+        return $id;
+    }
+
+
 }

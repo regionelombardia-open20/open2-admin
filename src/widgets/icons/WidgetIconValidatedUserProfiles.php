@@ -49,7 +49,7 @@ class WidgetIconValidatedUserProfiles extends WidgetIcon
             $this->setIcon('users');
         }
 
-        $this->setUrl(['/admin/user-profile/validated-users']);
+        $this->setUrl(['/'. AmosAdmin::getModuleName(). '/user-profile/validated-users']);
         $this->setCode('VALIDATED_USERS');
         $this->setModuleName(AmosAdmin::getModuleName());
         $this->setNamespace(__CLASS__);

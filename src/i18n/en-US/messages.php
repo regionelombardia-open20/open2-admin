@@ -801,6 +801,8 @@ return [
     '#fullsize_spid' => '<strong>ENTER</strong> with Sistema Pubblico di Identità Digitale',
     '#fullsize_login_spid_text' => 'Enter with SPID/CNS',
     '#fullsize_login_spid_text_right' => 'SPID is the access system that allows you to use, with a unique digital identity, the online services of the Public Administration and accredited individuals. <br/> If you already have a digital identity, log in with your credentials manager. If you don\'t have a digital identity yet, ask one of the managers for it.',
+    '#fullsize_login_spid_text_idm' => 'Enter with SPID/CNS/IDM',
+    '#fullsize_login_spid_text_right_idm' => 'SPID is the access system that allows you to use, with a unique digital identity, the online services of the Public Administration and accredited individuals. <br/> If you already have a digital identity, log in with your credentials manager. If you don\'t have a digital identity yet, ask one of the managers for it.',
     '#fullsize_register' => '<strong>REGISTER</strong> with your data',
     '#fullsize_field_name' => 'name',
     '#fullsize_field_surname' => 'surname',
@@ -826,5 +828,6 @@ return [
     '#facilitator_assigned' => ' chose you as a facilitator. You can contact him through the dedicated tool you find on your dashboard, in the management panel',
     '#facilitator_assigned_obj' => '{nomecognome} chose you as a facilitator',
     '#yours_validated_users' => '',
+    '#menu_front_events' => 'Users',
 
 ];

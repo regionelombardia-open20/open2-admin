@@ -4,7 +4,7 @@ use open20\amos\admin\AmosAdmin;
 $this->title = AmosAdmin::t('amosadmin',"Completa il tuo profilo utente");
 $assetBundle = \open20\amos\admin\assets\ModuleUserProfileAsset::register($this);
 
-$url = \yii\helpers\Url::to(['/admin/user-profile/update', 'id' => $model->id]);
+$url = \yii\helpers\Url::to(['/'.AmosAdmin::getModuleName().'/user-profile/update', 'id' => $model->id]);
 ?>
 <div class="col-xs-12 m-t-15">
     <h4><?= AmosAdmin::t('amosadmin',"Porta a termine la tua registrazione utente e richiedi la validazione del profilo, <br> così potrai partecipare attivamente alla creazione di contenuti in piattaforma, accedendo a <a href='{link}'>'Il mio profilo'</a>.",[

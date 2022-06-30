@@ -49,7 +49,7 @@ class WidgetIconInactiveUserProfiles extends WidgetIcon
             $this->setIcon('users');
         }
 
-        $this->setUrl(['/admin/user-profile/inactive-users']);
+        $this->setUrl(['/'. AmosAdmin::getModuleName(). '/user-profile/inactive-users']);
         $this->setCode('INACTIVE_USERS');
         $this->setModuleName(AmosAdmin::getModuleName());
         $this->setNamespace(__CLASS__);

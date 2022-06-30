@@ -181,7 +181,7 @@ JS;
                 echo Html::tag('div',
                     Html::a(AmosAdmin::t('amosadmin', 'Not now'), null, $this->modalButtonCancelOptions)
                     . Html::a(AmosAdmin::t('amosadmin', 'Complete the profile'),
-                        ['/admin/first-access-wizard/introduction', 'id' => $userProfile->id],
+                        ['/'.AmosAdmin::getModuleName().'/first-access-wizard/introduction', 'id' => $userProfile->id],
                         $this->modalButtonConfirmationOptions),
                     ['class' => 'pull-right m-15-0']
                 );
@@ -205,7 +205,7 @@ JS;
                     echo Html::tag('div',
                         Html::a(AmosAdmin::t('amosadmin', 'Cancel'), null, $this->modalButtonCancelOptions)
                         . Html::a(AmosAdmin::t('amosadmin', 'Invite contact'),
-                            ['/admin/user-contact/connect', 'contactId' => $model->user_id],
+                            ['/'.AmosAdmin::getModuleName().'/user-contact/connect', 'contactId' => $model->user_id],
                             $this->modalButtonConfirmationOptions),
                         ['class' => 'pull-right m-15-0']
                     );
@@ -251,7 +251,7 @@ JS;
                             echo Html::tag('div',
                                 Html::a(AmosAdmin::t('amosadmin', 'Cancel'), null, $this->modalButtonCancelOptions)
                                 . Html::a(AmosAdmin::t('amosadmin', 'Send reminder'),
-                                    ['/admin/user-contact/send-reminder', 'id' => $userContact->id],
+                                    ['/'.AmosAdmin::getModuleName().'/user-contact/send-reminder', 'id' => $userContact->id],
                                     $this->modalButtonConfirmationOptions),
                                 ['class' => 'pull-right m-15-0']
                             );
@@ -277,7 +277,7 @@ JS;
                             echo Html::tag('div',
                                 Html::a(AmosAdmin::t('amosadmin', 'Reject invitation'),
                                     [
-                                        '/admin/user-contact/connect',
+                                        '/'.AmosAdmin::getModuleName().'/user-contact/connect',
                                         'contactId' => $loggedUserId,
                                         'userId' => $userContact->user_id,
                                         'accept' => false
@@ -286,7 +286,7 @@ JS;
                                 )
                                 . Html::a(AmosAdmin::t('amosadmin', 'Accept invitation'),
                                     [
-                                        '/admin/user-contact/connect',
+                                        '/'.AmosAdmin::getModuleName().'/user-contact/connect',
                                         'contactId' => $loggedUserId,
                                         'userId' => $userContact->user_id,
                                         'accept' => true

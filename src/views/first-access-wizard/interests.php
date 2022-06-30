@@ -56,7 +56,7 @@ $moduleTag = Yii::$app->getModule('tag');
     
     <?= WizardPrevAndContinueButtonWidget::widget([
         'model' => $model,
-        'previousUrl' => Yii::$app->getUrlManager()->createUrl(['/admin/first-access-wizard/role-and-area'])
+        'previousUrl' => Yii::$app->getUrlManager()->createUrl(['/'.AmosAdmin::getModuleName().'/first-access-wizard/role-and-area'])
     ]) ?>
     <?php ActiveForm::end(); ?>
 </div>

@@ -121,14 +121,14 @@ $this->registerJs($js, View::POS_READY);
             $identity = Yii::$app->user->identity
             ?>
             <?php if (Yii::$app->user->can('CHANGE_USER_PASSWORD') && ($user['id'] == $identity->id)): ?>
-                <?= Html::a(AmosIcons::show('unlock') . AmosAdmin::t('amosadmin', 'Cambia password'), ['/admin/user-profile/cambia-password', 'id' => $model->id], [
+                <?= Html::a(AmosIcons::show('unlock') . AmosAdmin::t('amosadmin', 'Cambia password'), ['/'.AmosAdmin::getModuleName().'/user-profile/cambia-password', 'id' => $model->id], [
                     'class' => 'btn  btn-action-primary btn-cambia-password'
                 ]); ?>
             <?php endif; ?>
         <?php endif; ?>
 
         <?php if ($model->isActive() && Yii::$app->user->can('DeactivateAccount', ['model' => $model])): ?>
-            <?= Html::a(AmosAdmin::t('amosadmin', 'Deactivate user'), ['/admin/user-profile/deactivate-account', 'id' => $model->id], [
+            <?= Html::a(AmosAdmin::t('amosadmin', 'Deactivate user'), ['/'.AmosAdmin::getModuleName().'/user-profile/deactivate-account', 'id' => $model->id], [
                 'id' => 'deactivate-account-btn',
                 'class' => 'btn btn-danger',
                 'title' => AmosAdmin::t('amosadmin', 'Deactivate user'),
@@ -136,14 +136,19 @@ $this->registerJs($js, View::POS_READY);
             ]) ?>
         <?php endif; ?>
         <?php if ($model->isDeactivated() && (Yii::$app->user->can('ADMIN') || Yii::$app->user->can('AMMINISTRATORE_UTENTI'))): ?>
-            <?= Html::a(AmosAdmin::t('amosadmin', 'Reactivate this user'), ['/admin/user-profile/reactivate-account', 'id' => $model->id], [
+            <?= Html::a(AmosAdmin::t('amosadmin', 'Reactivate this user'), ['/'.AmosAdmin::getModuleName().'/user-profile/reactivate-account', 'id' => $model->id], [
                 'id' => 'reactivate-account-btn',
                 'class' => 'btn btn-navigation-primary',
                 'title' => AmosAdmin::t('amosadmin', 'Reactivate this user'),
 //                'data-confirm' => AmosAdmin::t('amosadmin', 'Do you really want to reactivate this user') . '?'
             ]) ?>
         <?php endif; ?>
-        <?= Html::a(AmosAdmin::t('amosadmin', '#delete_user'), ['/admin/user-profile/drop-account', 'id' => $model->id], [
+        <?php if(\Yii::$app->user->can('ADMIN')){
+            $urlDropAccount = ['/'.AmosAdmin::getModuleName().'/user-profile/drop-account', 'id' => $model->id];
+        } else {
+            $urlDropAccount = ['/'.AmosAdmin::getModuleName().'/user-profile/drop-account-by-email', 'id' => $model->id];
+        }?>
+        <?= Html::a(AmosAdmin::t('amosadmin', '#delete_user'), $urlDropAccount, [
             'id' => 'drop-account-btn',
             'class' => 'btn btn-danger',
             'title' => AmosAdmin::t('amosadmin', '#delete_user'),

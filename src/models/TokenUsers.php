@@ -5,6 +5,7 @@ namespace open20\amos\admin\models;
 use open20\amos\core\forms\editors\DateTime;
 use Yii;
 use yii\helpers\ArrayHelper;
+use open20\amos\admin\AmosAdmin;
 
 /**
  * This is the model class for table "token_users".
@@ -127,7 +128,19 @@ class TokenUsers extends \open20\amos\admin\models\base\TokenUsers
         $url = '';
         $backendUrl = \Yii::$app->params['platform']['backendUrl'];
         if(!empty($backendUrl)) {
-            $url = $backendUrl . '/admin/security/login?token=' . $this->token;
+            $url = $backendUrl . '/'.AmosAdmin::getModuleName().'/security/login?token=' . $this->token;
+        }
+        return $url;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFrontendTokenLink(){
+        $url = '';
+        $backendUrl = \Yii::$app->params['platform']['frontendUrl'];
+        if(!empty($backendUrl)) {
+            $url = $backendUrl . '/amosadmin/security/login?token=' . $this->token;
         }
         return $url;
     }

@@ -52,7 +52,7 @@ $confirmText = AmosAdmin::t('amosadmin', 'You have selected') . " " . $model->ge
 
 $isAssociateFacilitator = (Yii::$app->controller->action->id == 'associate-facilitator') || (Yii::$app->controller->action->id == 'send-request-external-facilitator');
 $urlConfirmBtn = Yii::$app->controller->action->id == 'send-request-external-facilitator'
-    ?  '/admin/user-profile/send-request-external-facilitator?idToAssign='.$model->id .'&id='.\Yii::$app->request->get('id')
+    ?  '/'.AmosAdmin::getModuleName().'/user-profile/send-request-external-facilitator?idToAssign='.$model->id .'&id='.\Yii::$app->request->get('id')
     : null;
 
 if ($isAssociateFacilitator) {
@@ -99,7 +99,7 @@ $modelFullViewUrl = $model->getFullViewUrl();
             <?= ContextMenuWidget::widget([
                 'model' => $model,
                 'mainDivClasses' => 'pull-right',
-                'actionModify' => '/admin/user-profile/update?id=' . $model->id,
+                'actionModify' => '/'.AmosAdmin::getModuleName().'/user-profile/update?id=' . $model->id,
                 'disableDelete' => true
             ]) ?>
         <?php endif; ?>

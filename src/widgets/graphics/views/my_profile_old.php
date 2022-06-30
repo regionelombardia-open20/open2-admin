@@ -33,7 +33,7 @@ use open20\amos\core\helpers\Html;
                         <span class="pull-left">
                             <?= Html::a(
                                 $widget->getUserProfileRoundImage(),
-                                ['/admin/user-profile/update', 'id' => $userProfile->id],
+                                ['/'.AmosAdmin::getModuleName().'/user-profile/update', 'id' => $userProfile->id],
                                 ['title' => AmosAdmin::t('amosadmin', '#go_to_your_profile'), 'class' => 'container-round-img-md ']
                             ) ?>
                         </span>

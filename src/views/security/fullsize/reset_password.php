@@ -39,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="col-xs-12">
                     <?= Html::beginTag('div', ['class' => 'form-group field-firstaccessform-password']) ?>
                     <?= Html::tag('span', $model->getAttributeLabel('username')) ?>
-                    <?= Html::tag('strong', $model->username) ?>
+                    <?= Html::tag('strong', Html::encode($model->username)) ?>
                     <?= Html::endTag('div') ?>
                 </div>
                 <div class="col-xs-12">
@@ -52,6 +52,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             'language' => 'it'
                         ],
                         'options' => [
+                            'autocomplete' => 'off',
                             'placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_reset_pwd_1')
                         ]
                     ])->label('');
@@ -59,7 +60,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?= AmosIcons::show('lucchetto', '', AmosIcons::IC) ?>
                 </div>
                 <div class="col-xs-12">
-                    <?= $form->field($model, 'ripetiPassword')->passwordInput(['placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_reset_pwd_2')])->label('') ?>
+                    <?= $form->field($model, 'ripetiPassword')->passwordInput(['autocomplete' => 'off', 'placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_reset_pwd_2')])->label('') ?>
                     <?= AmosIcons::show('lucchetto', '', AmosIcons::IC) ?>
                 </div>
                 <?php if (!empty($isFirstAccess) && $isFirstAccess) { ?>

@@ -62,7 +62,7 @@ JS;
                 <span id="manage-calendar">
                 <?= \open20\amos\core\helpers\Html::a(
                     AmosIcons::show('calendar', [], 'dash'),
-                    '/admin/user-profile/enable-google-service?id=' . $model->id . '&serviceName=calendar',
+                    '/'.AmosAdmin::getModuleName().'/user-profile/enable-google-service?id=' . $model->id . '&serviceName=calendar',
                     [
                         'id' => 'enable-calendar-btn',
                         'class' => 'btn btn-google-services' . ($isEnabledCalendar ? ' hidden' : ''),
@@ -71,7 +71,7 @@ JS;
                     ]) ?>
                 <?= \open20\amos\core\helpers\Html::a(
                     AmosIcons::show('calendar', [], 'dash') . '&nbsp;' . AmosAdmin::t('amosadmin', 'Disconnect'),
-                    '/admin/user-profile/disable-google-service?id=' . $model->id . '&serviceName=calendar',
+                    '/'.AmosAdmin::getModuleName().'/user-profile/disable-google-service?id=' . $model->id . '&serviceName=calendar',
                     [
                         'id' => 'disable-calendar-btn',
                         'class' => 'btn btn-google-services' . ($isEnabledCalendar ? ' btn-google-services-disconnect' : ' hidden'),
@@ -91,7 +91,7 @@ JS;
                     <span id="manage-contacts">
             <?= \open20\amos\core\helpers\Html::a(
                 AmosIcons::show('account'),
-                '/admin/user-profile/enable-google-service?id=' . $model->id . '&serviceName=contacts',
+                '/'.AmosAdmin::getModuleName().'/user-profile/enable-google-service?id=' . $model->id . '&serviceName=contacts',
                 [
                     'id' => 'enable-contacts-btn',
                     'class' => 'btn btn-google-services' . ($isEnabledContacts ? ' hidden' : ''),
@@ -100,7 +100,7 @@ JS;
                 ]) ?>
             <?= \open20\amos\core\helpers\Html::a(
                 AmosIcons::show('account') . '&nbsp;' . AmosAdmin::t('amosadmin', 'Disconnect'),
-                '/admin/user-profile/disable-google-service?id=' . $model->id . '&serviceName=contacts',
+                '/'.AmosAdmin::getModuleName().'/user-profile/disable-google-service?id=' . $model->id . '&serviceName=contacts',
                 [
                     'id' => 'disable-contacts-btn',
                     'class' => 'btn btn-google-services' . ($isEnabledContacts ? ' btn-google-services-disconnect' : ' hidden'),

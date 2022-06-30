@@ -31,7 +31,7 @@ $adminModule = Yii::$app->controller->module;
     'id' => 'removePrevalentPartnershipPopup',
     'modalDescriptionText' => AmosAdmin::t('amosadmin', '#remove_prevalent_partnerhip_confirm'),
     'confirmBtnLink' => Yii::$app->urlManager->createUrl([
-        '/admin/user-profile/remove-prevalent-partnership',
+        '/'.AmosAdmin::getModuleName().'/user-profile/remove-prevalent-partnership',
         'id' => $model->id
     ]),
     'confirmBtnOptions' => ['id' => 'confirm-remove-pp-btn', 'class' => 'btn btn-primary'],
@@ -45,7 +45,7 @@ $adminModule = Yii::$app->controller->module;
     'id' => 'selectPrevalentPartnershipPopup',
     'modalDescriptionText' => AmosAdmin::t('amosadmin', '#select_prevalent_partnerhip_confirm'),
     'confirmBtnLink' => Yii::$app->urlManager->createUrl([
-        '/admin/user-profile/associate-prevalent-partnership',
+        '/'.AmosAdmin::getModuleName().'/user-profile/associate-prevalent-partnership',
         'id' => $model->id,
         'viewM2MWidgetGenericSearch' => true
     ]),
@@ -102,12 +102,12 @@ $this->registerJs($js);
                 </div>
             </div>
             <div class="col-xs-12 nop text-right">
-                <?= Html::a(AmosAdmin::t('amosadmin', '#delete_prevalent_partnership'), ['/admin/user-profile/remove-prevalent-partnership', 'id' => $model->id], [
+                <?= Html::a(AmosAdmin::t('amosadmin', '#delete_prevalent_partnership'), ['/'.AmosAdmin::getModuleName().'/user-profile/remove-prevalent-partnership', 'id' => $model->id], [
                     'data-toggle' => 'modal',
                     'data-target' => '#removePrevalentPartnershipPopup',
                     'class' => 'text-danger m-r-15']) ?>
 
-                <?= Html::a(AmosAdmin::t('amosadmin', '#edit_prevalent_partnership'), ['/admin/user-profile/associate-prevalent-partnership', 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true], [
+                <?= Html::a(AmosAdmin::t('amosadmin', '#edit_prevalent_partnership'), ['/'.AmosAdmin::getModuleName().'/user-profile/associate-prevalent-partnership', 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true], [
                     'data-toggle' => 'modal',
                     'data-target' => '#selectPrevalentPartnershipPopup',
                     'class' => 'm-r-15']) ?>
@@ -122,7 +122,7 @@ $this->registerJs($js);
                         'closeButton' => false
                     ]); ?>
                 <?php else: ?>
-                    <div><?= Html::a(AmosAdmin::t('amosadmin', 'Select prevalent partnership'), ['/admin/user-profile/associate-prevalent-partnership', 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true], [
+                    <div><?= Html::a(AmosAdmin::t('amosadmin', 'Select prevalent partnership'), ['/'.AmosAdmin::getModuleName().'/user-profile/associate-prevalent-partnership', 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true], [
                             'data-toggle' => 'modal',
                             'data-target' => '#selectPrevalentPartnershipPopup',
                             'class' => 'text-danger m-r-15']) ?>

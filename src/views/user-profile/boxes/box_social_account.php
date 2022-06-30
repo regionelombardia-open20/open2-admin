@@ -24,7 +24,7 @@ use open20\amos\socialauth\models\SocialAuthUsers;
 
 /** @var AmosAdmin $adminModule */
 $adminModule = Yii::$app->controller->module;
-
+$adminModuleName = AmosAdmin::getModuleName();
 /**
  * @var $socialAuthModule \open20\amos\socialauth\Module
  */
@@ -37,7 +37,7 @@ function isLinkedSocial(userProfileId, provider){
     var unlinkBtn = $('#unlink-'+provider);
     var boxServices = $('#'+provider+'-services');
 
-    jQuery.getJSON( "/admin/user-profile/get-social-user", {id: "$model->id", provider: provider}, function( data ) {
+    jQuery.getJSON( "/$adminModuleName/user-profile/get-social-user", {id: "$model->id", provider: provider}, function( data ) {
 
         if(data <= 0 ){
             if(boxServices.length && !boxServices.hasClass('hidden')){
@@ -85,7 +85,7 @@ function isEnabledService(userProfileId, provider, serviceName){
     var serviceBtn = $('#enable-'+serviceName+'-btn');
     var disableServiceBtn = $('#disable-'+serviceName+'-btn');
   
-    jQuery.getJSON( "/admin/user-profile/get-social-service-status", {id: "$model->id", provider: provider, serviceName: serviceName}, function( data ) {
+    jQuery.getJSON( "/$adminModuleName/user-profile/get-social-service-status", {id: "$model->id", provider: provider, serviceName: serviceName}, function( data ) {
 
         if(data.enabled < 0 ){
             serviceBtn.attr('href', null);
@@ -127,45 +127,6 @@ function isEnabledService(userProfileId, provider, serviceName){
 JS;
 
 ?>
-<?php
-$moduleName = AmosAdmin::getModuleName();
-if ($socialAuthModule->enableSpid) {
-    ?>
-    <section class="social-admin-section col-xs-12 nop">
-        <h2 class="spid-title">
-            <?= AmosAdmin::t('amosadmin', '#fullsize_spid') ?>
-        </h2>
-        <?php
-        $connected = false;
-        $label = AmosAdmin::t('amosadmin', $socialAuthModule->shibbolethConfig['buttonLabel']);
-        $url = \Yii::$app->params['platform']['frontendUrl']."/$moduleName/user-profile/connect-spid?id=". $model->id;
-        $idm = \open20\amos\socialauth\models\SocialIdmUser::find()->andWhere(['user_id' => $model->user_id])->one();
-
-        if ($idm) {
-            $label = AmosAdmin::t('amosadmin', 'Disconnetti la tua identità digitale');
-            $connected = true;
-            $url = Yii::$app->urlManager->createAbsoluteUrl(['/socialauth/shibboleth/remove-spid', 'urlRedirect' => "/$moduleName/user-profile/update?id=" . $model->id . '#tab-settings']);
-
-        }
-        ?>
-
-        <?php if ($idm) { ?>
-            <p><?= AmosAdmin::t('amosadmin', 'Hai già associato la tua identità digitale') ?></p>
-        <?php } else { ?>
-            <div class="wrap-btn-social spid-container nop">
-                <?= Html::a(
-                    $label,
-                    $url,
-                    [
-                        'id' => 'link-spid',
-                        'class' => 'btn btn-spid',
-                        'title' => $label,
-                    ]) ?>
-            </div>
-        <?php } ?>
-    </section>
-<?php } ?>
-
 <?php if (!is_null($socialAuthModule) && $socialAuthModule->enableLink) {
 
     $this->registerJs($js);
@@ -217,9 +178,34 @@ JS
                         ]) ?>
                 <?php endif; ?>
             <?php } ?>
+
+            <?php
+            if($socialAuthModule->enableSpid){
+                $connected = false;
+                $label = 'SPID';
+                $url = Yii::$app->urlManager->createAbsoluteUrl(['/admin/user-profile/connect-spid', 'id' => $model->id]);
+                $idm = \open20\amos\socialauth\models\SocialIdmUser::find()->andWhere(['user_id' => $model->user_id])->one();
+                if($idm){
+                    $label = 'Disconnect '.$label;
+                    $connected = true;
+                    $url = Yii::$app->urlManager->createAbsoluteUrl(['/socialauth/shibboleth/remove-spid', 'urlRedirect' => '/admin/user-profile/update?id='.$model->id.'#tab-settings']);
+
+                }
+            ?>
+            <?= Html::a(
+                $label,
+                 $url,
+                [
+                    'id' => 'link-spid' ,
+                    'class' => 'btn  btn-spid btn-spid-square',
+                    'title' => AmosAdmin::t('amosadmin', 'Connect with your account'),
+                ]) ?>
+            <?php } ?>
         </div>
 
     </section>
+
+
 
     <?php if ($socialAuthModule->providers && !empty($socialAuthModule->enableServices)) {
         $this->registerJs($jsServices);

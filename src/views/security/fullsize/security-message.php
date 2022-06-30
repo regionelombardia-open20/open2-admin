@@ -55,7 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="col-xs-12 action">
                     <?php if (!isset($hideGoBackBtn) || !$hideGoBackBtn): ?>
                         <?php if (!isset($go_to_login_url)) { ?>
-                            <?= Html::a(AmosAdmin::t('amosadmin', '#go_to_login'), ['/admin/security/login'], ['class' => 'btn btn-secondary', 'title' => AmosAdmin::t('amosadmin', '#go_to_login'), 'target' => '_self']) ?>
+                            <?= Html::a(AmosAdmin::t('amosadmin', '#go_to_login'), ['/'.AmosAdmin::getModuleName().'/security/login'], ['class' => 'btn btn-secondary', 'title' => AmosAdmin::t('amosadmin', '#go_to_login'), 'target' => '_self']) ?>
                         <?php } else { ?>
                             <?= Html::a(AmosAdmin::t('amosadmin', '#go_to_login'), [$go_to_login_url], ['class' => 'btn btn-secondary', 'title' => AmosAdmin::t('amosadmin', '#go_to_login'), 'target' => '_self']) ?>
                         <?php } ?>

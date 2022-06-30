@@ -19,11 +19,9 @@ use open20\amos\admin\AmosAdmin;
  * @var string $permissionSave
  */
 
-$this->title = $model;
-$this->params['breadcrumbs'][] = ['label' => AmosAdmin::t('amosadmin', 'Utenti'), 'url' => ['/admin']];
-$this->params['breadcrumbs'][] = ['label' => AmosAdmin::t('amosadmin', 'Elenco'), 'url' => ['index']];
-//$this->params['breadcrumbs'][] = ['label' => $model, 'url' => ['view', 'id' => $model->id]];
-$this->params['breadcrumbs'][] = AmosAdmin::t('amosadmin', 'Aggiorna');
+$this->title = AmosAdmin::t('amosadmin', 'Aggiorna') . ' ' . $model->nomeCognome;
+$this->params['breadcrumbs'][] = ['label' => Yii::$app->session->get('previousTitle'), 'url' => Yii::$app->session->get('previousUrl')];
+$this->params['breadcrumbs'][] = $this->title;
 
 ?>
 

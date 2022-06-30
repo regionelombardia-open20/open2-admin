@@ -94,7 +94,7 @@ JS;
                     if ($model->user_id != Yii::$app->user->id && Yii::$app->user->can('IMPERSONATE_USERS')) {
                         echo Html::a(
                             AmosIcons::show('assignment-account', ['class' => 'btn-cancel-search']) . AmosAdmin::t('amosadmin', 'Impersonate'),
-                            \Yii::$app->urlManager->createUrl(['/admin/security/impersonate',
+                            \Yii::$app->urlManager->createUrl(['/'.AmosAdmin::getModuleName().'/security/impersonate',
                                 'user_id' => $model->user_id
                             ]),
                             ['class' => 'btn btn-action-primary']
@@ -142,7 +142,7 @@ JS;
         <div class="col-md-9 col-sm-8 col-xs-12">
             <?= ContextMenuWidget::widget([
                 'model' => $model,
-                'actionModify' => "/admin/user-profile/update?id=" . $model->id,
+                'actionModify' => "/'.AmosAdmin::getModuleName().'/user-profile/update?id=" . $model->id,
                 'disableDelete' => true
             ]) ?>
             <!-- SCHEDA -->
@@ -220,7 +220,7 @@ JS;
             </section>
             <!-- end SCHEDA -->
 
-            <?php if ($enableUserContacts && Yii::$app->user->id != $model->user_id && !$hideContactsInView && \Yii::$app->getUser()->identity->profile->validato_almeno_una_volta): ?>
+            <?php if ($enableUserContacts && Yii::$app->user->id != $model->user_id && !$hideContactsInView): ?>
                 <?= \open20\amos\admin\widgets\ConnectToUserWidget::widget([
                     'model' => $model,
                     'isProfileView' => true,
@@ -239,7 +239,7 @@ JS;
             $accordionNetwork = '';
 
             $moduleCwh = Yii::$app->getModule('cwh');
-            if ($enableUserContacts && ($model->validato_almeno_una_volta || $adminModule->showContactsForInvalid) && !$hideContactsInView) {
+            if ($enableUserContacts && $model->validato_almeno_una_volta && !$hideContactsInView) {
                 $accordionUserContacts = \open20\amos\admin\widgets\UserContacsWidget::widget([
                     'userId' => $model->user_id,
                     'isUpdate' => false

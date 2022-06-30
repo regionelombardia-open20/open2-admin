@@ -36,11 +36,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => ['class' => 'form-horizontal', 'autocomplete' => 'off'],
         ]) ?>
         <div class="col-sm-5 col-xs-12">
-            <?= $form->field($model, 'vecchiaPassword')->passwordInput() ?>
+            <?= $form->field($model, 'vecchiaPassword')->passwordInput(['autocomplete' => 'off']) ?>
         </div>
         <div class="clearfix"></div>
         <div class="col-sm-5 pull-left col-xs-12">
-            <?= $form->field($model, 'nuovaPassword')->passwordInput();
+            <?= $form->field($model, 'nuovaPassword')->passwordInput(['autocomplete' => 'off']);
     //            $form->field($model, 'nuovaPassword')->widget(PasswordInput::classname(), [
     //            'language' => 'it',
     //            'pluginOptions' => [
@@ -60,7 +60,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ?>
         </div>
         <div class="col-sm-5 pull-right col-xs-12">
-            <?= $form->field($model, 'ripetiPassword')->passwordInput() ?>
+            <?= $form->field($model, 'ripetiPassword')->passwordInput(['autocomplete' => 'off']) ?>
         </div>
 
         <div class="clearfix"></div>

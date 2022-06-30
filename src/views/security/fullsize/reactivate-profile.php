@@ -58,9 +58,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="col-xs-12 action">
                     <?= Html::submitButton(AmosAdmin::t('amosadmin', '#reactivate_profile_send'), ['class' => 'btn btn-secondary', 'title' => AmosAdmin::t('amosadmin', '#reactivate_profile_send_title')]) ?>
                     <?php if (\Yii::$app->request->get() && array_key_exists("userdisabled", \Yii::$app->request->get())) { ?>
-                        <?= Html::a(AmosAdmin::t('amosadmin', '#go_to_login'), ['/admin/security/login'], ['class' => 'btn btn-navigation-primary', 'title' => AmosAdmin::t('amosadmin', '#go_to_login_title')]) ?>
+                        <?= Html::a(AmosAdmin::t('amosadmin', '#go_to_login'), ['/'.AmosAdmin::getModuleName().'/security/login'], ['class' => 'btn btn-navigation-primary', 'title' => AmosAdmin::t('amosadmin', '#go_to_login_title')]) ?>
                     <?php } else { ?>
-                        <?= Html::a(AmosAdmin::t('amosadmin', '#go_to_register'), ['/admin/security/register'], ['class' => 'btn btn-navigation-primary', 'title' => AmosAdmin::t('amosadmin', '#go_to_register_title')]) ?>
+                        <?= Html::a(AmosAdmin::t('amosadmin', '#go_to_register'), ['/'.AmosAdmin::getModuleName().'/security/register'], ['class' => 'btn btn-navigation-primary', 'title' => AmosAdmin::t('amosadmin', '#go_to_register_title')]) ?>
                     <?php } ?>
                 </div>
             </div>

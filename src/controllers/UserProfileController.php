@@ -18,7 +18,6 @@ use open20\amos\admin\models\CambiaPasswordForm;
 use open20\amos\admin\models\DropAccountForm;
 use open20\amos\admin\models\search\UserProfileAreaSearch;
 use open20\amos\admin\models\search\UserProfileRoleSearch;
-use open20\amos\admin\models\UserContact;
 use open20\amos\admin\models\UserProfile;
 use open20\amos\admin\models\UserProfileReactivationRequest;
 use open20\amos\admin\utility\UserProfileMailUtility;
@@ -48,9 +47,6 @@ use yii\helpers\Url;
 use yii\log\Logger;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
-use open20\amos\cwh\query\CwhActiveQuery;
-use open20\amos\tag\AmosTag;
-use open20\amos\tag\models\Tag;
 
 /**
  * Class UserProfileController
@@ -115,8 +111,8 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
                                 'complete-profile',
                                 'send-request-external-facilitator',
                                 'connect-spid',
-                                'find-name',
-                                'find-name-user-by-cwh'
+                                'drop-account-by-email',
+                                'drop-account'
                             ],
                             'roles' => ['BASIC_USER']
                         ],
@@ -142,7 +138,7 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
                                 'associate-prevalent-partnership',
                                 'update-profile',
                                 'remove-prevalent-partnership',
-                                'drop-account',
+                                'drop-account'
                             ],
                             'roles' => ['UpdateOwnUserProfile']
                         ],
@@ -168,6 +164,7 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
                                 'contacts',
                                 'password-expired',
                                 'cambia-password',
+                                'drop-account-by-email'
                             ],
                             'roles' => ['ADMIN', 'AMMINISTRATORE_UTENTI']
                         ],
@@ -274,6 +271,55 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
                 ArrayHelper::map(UserProfileAreaSearch::searchAll(), 'id', 'name'), 'amosadmin', AmosAdmin::className()
         );
     }
+
+
+
+    public function beforeAction($action)
+    {
+        if (\Yii::$app->user->isGuest) {
+            $titleSection = AmosAdmin::t('amosadmin', 'Utenti');
+            $urlLinkAll   = '/amosadmin/user-profile/validated-users';
+
+            
+        } else {
+            $titleSection = AmosAdmin::t('amosadmin', 'Utenti');
+           
+        }
+
+        $labelCreate = AmosAdmin::t('amosadmin', 'Nuovo');
+        $titleCreate = AmosAdmin::t('amosadmin', 'Add new user');
+        $labelManage = AmosAdmin::t('amosadmin', 'Gestisci');
+        $titleManage = AmosAdmin::t('amosadmin', 'Gestisci gli utenti');
+        $urlCreate   = '/amosadmin/user-profile/create';
+        $urlManage   =  AmosAdmin::t('amosadmin', '#');
+
+        $this->view->params = [
+            'isGuest' => \Yii::$app->user->isGuest,
+            'modelLabel' => 'utenti',
+            'titleSection' => $titleSection,
+            'subTitleSection' => $subTitleSection,
+            'urlLinkAll' => $urlLinkAll,
+            'labelLinkAll' => $labelLinkAll,
+            'titleLinkAll' => $titleLinkAll,
+            'labelCreate' => $labelCreate,
+            'titleCreate' => $titleCreate,
+            'labelManage' => $labelManage,
+            'titleManage' => $titleManage,
+            'urlCreate' => $urlCreate,
+            'urlManage' => $urlManage,
+        ];
+
+        if (!parent::beforeAction($action)) {
+            return false;
+        }
+
+        // other custom code here
+
+        return true;
+    }
+
+
+
 
     /**
      * @param int $id The user id
@@ -917,7 +963,7 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
             Yii::$app->getSession()->addFlash('success',
                 AmosAdmin::t('amosadmin', 'User profile deactivated successfully.'));
             if ($isLoggedUser) {
-                return $this->redirect(['/admin/security/logout']);
+                return $this->redirect(['/'.AmosAdmin::getModuleName().'/security/logout']);
             }
         } else {
             Yii::$app->getSession()->addFlash('danger',
@@ -1051,13 +1097,67 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
     }
 
     /**
-     * This is a GDPR required function to allow user drop theri own account and all his data
-     * @param int $id UserProfile
-     * @return string|\yii\web\Response
+     * @param $id
+     * @return string
      * @throws NotFoundHttpException
      */
-    public function actionDropAccount($id)
+    public function actionDropAccountByEmail($id){
+        $this->setUpLayout('main');
+        $this->model = $this->findModel($id);
+
+        //Avoid admin self-dropping
+        if (\Yii::$app->user->can('ADMIN') && $id == \Yii::$app->user->id) {
+            throw new \Exception('Hey! Can\'t Drop ADMIN User');
+        }
+        if (!\Yii::$app->user->can('ADMIN') && $this->model->user_id != Yii::$app->user->id) {
+            throw new \Exception('Not allowed to drop other users');
+        }
+
+
+        if(\Yii::$app->request->isPost){
+            $ok = UserProfileMailUtility::sendEmailDropAccountRequest($this->model);
+            if($ok){
+                \Yii::$app->session->addFlash('success', AmosAdmin::t('amosadmin', "Ti abbiamo inviato una email per completare la cancellazione dalla piattaforma, hai a disposizione 24 ore per completare l'operazione"));
+
+            }
+            return $this->redirect(['update', 'id' => $id]);
+        }
+        return $this->render('drop-account-by-email', ['model' => $this->model]);
+    }
+
+
+    /**
+     * @param null $id
+     * @param null $token
+     * @return string|\yii\web\Response
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function actionDropAccount($id = null, $token = null)
     {
+
+        $authorized = false;
+        $confirm = \Yii::$app->request->post('confirm');
+
+
+        //check if the token is valid
+        if(!empty($token)){
+            $id = UserProfile::checkDeleteToken($token);
+            if(!empty($id)){
+                $authorized = true;
+                if(!$confirm){
+                    $model = $this->findModel($id);
+                    $this->setUpLayout('main');
+                    return $this->render('confirm-drop-account-by-email',['model' => $model]);
+                }
+
+            }
+        }
+
+        if(empty($id)){
+            throw new ForbiddenHttpException(AmosAdmin::t('amosadmin', "Access denied"));
+        }
         //Avoid admin self-dropping
         if (\Yii::$app->user->can('ADMIN') && $id == \Yii::$app->user->id) {
             throw new \Exception('Hey! Can\'t Drop ADMIN User');
@@ -1068,8 +1168,8 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
         $user  = $this->findModel($id);
         $model = new DropAccountForm();
 
-        if (Yii::$app->request->isPost) {
-            if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+        if ($authorized || Yii::$app->request->isPost) {
+            if (($authorized && $confirm)|| ($model->load(Yii::$app->request->post()) && $model->validate())) {
                 //New drop instance
                 $dropController = new UserDropController('user_drop', $this->module);
 
@@ -1079,11 +1179,11 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
                 if (!empty($moduleAdmin) && $moduleAdmin->sendUserAssignmentsReportOnDelete) {
                     // Security Policy copied from dropEverything() function below, so the email won't be sent
                     // if the function will throw an exception.
-                    if (!\Yii::$app->user->can('ADMIN') && $user->user_id != Yii::$app->user->id) {
-                        throw new \Exception('Not allowed to drop other users');
-                    }
-
                     $this->sendUserAssignmentsReport($user->user_id, \Yii::$app->user->id);
+                }
+
+                if (!\Yii::$app->user->can('ADMIN') && $user->user_id != Yii::$app->user->id) {
+                    throw new \Exception('Not allowed to drop other users');
                 }
 
                 //Irreversible action of user drop
@@ -1109,6 +1209,10 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
         }
     }
 
+    /**
+     * @param $userId
+     * @param $userRequestId
+     */
     private function sendUserAssignmentsReport($userId, $userRequestId)
     {
         $userAssignments = $this->listUserAssignments($userId);
@@ -1414,7 +1518,7 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
                 } else {
                     $action = 'enable';
                 }
-                $service['url'] = '/admin/user-profile/'.$action.'-'.$provider.'-service?id='.$this->model->id.'&serviceName='.$serviceName;
+                $service['url'] = '/'.AmosAdmin::getModuleName().'/user-profile/'.$action.'-'.$provider.'-service?id='.$this->model->id.'&serviceName='.$serviceName;
             }
         }
         return json_encode($service);
@@ -1573,184 +1677,15 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
     }
 
 
-    // // /**
-    // //  * Method to get UserProfile name and surname
-    // //  *
-    // //  * @param string $name
-    // //  * @return json | UserProfile | name and surname
-    // //  */ 
-    // // public function actionFindName($name = "") {
-
-    // //     $className = \Yii::$app->request->get('className');
-	// //     $model_id = \Yii::$app->request->get('model_id');
-
-    // //     // get cwh scope
-    // //     $scope = \open20\amos\cwh\AmosCwh::getInstance()->getCwhScope();
-    // //     // get tags
-	// //     $tags = $this->getTags($className, $model_id);
-
-    // //     $model = $className::find($model->id)->one();
-    // //     $cwh_active_query = new CwhActiveQuery($className);
-    // //     $cwh_active_query->modelObject = $model;
-
-    // //     // get all Users filtered by cwh
-    // //     $query_users = $cwh_active_query::getRecipients(RULE_NETWORK_TAG, $tags, $scope)->all();
-    // // 	$tmp =[];
-    // //     foreach ($query_users as $key => $user) {
-    // // 		$tmp[] = $user->id;
-    // //     }
-
-    // //     $users = UserProfile::find();
-    // //     $users->asArray();
-    // //     $users->limit(5);
-    // //     $users->select(new \yii\db\Expression('user_id, CONCAT(nome," ",cognome) as name, CONCAT("/'.AmosAdmin::getModuleName().'/user-profile/view?id=",id) as url, user_id as user_id'));
-        
-    // //     $users->andHaving(new \yii\db\Expression("name LIKE \"%{$name}%\""));
-	// //     $users->andWhere(['user_id' => $tmp]);
-
-    // //     return json_encode($users->all());
-    // // }
-
-    /**
-     * Method to get query tags for specific model namespace and id model
-     *
-     * @param string $className
-     * @param int $record_id
-     * @return query | Tags | $query
-     */
-    protected function getTags($className, $record_id){
-        
-        $tagsMm = \open20\amos\tag\models\EntitysTagsMm::find()
-                    ->joinWith('tag')
-                    ->andWhere([
-                        'classname' => $className,
-                        'record_id' => $record_id,
-                    ])
-                    ->orderBy([
-                        'tag.nome' => SORT_DESC
-                    ])->all();
-    
-        $tagListId = [];
-        foreach ($tagsMm as $elem) {
-            $tagListId [] = $elem->tag_id;
-        }
-
-        $query = Tag::find()->andWhere(['id' => $tagListId]);
-
-        return $query;
-    }
-
-
-    /**
-     * Method to get UserProfile name and surname
-     *
-     * @param string $name
-     * @return json | UserProfile | name and surname
-     */
-    public function actionFindNameUserByCwh($name = ""){
-
-        $className = \Yii::$app->request->get('className');
-        $model_id = \Yii::$app->request->get('model_id');
-
-        if( (null != $className) || (!empty($className)) ){
-            $model = $className::find($model->id)->one();
-        }
-
-        // get cwh scope
-        $scope = \open20\amos\cwh\AmosCwh::getInstance()->getCwhScope();
-        // get tags
-        $tags = $this->getTags($className, $model_id);
-
-
-        // check if exist scope 
-        if( ((null != $scope) || (!empty($scope))) && ((null != $className) || (!empty($className))) ){
-
-            foreach ($scope as $key => $value) {
-
-                if( strcmp($key, "community") == 0 ){
-
-                    // extract community of scope 
-                    $community = Community::find()->andWhere(['id' => $value])->one();
-
-
-                    // check if community type not is 1 (Open)
-                    if( (null != $community) && ($community->community_type_id != 1) ){
-
-                        // extract only user for specific scope from cwh
-                        $cwh_active_query = new CwhActiveQuery($className);
-                        $cwh_active_query->modelObject = $model;
-
-                        // get all Users filtered by cwh
-                        $cwh_users = $cwh_active_query::getRecipients(RULE_NETWORK, $tags, $scope)->all();
-
-                        if( $this->adminModule->enableUserContacts == true && $this->adminModule->enableTagOnlyNetwork == true ) {
-                            $cwh_users = \open20\amos\community\models\CommunityUserMm::find()->select('user_id')->distinct()->andWhere(['community_id' => $community->id])->all();
-                        }
-                        $cwh_user_id = [];
-                        foreach ($cwh_users as $key => $user) {
-                            $cwh_user_id[] = $user->user_id;
-                        }
-                    }
-                }
-            }
-        }
-
-
-
-        /** @var UserProfile $userProfileModel */
-        $userProfileModel = $this->adminModule->createModel('UserProfile');
-
-        /** @var ActiveQuery $users */
-        $users = $userProfileModel::find();
-        $users->asArray();
-        $users->limit(5);
-        $users->select(new \yii\db\Expression('distinct(user_profile.user_id), CONCAT(nome," ",cognome) as name, CONCAT("/'.AmosAdmin::getModuleName().'/user-profile/view?id=",user_profile.id) as url, user_profile.user_id as user_id'));
-
-        $users->andHaving(new \yii\db\Expression("name LIKE \"%{$name}%\""));
-        if( $this->adminModule->enableUserContacts == true && $this->adminModule->enableTagOnlyNetwork == true ){
-            //Persone della mia rete
-            $users->innerJoin('user', 'user.id = user_profile.user_id');
-            $users->innerJoin('user_contact', 'user.id = user_contact.contact_id or user.id = user_contact.user_id ');
-            $users->andWhere('user_contact.deleted_at IS NULL');
-            $users->andWhere(['OR',
-                ['user_contact.user_id'=> Yii::$app->user->id],
-                ['user_contact.contact_id'=> Yii::$app->user->id]
-            ]);
-            $users->andWhere(['user_contact.status' => UserContact::STATUS_ACCEPTED]);
-            $users->andWhere(['attivo' => 1]);
-        }
-
-        if(array_key_exists( 'notify_tagging_user_in_content',$userProfileModel->attributes)){
-            $users->andWhere(['notify_tagging_user_in_content' => true]);
-        }
-
-
-        // $users->andWhere(['!=','id' , Yii::$app->user->id]);
-
-        // check if not exist a cwh user id for filter
-        if( isset($cwh_user_id) && (!empty($cwh_user_id)) ){
-            $users->andWhere(['user_profile.user_id' => $cwh_user_id]);
-        }
-
-        // clausole to remove all user profile deleted (for privacy)
-        $users->andWhere(['not like', 'nome', UserProfileUtility::DELETED_ACCOUNT_NAME]);
-
-        return json_encode($users->all());
-    }
-
     /**
      * @param $id
      * @param null $redirectUrl
      * @return \yii\web\Response
      */
-    public function actionConnectSpid($id, $redirectUrl = null)
-    {
-        $moduleName = AmosAdmin::getModuleName();
-        if (empty($redirectUrl)) {
-            $redirectUrl = \Yii::$app->params['platform']['frontendUrl'] . "/$moduleName/user-profile/update?id=" . $id . '#tab-settings';
-        }
+    public function actionConnectSpid($id, $redirectUrl = null){
         \Yii::$app->session->set('connectSpidToProfile', 1);
-        \Yii::$app->session->set('redirect_url_spid', $redirectUrl);
-        return $this->redirect(['/socialauth/shibboleth/endpoint', 'confirm' => true]);
+        \Yii::$app->session->set('redirect_url_spid', \Yii::$app->params['platform']['backendUrl'].'/admin/user-profile/update?id='.$id.'#tab-settings');
+       return $this->redirect( ['/socialauth/shibboleth/endpoint','confirm' => true]);
+
     }
 }

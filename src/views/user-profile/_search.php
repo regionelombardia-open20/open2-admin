@@ -157,11 +157,12 @@ $enableAutoOpenSearchPanel = !isset(\Yii::$app->params['enableAutoOpenSearchPane
 
     <div class="col-xs-12">
         <div class="pull-right">
-            <?= Html::a(
+            <!-- < ?= Html::a(
                 AmosAdmin::t('amosadmin', 'Reset'),
                 [Yii::$app->controller->action->id, 'currentView' => Yii::$app->request->getQueryParam('currentView')],
                 ['class' => 'btn btn-secondary'])
-            ?>
+            ?> -->
+            <?= Html::a(AmosAdmin::t('amosadmin', 'Reset'), [''], ['class' => 'btn btn-outline-primary']) ?>
             <?= Html::submitButton(AmosAdmin::t('amosadmin', 'Search'), ['class' => 'btn btn-navigation-primary']) ?>
         </div>
     </div>

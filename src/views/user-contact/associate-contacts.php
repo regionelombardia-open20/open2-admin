@@ -59,7 +59,7 @@ if (isset($post['genericSearch'])) {
         'query' => $query,
     ],
     'targetFooterButtons' => Html::a(AmosAdmin::t('amosadmin', 'Close'), Yii::$app->urlManager->createUrl([
-        '/admin/user-contact/annulla-m2m',
+        '/'.AmosAdmin::getModuleName().'/user-contact/annulla-m2m',
         'id' => $userProfileId
     ]), ['class' => 'btn btn-secondary', 'AmosAdmin' => Yii::t('amosadmin', 'Close')]),
     'renderTargetCheckbox' => false,
@@ -95,7 +95,7 @@ if (isset($post['genericSearch'])) {
             'label' => AmosAdmin::t('amosadmin', 'Name'),
             'value' => function($model){
                 /** @var UserProfile $model */
-                return Html::a($model->surnameName, ['/admin/user-profile/view', 'id' => $model->id ], [
+                return Html::a($model->surnameName, ['/'.AmosAdmin::getModuleName().'/user-profile/view', 'id' => $model->id ], [
                     'title' => AmosAdmin::t('amosnews', 'Apri il profilo di {nome_profilo}', ['nome_profilo' => $model->surnameName])
                 ]);
             },
@@ -110,10 +110,8 @@ if (isset($post['genericSearch'])) {
                     return \open20\amos\admin\widgets\GoogleContactWidget::widget(['model' => $model]).'&nbsp;';
                 },
                 'connect' =>  function ($url, $model) {
-                    if (\Yii::$app->getUser()->identity->profile->validato_almeno_una_volta)
-                        /** @var UserProfile $model */
-                        return \open20\amos\admin\widgets\ConnectToUserWidget::widget([ 'model' => $model, 'isGridView' => true ]);
-                    return '';
+                    /** @var UserProfile $model */
+                    return \open20\amos\admin\widgets\ConnectToUserWidget::widget([ 'model' => $model, 'isGridView' => true ]);
                 }
             ]
         ]

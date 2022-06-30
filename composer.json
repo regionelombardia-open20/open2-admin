@@ -21,10 +21,10 @@
     "require": {
         "php": ">=5.4.0",
         "open20/amos-comuni": "*",
-        "open20/amos-core": "^1.16.0",
+        "open20/amos-core": "^1.18.0",
         "open20/amos-attachments": "^1.1.11",
         "open20/amos-notify": "^1.4.17",
-        "open20/amos-social-auth": "^1.1.7",
+        "open20/amos-social-auth": "^1.4.0",
         "open20/amos-privileges": "^1.0.0",
         "softcommerce/yii2-knob": "*",
         "raoul2000/yii2-workflow": "*",

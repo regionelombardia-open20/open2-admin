@@ -19,6 +19,7 @@ use open20\amos\core\record\Record;
 use open20\amos\core\user\User;
 use open20\amos\core\utilities\Email;
 use Yii;
+use yii\console\Application;
 use yii\db\ActiveRecord;
 use yii\web\Controller;
 
@@ -47,7 +48,7 @@ class UserDropController extends Controller
      */
     public function softDropEverything($userID){
         //Security Policy
-        if(!\Yii::$app->user->can('ADMIN') && $userID != Yii::$app->user->id) {
+        if(!\Yii::$app instanceof Application && !\Yii::$app->user->can('ADMIN') && $userID != Yii::$app->user->id) {
             throw new \Exception('Not allowed to drop other users');
         }
 

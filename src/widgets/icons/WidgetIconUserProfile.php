@@ -52,7 +52,7 @@ class WidgetIconUserProfile extends WidgetIcon
             $this->setIcon('users');
         }
 
-        $this->setUrl(['/admin/user-profile/index']);
+        $this->setUrl(['/'. AmosAdmin::getModuleName(). '/user-profile/index']);
         $this->setCode('ALL_USERS');
         $this->setModuleName(AmosAdmin::getModuleName());
         $this->setNamespace(__CLASS__);

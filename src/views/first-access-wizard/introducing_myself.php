@@ -158,12 +158,12 @@ $this->registerJs($js);
                         <div class="col-xs-9 m-t-10">
                             <p><strong><?= $facilitatorUserProfile->getNomeCognome() ?></strong></p>
                             <div><?= AmosAdmin::t('amosadmin', 'Prevalent partnership') . ': ' . (!is_null($facilitatorUserProfile->prevalentPartnership) ? $facilitatorUserProfile->prevalentPartnership->name : '-') ?></div>
-                            <?= Html::a(AmosAdmin::t('amosadmin', 'Change facilitator'), ['/admin/first-access-wizard/associate-facilitator', 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true], ['id' => 'change-facilitator-button']) ?>
+                            <?= Html::a(AmosAdmin::t('amosadmin', 'Change facilitator'), ['/'.AmosAdmin::getModuleName().'/first-access-wizard/associate-facilitator', 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true], ['id' => 'change-facilitator-button']) ?>
                         </div>
                     <?php else: ?>
                         <div class="col-xs-9 m-t-10">
                             <div><?= AmosAdmin::tHtml('amosadmin', 'Facilitator not selected') ?></div>
-                            <?= Html::a(AmosAdmin::t('amosadmin', 'Change facilitator'), ['/admin/first-access-wizard/associate-facilitator', 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true], ['id' => 'insert-facilitator-button']) ?>
+                            <?= Html::a(AmosAdmin::t('amosadmin', 'Change facilitator'), ['/'.AmosAdmin::getModuleName().'/first-access-wizard/associate-facilitator', 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true], ['id' => 'insert-facilitator-button']) ?>
                         </div>
                     <?php endif; ?>
                     <div class="clearfix"></div>
@@ -184,7 +184,7 @@ $this->registerJs($js);
 
     <?= WizardPrevAndContinueButtonWidget::widget([
         'model' => $model,
-        'previousUrl' => Yii::$app->getUrlManager()->createUrl(['/admin/first-access-wizard/introduction'])
+        'previousUrl' => Yii::$app->getUrlManager()->createUrl(['/'.AmosAdmin::getModuleName().'/first-access-wizard/introduction'])
     ]) ?>
     <?php ActiveForm::end(); ?>
 </div>

@@ -87,6 +87,7 @@ use yii\helpers\ArrayHelper;
  * @property integer $user_profile_age_group_id
  * @property integer $prevalent_partnership_id
  * @property integer $user_id
+ * @property integer $delete_token
  * @property integer $notify_from_editorial_staff
  * @property string $created_at
  * @property string $updated_at
@@ -256,6 +257,7 @@ class UserProfile extends NotifyAuditRecord
                 'notify_from_editorial_staff',
                 'first_access_mail_url',
                 'enable_facilitator_box',
+                'delete_token',
             ], 'safe'],
             [[
                 'nome',
@@ -309,8 +311,8 @@ class UserProfile extends NotifyAuditRecord
         if (!$this->adminModule->enableMultiUsersSameCF) {
             $rules[] = ['codice_fiscale', 'unique', 'filter' => ['deleted_at' => null]];
         }
-        if ((Yii::$app instanceof \yii\console\Application) || (!\Yii::$app->user->can('FACILITATOR') && !Yii::$app->user->can('VALIDATOR') && !Yii::$app->user->can('ADMIN'))) {
-            $rules[] = [['presentazione_personale'], 'string', 'max' => 600];
+        if(!\Yii::$app->user->can('FACILITATOR')&& !Yii::$app->user->can('VALIDATOR') && !Yii::$app->user->can('ADMIN') ){
+            $rules[] =[['presentazione_personale'], 'string', 'max' => 600];
         }
 
         return $rules;

@@ -156,6 +156,8 @@ class UserProfileController extends CrudController
      */
     public function setTitleAndBreadcrumbs($pageTitle)
     {
+        Yii::$app->session->set('previousTitle', $pageTitle);
+        Yii::$app->session->set('previousUrl', Url::previous());
         Yii::$app->view->title                 = $pageTitle;
         Yii::$app->view->params['breadcrumbs'] = [
             ['label' => $pageTitle]
@@ -397,10 +399,10 @@ class UserProfileController extends CrudController
 
         $this->setUpLayout('form');
 
-        $url = Yii::$app->urlManager->createUrl(['/admin/user-profile/update-profile', 'id' => $id]);
+        $url = Yii::$app->urlManager->createUrl(['/'.AmosAdmin::getModuleName().'/user-profile/update-profile', 'id' => $id]);
 
         if ($render) {
-            $url = Yii::$app->urlManager->createUrl(['/admin/user-profile/update', 'id' => $id]);
+            $url = Yii::$app->urlManager->createUrl(['/'.AmosAdmin::getModuleName().'/user-profile/update', 'id' => $id]);
         }
 
 
@@ -742,9 +744,9 @@ class UserProfileController extends CrudController
         }
 
         if ($redirectToUpdatePage) {
-            return $this->redirect(['/admin/user-profile/update', 'id' => $model->id]);
+            return $this->redirect(['/' . AmosAdmin::getModuleName(). '/user-profile/update', 'id' => $model->id]);
         } else {
-            return $this->redirect('/admin/user-profile/validated-users');
+            return $this->redirect('/' . AmosAdmin::getModuleName(). '/user-profile/validated-users');
         }
     }
 
@@ -770,10 +772,10 @@ class UserProfileController extends CrudController
             } elseif (($model->status == UserProfile::USERPROFILE_WORKFLOW_STATUS_DRAFT) && ($previousStatus == UserProfile::USERPROFILE_WORKFLOW_STATUS_TOVALIDATE)) {
                 return $this->redirect(BreadcrumbHelper::lastCrumbUrl());
             } else {
-                return $this->redirect(['/admin/user-profile/update', 'id' => $model->id]);
+                return $this->redirect(['/' . AmosAdmin::getModuleName(). '/user-profile/update', 'id' => $model->id]);
             }
         } else {
-            return $this->redirect('/admin/user-profile/validated-users');
+            return $this->redirect('/' . AmosAdmin::getModuleName(). '/user-profile/validated-users');
         }
     }
 

@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="form-group">
             </div>
             <div class="clear"></div>
-           <?= Html::a(AmosIcons::show('unlock') . AmosAdmin::t('amosadmin', 'Cambia password'), ['/admin/user-profile/cambia-password', 'id' => $user_id], [
+           <?= Html::a(AmosIcons::show('unlock') . AmosAdmin::t('amosadmin', 'Cambia password'), ['/'.AmosAdmin::getModuleName().'/user-profile/cambia-password', 'id' => $user_id], [
                         'class' => 'btn  btn-action-primary btn-cambia-password'
                     ]); ?>
         </div>

@@ -128,7 +128,7 @@ $this->registerCss("
     
     <?= WizardPrevAndContinueButtonWidget::widget([
         'model' => $model,
-        'previousUrl' => Yii::$app->getUrlManager()->createUrl(['/admin/first-access-wizard/introducing-myself'])
+        'previousUrl' => Yii::$app->getUrlManager()->createUrl(['/'.AmosAdmin::getModuleName().'/first-access-wizard/introducing-myself'])
     ]) ?>
     <?php ActiveForm::end(); ?>
 

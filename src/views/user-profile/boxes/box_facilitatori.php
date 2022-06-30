@@ -28,7 +28,7 @@ $enableExternalFacilitator = $adminModule->enableExternalFacilitator;
 /** @var \open20\amos\admin\models\UserProfile $facilitatorUserProfile */
 $facilitatorUserProfile = $model->facilitatore; // Non modificare! Dev'essere usata la relazione!!!
 $titleBox = AmosAdmin::t('amosadmin', 'The facilitator');
-$url = '/admin/user-profile/associate-facilitator';
+$url = '/'.AmosAdmin::getModuleName().'/user-profile/associate-facilitator';
 $isRequestPending = false;
 $facilitatorRequest = null;
 

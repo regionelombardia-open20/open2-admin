@@ -12,6 +12,7 @@
 namespace open20\amos\admin\controllers;
 
 use open20\amos\dashboard\controllers\base\DashboardController;
+use open20\amos\admin\AmosAdmin;
 use yii\helpers\Url;
 
 /**
@@ -41,7 +42,7 @@ class DefaultController extends DashboardController
      */
     public function actionIndex()
     {
-        return $this->redirect(['/admin/user-profile/validated-users']);
+        return $this->redirect(['/'.AmosAdmin::getModuleName().'/user-profile/validated-users']);
         Url::remember();
         $params = ['currentDashboard' => $this->getCurrentDashboard()];
         return $this->render('index', $params);

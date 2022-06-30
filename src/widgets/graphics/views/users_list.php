@@ -41,7 +41,7 @@ $moduleAdmin = \Yii::$app->getModule(AmosAdmin::getModuleName());
 		echo WidgetGraphicsActions::widget([
 			'widget' => $widget,
 			'tClassName' => AmosAdmin::className(),
-			'actionRoute' => '/admin/admin/create',
+			'actionRoute' => '/'.AmosAdmin::getModuleName().'/admin/create',
 			'toRefreshSectionId' => $toRefreshSectionId
 		]);
 	} ?>

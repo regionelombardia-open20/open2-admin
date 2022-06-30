@@ -51,7 +51,7 @@ $adminModule = Yii::$app->controller->module;
                         <?= Html::a(
                             AmosIcons::show('email') . AmosAdmin::t('amosadmin', 'Spedisci credenziali'),
                             [
-                                '/admin/security/spedisci-credenziali',
+                                '/'.AmosAdmin::getModuleName().'/security/spedisci-credenziali',
                                 'id' => $model->id
                             ],
                             [
@@ -73,7 +73,7 @@ $adminModule = Yii::$app->controller->module;
                 $identity = Yii::$app->user->identity
                 ?>
                 <?php if (Yii::$app->user->can('CHANGE_USER_PASSWORD') && ($user['id'] == $identity->id)): ?>
-                    <?= Html::a(AmosIcons::show('unlock') . AmosAdmin::t('amosadmin', 'Cambia password'), ['/admin/user-profile/cambia-password', 'id' => $model->id], [
+                    <?= Html::a(AmosIcons::show('unlock') . AmosAdmin::t('amosadmin', 'Cambia password'), ['/'.AmosAdmin::getModuleName().'/user-profile/cambia-password', 'id' => $model->id], [
                         'class' => 'btn  btn-action-primary btn-cambia-password'
                     ]); ?>
                 <?php endif; ?>

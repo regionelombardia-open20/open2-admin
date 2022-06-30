@@ -25,7 +25,9 @@ use open20\amos\core\helpers\Html;
 use open20\amos\core\interfaces\InvitationExternalInterface;
 use open20\amos\core\module\AmosModule;
 use open20\amos\core\user\User;
+use Hybridauth\User\Profile;
 use Yii;
+use yii\base\Exception;
 use yii\db\Expression;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -187,7 +189,7 @@ class SecurityController extends BackendController
                 }
 
                 if (!is_null($inactiveUser)) {
-                    return $this->redirect('/admin/security/reactivate-profile?userdisabled');
+                    return $this->redirect('/'.AmosAdmin::getModuleName().'/security/reactivate-profile?userdisabled');
                 }
 
                 // Trigger validation for password check
@@ -235,7 +237,6 @@ class SecurityController extends BackendController
                         $this->createSocialUser($userProfile, $socialProfile, $provider);
                     }
                 }
-                $this->afterLogin(Yii::$app->getUser());
 
                 /** @var  $response  Response */
 //                $response = $this->goBack();
@@ -296,7 +297,7 @@ class SecurityController extends BackendController
             }
 
             if (!is_null($inactiveUser)) {
-                return $this->redirect('/admin/security/reactivate-profile?userdisabled');
+                return $this->redirect('/'.AmosAdmin::getModuleName().'/security/reactivate-profile?userdisabled');
             }
 
             //Trigger validation for password check
@@ -451,15 +452,6 @@ class SecurityController extends BackendController
     {
 
     }
-    
-    /**
-     * 
-     * @param User $model
-     */
-    protected function afterLogin($model)
-    {
-
-    }
 
     /**
      * @return bool|\yii\web\Response
@@ -521,7 +513,7 @@ class SecurityController extends BackendController
             $model->cognome = $spidData['cognome'];
             $model->email   = $spidData['emailAddress'];
         }
-        
+
         // Invitation User id
         $iuid = isset($getParams['iuid']) ? $getParams['iuid'] : null;
 
@@ -540,7 +532,7 @@ class SecurityController extends BackendController
             if (!$newUser || isset($newUser['error'])) {
                 //Yii::$app->session->addFlash('danger', AmosAdmin::t('amosadmin', '#error_unable_to_register'));
                 $result_message = [];
-                $errorMail      = ($model->email ? $model->email : '');
+                $errorMail      = Html::encode($model->email ? $model->email : '');
                 array_push($result_message,
                     AmosAdmin::t('amosadmin', '#error_register_user', ['errorMail' => $errorMail]));
 
@@ -644,7 +636,7 @@ class SecurityController extends BackendController
                         'title_message' => AmosAdmin::t('amosadmin', '#msg_complete_registration_title'),
                         'result_message' => [
                             AmosAdmin::t('amosadmin', '#msg_complete_registration_result_1').'<br>'.Html::tag('span',
-                                $model->email),
+                                Html::encode($model->email)),
                             AmosAdmin::t('amosadmin', '#msg_complete_registration_result_2')
                         ]
                 ]);
@@ -693,7 +685,7 @@ class SecurityController extends BackendController
                 $dati_utente = $model->verifyEmail($model->email);
                 if ($dati_utente) {
                     if ($dati_utente->userProfile->isDeactivated()) {
-                        return $this->redirect('/admin/security/reactivate-profile?userdisabled');
+                        return $this->redirect('/'.AmosAdmin::getModuleName().'/security/reactivate-profile?userdisabled');
                     }
                     $urlCurrent      = null;
                     $urlCurrentParam = Yii::$app->getRequest()->get('url_current');
@@ -706,7 +698,7 @@ class SecurityController extends BackendController
                         [
                         'title_message' => AmosAdmin::t('amosadmin', '#msg_forgot_pwd_title'),
                         'result_message' => [
-                            AmosAdmin::t('amosadmin', '#msg_forgot_pwd_result_1').'<br>'.Html::tag('span', $model->email),
+                            AmosAdmin::t('amosadmin', '#msg_forgot_pwd_result_1').'<br>'.Html::tag('span', Html::encode($model->email)),
                             AmosAdmin::t('amosadmin', '#msg_forgot_pwd_result_2')
                         ],
                         'go_to_login_url' =>  !is_null(Yii::$app->getRequest()->get('return_url'))? Yii::$app->getRequest()->get('return_url') : Url::current(),
@@ -788,7 +780,7 @@ class SecurityController extends BackendController
         //Set Current admin user in session
         Yii::$app->session->set('IMPERSONATOR', $impersonator);
 
-        return $this->redirect(['/dashboard']);
+        return $this->redirect(['/']);
     }
 
     /**
@@ -819,7 +811,7 @@ class SecurityController extends BackendController
             Yii::$app->user->login($identity, $loginTimeout);
         }
 
-        return $this->redirect(['/dashboard']);
+        return $this->redirect(['/']);
     }
 
     /**
@@ -989,24 +981,23 @@ class SecurityController extends BackendController
                     AmosAdmin::t('amosadmin', "#insert_auth_data_token_expired_message_contact_assistance").' '.
                     Html::a(
                         AmosAdmin::t('amosadmin', "#insert_auth_data_token_expired_message_click_here"), $linkHref,
-                        ['title' => Yii::t('amoscore', 'Verrà aperta una nuova finestra')]
+                        ['title' => Yii::t('amoscore', 'Verrà aperta una nuova finestra'), 'style' => 'color:white']
                     ).Html::tag('br').AmosAdmin::t('amosadmin',
-                        "#insert_auth_data_token_expired_message_forgot_password_else").' '.
-                    Html::a(
+                        "#insert_auth_data_token_expired_message_forgot_password_else").' '
+                .(Html::a(
                         AmosAdmin::t('amosadmin', "#insert_auth_data_token_expired_message_click_here"),
-                        ['/admin/security/forgot-password'],
-                        ['title' => AmosAdmin::t('amosadmin', '#forgot_password_title_link')]
-                );
+                        ['/'.AmosAdmin::getModuleName().'/security/forgot-password'],
+                        ['title' => AmosAdmin::t('amosadmin', '#forgot_password_title_link'),'style' => 'color:white']
+                ));
             } else {
                 $tokenErrorMessage .= Html::tag('br').
                     AmosAdmin::t('amosadmin', "#forgot_password_title_link").' '.
                     Html::a(
                         AmosAdmin::t('amosadmin', "#insert_auth_data_token_expired_message_click_here"),
-                        ['/admin/security/forgot-password'],
+                        ['/'.AmosAdmin::getModuleName().'/security/forgot-password'],
                         ['title' => AmosAdmin::t('amosadmin', '#forgot_password_title_link')]
                 );
             }
-
             return $this->render('security-message',
                     [
                     'title_message' => AmosAdmin::t('amosadmin', 'Spiacenti'),
@@ -1124,11 +1115,11 @@ class SecurityController extends BackendController
 
     /**
      * @param UserProfile $userProfile
-     * @param \Hybrid_User_Profile $socialProfile
+     * @param Profile $socialProfile
      * @param $provider
      * @return bool|SocialAuthUsers
      */
-    protected function createSocialUser($userProfile, \Hybrid_User_Profile $socialProfile, $provider)
+    protected function createSocialUser($userProfile, Profile $socialProfile, $provider)
     {
         try {
             /**
@@ -1227,8 +1218,10 @@ class SecurityController extends BackendController
                 $user            = $tokenUser->user;
                 $model->username = $user->username;
                 if (Yii::$app->user->login($user, $model->rememberMe ? $authTimeout : 0)) {
+                    if($tokenUser->used == 0 || !(!empty(\Yii::$app->params['performance']) && \Yii::$app->params['performance'] == true)){
                     $tokenUser->used = $tokenUser->used + 1;
                     $tokenUser->save();
+                    }
                     return $this->redirect($tokenUser->tokenGroup->url_redirect);
                 }
             } else {
@@ -1237,3 +1230,4 @@ class SecurityController extends BackendController
         }
     }
 }
+?>

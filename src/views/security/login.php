@@ -28,7 +28,7 @@ $this->title = AmosAdmin::t('amosadmin', 'Login');
 $this->params['breadcrumbs'][] = $this->title;
 
 /** @var $socialAuthModule \open20\amos\socialauth\Module */
-$socialAuthModule = Yii::$app->getModule('socialauth');
+$socialAuthModule = \open20\amos\socialauth\Module::getInstance();
 
 /** @var AmosAdmin $adminModule */
 $adminModule = Yii::$app->getModule(AmosAdmin::getModuleName());
@@ -54,7 +54,8 @@ $usernameFieldOptions = [];
 $usernameOrEmailInputOptions = [];
 $usernameInputOptions = [];
 $passwordFieldOptions = [];
-$passwordInputOptions = [];
+$passwordInputOptions = ['autocomplete' => 'off'];
+
 if ($isDemoLogin) {
     $usernameOrEmailFieldOptions = ['inputOptions' => ['value' => 'demo']];
     $usernameOrEmailInputOptions = ['readonly' => true];
@@ -85,11 +86,11 @@ if ($isDemoLogin) {
         <?php if ($socialAuthModule && $socialAuthModule->enableSpid) : ?>
             <?=
             Html::a(
-                AmosIcons::show('account-circle') . AmosAdmin::t('amosadmin', '#fullsize_login_spid_text'),
-                Url::to('/socialauth/shibboleth/endpoint', 'https'),
+                AmosIcons::show('account-circle') . AmosAdmin::t('amosadmin',  $socialAuthModule->shibbolethConfig['buttonLabel']),
+                Url::to("/{$socialAuthModule->id}/shibboleth/endpoint", 'https'),
                 [
                     'class' => 'btn btn-spid',
-                    'title' => AmosAdmin::t('amosadmin', '#fullsize_login_spid_text'),
+                    'title' => AmosAdmin::t('amosadmin',  $socialAuthModule->shibbolethConfig['buttonLabel']),
                     //'target' => '_blank'
                 ]
             )
@@ -148,7 +149,7 @@ if ($isDemoLogin) {
                         <div class="col-xs-12 col-sm-6">
                             <?= $form->field($model, 'password', $passwordFieldOptions)->passwordInput($passwordInputOptions) ?>
                             <div class="forgot-password">
-                                <?= Html::a(AmosAdmin::t('amosadmin', '#forgot_password'), ['/admin/security/forgot-password'],
+                                <?= Html::a(AmosAdmin::t('amosadmin', '#forgot_password'), ['/'.AmosAdmin::getModuleName().'/security/forgot-password'],
                                     ['title' => AmosAdmin::t('amosadmin', '#forgot_password_title_link'), 'target' => '_self'])
                                 ?>
                             </div>
@@ -174,7 +175,7 @@ if ($isDemoLogin) {
                 <?php if ($adminModule->enableRegister || (!$adminModule->enableRegister && !empty($adminModule->textWarningForRegisterDisabled))): ?>
                     <div class="col-xs-12 footer-link">
                         <?php
-                        $urlRegister = ['/admin/security/register'];
+                        $urlRegister = ['/'.AmosAdmin::getModuleName().'/security/register'];
                         if ($communityId) {
                             $urlRegister['community'] = $communityId;
                         }

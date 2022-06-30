@@ -144,12 +144,12 @@ $redirectUrl = \Yii::$app->request->get('redirectUrl');
         <div class="col-xs-12 action-block">
             <?= Html::submitButton(AmosAdmin::t('amosadmin', '#text_button_register'), ['class' => 'btn btn-secondary', 'name' => 'login-button', 'title' => AmosAdmin::t('amosadmin', '#text_button_register')]) ?>
             <?php ActiveForm::end(); ?>
-            <?= Html::a(AmosAdmin::t('amosadmin', '#go_to_login'), ['/admin/security/login'], ['class' => 'btn btn-navigation-primary', 'title' => AmosAdmin::t('amosadmin', '#go_to_login_title'), 'target' => '_self']) ?>
+            <?= Html::a(AmosAdmin::t('amosadmin', '#go_to_login'), ['/'.AmosAdmin::getModuleName().'/security/login'], ['class' => 'btn btn-navigation-primary', 'title' => AmosAdmin::t('amosadmin', '#go_to_login_title'), 'target' => '_self']) ?>
         </div>
     </div>
 
     <div class="col-xs-12 reactivate-profile-block">
-        <?= Html::a(AmosAdmin::t('amosadmin', '#reactive_profile'), ['/admin/security/reactivate-profile'], ['class' => '', 'title' => AmosAdmin::t('amosadmin', '#reactive_profile'), 'target' => '_self']) ?>
+        <?= Html::a(AmosAdmin::t('amosadmin', '#reactive_profile'), ['/'.AmosAdmin::getModuleName().'/security/reactivate-profile'], ['class' => '', 'title' => AmosAdmin::t('amosadmin', '#reactive_profile'), 'target' => '_self']) ?>
     </div>
 
     <?php

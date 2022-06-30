@@ -352,8 +352,12 @@ class UserProfileUtility
         try {
             $model->user->generatePasswordResetToken();
             $model->user->save(false);
-            $subjectView = '@vendor/open20/amos-admin/src/mail/user/forgotpassword-subject';
-            $contentView = '@vendor/open20/amos-admin/src/mail/user/forgotpassword-html';
+            
+            /** @var AmosAdmin $adminModule */
+            $adminModule = \Yii::$app->getModule((empty($module_name)? AmosAdmin::getModuleName() : $module_name));
+            $subjectView = $adminModule->htmlMailForgotPasswordSubjectView;
+            $contentView = $adminModule->htmlMailForgotPasswordView;
+
             $subject = Email::renderMailPartial($subjectView, ['profile' => $model], \Yii::$app->getUser()->id);
             $mail = Email::renderMailPartial($contentView, ['profile' => $model, 'community' => $community, 'urlPrevious' => $urlPrevious], \Yii::$app->getUser()->id);
             return Email::sendMail(Yii::$app->params['supportEmail'], [$model->user->email], $subject, $mail, []);

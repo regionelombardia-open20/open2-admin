@@ -221,7 +221,7 @@ class UserContactController extends CrudController
      */
     public function beforeCancelAssociateM2m($event)
     {
-        $this->setRedirectArray(['/admin/user-profile/update', 'id' => \Yii::$app->request->get('id')]);
+        $this->setRedirectArray(['/'.AmosAdmin::getModuleName().'/user-profile/update', 'id' => \Yii::$app->request->get('id')]);
     }
     
     /**
@@ -245,7 +245,7 @@ class UserContactController extends CrudController
             } else {
                 /** @var AmosNotify $notifyModule */
                 $notifyModule = Yii::$app->getModule('notify');
-                if ($notifyModule && $notifyModule->hasMethod('contactAccepted') &&  $notifyModule->hasProperty('enableSuggestions') &&   !empty($notifyModule->enableSuggestions) ) {
+                if ($notifyModule && $notifyModule->hasMethod('contactAccepted')) {
                     $notifyModule->contactAccepted($user, $invitedUser);
                     return;                    
                 } else {

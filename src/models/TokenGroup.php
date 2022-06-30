@@ -122,6 +122,8 @@ class TokenGroup extends \open20\amos\admin\models\base\TokenGroup
                 if($tokenuser->save()){
                     return $tokenuser;
                 }
+            }else{
+                return $tokenuser;
             }
         }
         return null;
