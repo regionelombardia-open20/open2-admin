@@ -137,29 +137,19 @@ $this->registerJs($js, View::POS_READY);
                 //$presentazione_breve = strip_tags($model->presentazione_breve);
                 ?>
 
-                <?= AmosAdmin::t('amosadmin', 'Presentazione Breve') ?>
-
-                <?=
-                Html::input('text', 'UserProfile[presentazione_breve]', $model->presentazione_breve,
-                    [
-                    'id' => 'search-users-share',
-                    'class' => 'form-control pull-left',
-                    'placeholder' => AmosAdmin::t('amosadmin', '#short_presentation_placeholder'),
-                    'maxlength' => 140,
-                ]);
-
-
-                /*
-                  $form->field($model, 'presentazione_breve')->limitedCharsTextArea([
-                  'rows' => 6,
-                  'readonly' => false,
-                  'placeholder' => AmosAdmin::t('amosadmin', '#short_presentation_placeholder'),
-                  'maxlength' => 140
-                  ]);
-                 */
-                ?>
-
-
+<!--                TODO perché è stata messa sta roba, che ho tolto, che si perde tutte le cose che fa Yii2 sulla validazione????????????????????????????????? -->
+<!--                < ?= AmosAdmin::t('amosadmin', 'Presentazione Breve') ?>-->
+<!--                < ?=-->
+<!--                Html::input('text', 'UserProfile[presentazione_breve]', $model->presentazione_breve,-->
+<!--                    [-->
+<!--                    'id' => 'search-users-share',-->
+<!--                    'class' => 'form-control pull-left',-->
+<!--                    'placeholder' => AmosAdmin::t('amosadmin', '#short_presentation_placeholder'),-->
+<!--                    'maxlength' => 140,-->
+<!--                ]);-->
+<!--                ?>-->
+                
+                <?= $form->field($model, 'presentazione_breve')->textInput(['maxlength' => true, 'placeholder' => AmosAdmin::t('amosadmin', '#short_presentation_placeholder')]); ?>
 
                 <!--                < ?= Html::a(AmosAdmin::t('amosadmin', 'Do you want to include a more complete professional presentation') . '?', '#' . $idTabInsights, [-->
                 <!--                    'data-toggle' => 'tab',-->
