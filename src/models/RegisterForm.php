@@ -45,7 +45,7 @@ class RegisterForm extends Model
             [['privacy'], 'required', 'requiredValue' => 1, 'message' => AmosAdmin::t('amosadmin', "#register_privacy_alert_not_accepted")],
             [['nome', 'cognome'], 'string'],
             ['email', 'email'],
-            [['reCaptcha'], \open20\amos\admin\validators\ReCaptchaValidator::className(), 'message' => AmosAdmin::t('amosadmin', "#register_recaptcha_alert")]
+            [['reCaptcha'], \himiklab\yii2\recaptcha\ReCaptchaValidator::className(), 'message' => AmosAdmin::t('amosadmin', "#register_recaptcha_alert")]
         ];
     }
 

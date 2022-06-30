@@ -30,8 +30,8 @@ use yii\helpers\ArrayHelper;
  */
 class AmosAdmin extends AmosModule implements SearchModuleInterface
 {
-    const site_key_param               = 'google_recaptcha_site_key';
-    const secret_param                 = 'google_recaptcha_secret';
+    const site_key_param = 'google_recaptcha_site_key';
+    const secret_param = 'google_recaptcha_secret';
     //google contacts session keys
     const GOOGLE_CONTACTS = 'contacts';
     const GOOGLE_CONTACTS_PLATFORM = 'contacts_platform';
@@ -269,11 +269,6 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
      * @var bool $enableMultiUsersSameCF If true the model validation doesn't check the unique of che fiscal code.
      */
     public $enableMultiUsersSameCF = false;
-
-    /**
-     * @var bool $enableUserCanChangeProfile If true the logged user can change profile with another with the same fiscal code. Require enableMultiUsersSameCF = true.
-     */
-    public $enableUserCanChangeProfile = false;
 
     /**
      * @var bool $bypassRequiredForAdmin If true the required fields for logged user admin is only name and surname when update another user.
@@ -553,7 +548,6 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
     protected function getDefaultModels()
     {
         return [
-            'ChangeUserCreateForm' => __NAMESPACE__ . '\\' . 'models\ChangeUserCreateForm',
             'UserProfile' => __NAMESPACE__ . '\\' . 'models\UserProfile',
             'UserContact' => __NAMESPACE__ . '\\' . 'models\UserContact',
             'UserProfileStatiCivili' => __NAMESPACE__ . '\\' . 'models\UserProfileStatiCivili',
@@ -569,23 +563,10 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface
             'RegisterForm' => __NAMESPACE__ . '\\' . 'models\RegisterForm',
             'CambiaPasswordForm' => __NAMESPACE__ . '\\' . 'models\CambiaPasswordForm',
             'Ruoli' => 'common\models\Ruoli',
-            'ChangeUserSearch' => __NAMESPACE__ . '\\' . 'models\search\ChangeUserSearch',
             'UserProfileSearch' => __NAMESPACE__ . '\\' . 'models\search\UserProfileSearch',
             'UserContactSearch' => __NAMESPACE__ . '\\' . 'models\search\UserContactSearch',
             'UserProfileTitoliStudioSearch' => __NAMESPACE__ . '\\' . 'models\search\UserProfileTitoliStudioSearch',
         ];
-    }
-    
-    /**
-     * @return bool
-     */
-    public function loggedUserCanChangeProfile()
-    {
-        return (
-            $this->enableUserCanChangeProfile &&
-            $this->enableMultiUsersSameCF &&
-            Yii::$app->user->can('CHANGE_USER_PROFILE')
-        );
     }
 
     /**

@@ -21,6 +21,7 @@ use open20\amos\core\module\BaseAmosModule;
 use open20\amos\notificationmanager\forms\NewsWidget;
 use Yii;
 use yii\bootstrap\Widget;
+use yii\helpers\ArrayHelper;
 use yii\web\Application;
 
 /**
@@ -69,6 +70,11 @@ class UserCardWidget extends Widget
      * @var bool $squareAvatar
      */
     public $squareAvatar = false;
+    
+    /**
+     * @var array $creatorLinkOptions
+     */
+    public $creatorLinkOptions = [];
 
     /**
      * widget initialization
@@ -167,13 +173,22 @@ class UserCardWidget extends Widget
                     $title = AmosAdmin::t('amosadmin', 'Apri il profilo di {nome_profilo}', ['nome_profilo' => $model->getNomeCognome()]);
                 }
 
+                $defaultLinkOptions = [
+                    'title' => $title,
+                    'data' => $confirm
+                ];
+                if (!empty($this->creatorLinkOptions)) {
+                    $linkOptions = ArrayHelper::merge($defaultLinkOptions, $this->creatorLinkOptions);
+                } else if (isset(\Yii::$app->params['customUserCardWidgetCreatorLinkOptions']) && is_array(\Yii::$app->params['customUserCardWidgetCreatorLinkOptions'])) {
+                    $linkOptions = ArrayHelper::merge($defaultLinkOptions, \Yii::$app->params['customUserCardWidgetCreatorLinkOptions']);
+                } else {
+                    $linkOptions = $defaultLinkOptions;
+                }
+                
                 $html .= Html::a(
                     $img,
                     $link,
-                    [
-                        'title' => $title,
-                        'data' => $confirm
-                    ]
+                    $linkOptions
                 );
             } else {
                 $html .= $img;
@@ -183,21 +198,30 @@ class UserCardWidget extends Widget
                 'model' => $this->model,
                 'onlyModals' => true
             ]);
+    
+            $defaultLinkOptions = [
+                'data' => [
+                    'toggle' => 'tooltip',
+                    'html' => true,
+                    'placement' => 'right',
+                    'delay' => ['show' => 100, 'hide' => 5000],
+                    'trigger' => 'hover',
+                    'template' => '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner" style="background-color:transparent"></div></div>',
+                ],
+                'title' => $this->getHtmlTooltip(),
+                'style' => 'border-color:transparent;'
+            ];
+            if (!empty($this->creatorLinkOptions)) {
+                $linkOptions = ArrayHelper::merge($defaultLinkOptions, $this->creatorLinkOptions);
+            } else if (isset(\Yii::$app->params['customUserCardWidgetCreatorLinkOptions']) && is_array(\Yii::$app->params['customUserCardWidgetCreatorLinkOptions'])) {
+                $linkOptions = ArrayHelper::merge($defaultLinkOptions, \Yii::$app->params['customUserCardWidgetCreatorLinkOptions']);
+            } else {
+                $linkOptions = $defaultLinkOptions;
+            }
 
             $html = $modals . Html::a(
                     $img, null,
-                    [
-                        'data' => [
-                            'toggle' => 'tooltip',
-                            'html' => true,
-                            'placement' => 'right',
-                            'delay' => ['show' => 100, 'hide' => 5000],
-                            'trigger' => 'hover',
-                            'template' => '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner" style="background-color:transparent"></div></div>',
-                        ],
-                        'title' => $this->getHtmlTooltip(),
-                        'style' => 'border-color:transparent;'
-                    ]
+                    $linkOptions
                 );
         }
 

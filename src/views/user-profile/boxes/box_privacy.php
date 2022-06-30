@@ -46,7 +46,7 @@ $adminModule = Yii::$app->controller->module;
                 <h4 class="modal-title" id="myModalLabel"><?=AmosAdmin::t('amosadmin','#privacy_label')?></h4>
             </div>
             <div class="modal-body">
-                <?= $this->render('@backend/views/site/privacy'); ?>
+                <?= $this->render('@app/views/site/privacy'); ?>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal"><?=AmosAdmin::t('amosadmin','#close')?></button>

@@ -11,7 +11,6 @@
 namespace open20\amos\admin\controllers;
 
 use open20\amos\admin\AmosAdmin;
-use open20\amos\admin\exceptions\AdminException;
 use open20\amos\admin\models\ForgotPasswordForm;
 use open20\amos\admin\models\LoginForm;
 use open20\amos\admin\models\ProfileReactivationForm;
@@ -512,8 +511,6 @@ class SecurityController extends BackendController
 
         // Pre-compile with SPID session data
         $spidData = \Yii::$app->session->get('IDM');
-        
-        $socialAccount = false;
 
         if (!empty($getParams['name']) && !empty($getParams['surname']) && !empty($getParams['email'])) {
             $model->nome = $getParams['name'];
@@ -523,12 +520,10 @@ class SecurityController extends BackendController
             $model->nome = $socialProfile->firstName;
             $model->cognome = $socialProfile->lastName;
             $model->email = $socialProfile->email;
-            $socialAccount = true;
-        } elseif (!empty($spidData)) {
+        } elseif ($spidData && $spidData['emailAddress']) {
             $model->nome = $spidData['nome'];
             $model->cognome = $spidData['cognome'];
             $model->email = $spidData['emailAddress'];
-            $socialAccount = true;
         }
     
         if ($this->adminModule->enableDlSemplification && !$spidData) {
@@ -545,7 +540,7 @@ class SecurityController extends BackendController
         // Invitation User id
         $iuid = isset($getParams['iuid']) ? $getParams['iuid'] : null;
 
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+        if ($model->load(Yii::$app->request->post())) {
             $this->beforeRegisterNewUser($model);
             /**
              * @var $newUser integer False or UserId
@@ -643,7 +638,7 @@ class SecurityController extends BackendController
                 }
             }
 
-            $sent = UserProfileUtility::sendCredentialsMail($newUserProfile, $community, null, $socialAccount);
+            $sent = UserProfileUtility::sendCredentialsMail($newUserProfile, $community);
 
             if (!$sent) {
                 //Yii::$app->session->addFlash('danger', AmosAdmin::t('amosadmin', '#error_send_register_mail'));
@@ -665,9 +660,6 @@ class SecurityController extends BackendController
                 if ($this->adminModule->enableDlSemplification) {
                     $msg1 .= '_dl_semplification';
                     $msg2 .= '_dl_semplification';
-                } elseif ($socialAccount) {
-                    $msg1 .= '_social_registration';
-                    $msg2 .= '_social_registration';
                 }
                 
                 return $this->render('security-message', [
@@ -1274,6 +1266,7 @@ class SecurityController extends BackendController
                 /** @var  $user User */
                 $user = $tokenUser->user;
                 $model->username = $user->username;
+                Yii::$app->getUser()->setReturnUrl($tokenUser->tokenGroup->url_redirect);
                 if (Yii::$app->user->login($user, $model->rememberMe ? $authTimeout : 0)) {
                     if ($tokenUser->used == 0 || !(!empty(\Yii::$app->params['performance']) && \Yii::$app->params['performance'] == true)) {
                         $tokenUser->used = $tokenUser->used + 1;
@@ -1289,10 +1282,6 @@ class SecurityController extends BackendController
     
     public function actionSetDlSemplificationModalCookie()
     {
-        $dlSemplificationExpired = UserProfileUtility::isExpiredDateDlSemplification();
-        if ($dlSemplificationExpired) {
-            throw new AdminException('Dl Semplification Expired');
-        }
         if (!\Yii::$app->request->isAjax || !\Yii::$app->request->isPost) {
             throw new ForbiddenHttpException(Yii::t('amoscore', 'Non sei autorizzato a visualizzare questa pagina'));
         }

@@ -1329,54 +1329,6 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
     {
         return (($this->attivo == self::STATUS_DEACTIVATED) && ($this->user->status == User::STATUS_DELETED));
     }
-    
-    /**
-     * This method checks if this profile is the main user profile.
-     * If the relation "mainUserProfile" is null it means that this profile is the main profile.
-     * If the relation is not null it contains the main profile of this profile.
-     * @return bool
-     */
-    public function isMainUserProfile()
-    {
-        $mainProfile = $this->mainUserProfile;
-        return (is_null($mainProfile));
-    }
-    
-    /**
-     * @param int $mainUserProfileId
-     * @return array|ActiveRecord[]
-     * @throws \yii\base\InvalidConfigException
-     */
-    public function getAllProfilesOfMainUserProfile($mainUserProfileId = 0)
-    {
-        /** @var UserProfile $userProfileModel */
-        $userProfileModel = $this->adminModule->createModel('UserProfile');
-        $isMainUserProfile = false;
-        
-        if ($mainUserProfileId == 0) {
-            if ($this->isMainUserProfile()) {
-                $isMainUserProfile = true;
-                $mainUserProfileId = $this->id;
-            } else {
-                $mainUserProfileId = $this->main_user_profile_id;
-            }
-            $mainProfile = ($isMainUserProfile ? $this : $this->mainUserProfile);
-        } else {
-            $foundMainUserProfile = $userProfileModel::findOne(['id' => $mainUserProfileId]);
-            if ($foundMainUserProfile->isMainUserProfile()) {
-                $isMainUserProfile = true;
-            }
-            $mainProfile = ($isMainUserProfile ? $foundMainUserProfile : $foundMainUserProfile->mainUserProfile);
-        }
-        
-        /** @var ActiveQuery $query */
-        $query = $userProfileModel::find();
-        $query->andWhere(['main_user_profile_id' => $mainUserProfileId]);
-        $userProfiles = $query->all();
-        $userProfiles[] = $mainProfile;
-        
-        return $userProfiles;
-    }
 
     /**
      * This method return the facilitator profile of this user profile. If not present,

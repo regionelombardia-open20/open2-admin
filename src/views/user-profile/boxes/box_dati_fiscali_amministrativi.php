@@ -42,7 +42,7 @@ $checkIBAN = ($adminModule->confManager->isVisibleField('iban', ConfigurationMan
 
         <div class="row">
             <?php if ($checkCF): ?>
-                <?php if ($adminModule->enableDlSemplification && !Yii::$app->user->can('USER_CAN_CHANGE_FISCAL_CODE')): ?>
+                <?php if ($adminModule->enableDlSemplification): ?>
                     <div class="col-lg-6 col-sm-6 nop">
                         <div class="form-group">
                             <label class="control-label"><?= $model->getAttributeLabel('codice_fiscale') ?></label>

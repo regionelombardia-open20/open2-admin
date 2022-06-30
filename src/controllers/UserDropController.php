@@ -17,7 +17,6 @@ use open20\amos\admin\models\UserProfile;
 use open20\amos\admin\utility\UserProfileUtility;
 use open20\amos\core\user\User;
 use open20\amos\core\utilities\Email;
-use open20\amos\socialauth\models\SocialAuthUsers;
 use open20\amos\socialauth\models\SocialIdmUser;
 use Yii;
 use yii\console\Application;
@@ -82,9 +81,8 @@ class UserDropController extends Controller
             UserProfileUtility::deassignRoleFacilitator($user->userProfile);
 
             $user->userProfile->deactivateUserProfile();
-    
-            // Drop social links
-            $this->dropSocialLinks($user->id);
+            
+            $this->dropSPIDLink($user->id);
         }
     }
 
@@ -119,12 +117,11 @@ class UserDropController extends Controller
 
             //Mask the user data
             $user = $this->maskUserData($user);
-            
-            // Drop social links
-            $this->dropSocialLinks($user->id);
 
             //And finally drop profile, this is the end of the user on the platform
             $this->dropUser($user);
+    
+            $this->dropSPIDLink($user->id);
         }
 
         return true;
@@ -342,46 +339,17 @@ class UserDropController extends Controller
      * @throws \Throwable
      * @throws \yii\db\StaleObjectException
      */
-    public function dropSocialLinks($userId)
-    {
-        $this->dropSocialUsersLink($userId);
-        $this->dropSPIDLink($userId);
-    }
-    
-    /**
-     * @param int $userId
-     * @throws \Throwable
-     * @throws \yii\db\StaleObjectException
-     */
-    public function dropSocialUsersLink($userId)
-    {
-        /** @var \open20\amos\socialauth\Module $socialModule */
-        $socialModule = Yii::$app->getModule('socialauth');
-        if (!is_null($socialModule)) {
-            /** @var SocialAuthUsers[] $socialUsers */
-            $socialUsers = SocialAuthUsers::find()->andWhere(['user_id' => $userId])->all();
-            if (!empty($socialUsers)) {
-                foreach ($socialUsers as $socialUser) {
-                    $socialUser->delete();
-                }
-            }
-        }
-    }
-    
-    /**
-     * @param int $userId
-     * @throws \Throwable
-     * @throws \yii\db\StaleObjectException
-     */
     public function dropSPIDLink($userId)
     {
         /** @var \open20\amos\socialauth\Module $socialModule */
         $socialModule = Yii::$app->getModule('socialauth');
-        if (!is_null($socialModule)) {
-            /** @var SocialIdmUser $socialIdmUser */
-            $socialIdmUser = $socialModule->findSocialIdmByUserId($userId);
-            if (!is_null($socialIdmUser)) {
-                $socialIdmUser->delete();
+        if ($this->adminModule->enableDlSemplification) {
+            if (!is_null($socialModule)) {
+                /** @var SocialIdmUser $socialIdmUser */
+                $socialIdmUser = $socialModule->findSocialIdmByUserId($userId);
+                if (!is_null($socialIdmUser)) {
+                    $socialIdmUser->delete();
+                }
             }
         }
     }

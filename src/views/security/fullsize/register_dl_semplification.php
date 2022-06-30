@@ -103,11 +103,11 @@ $redirectUrl = \Yii::$app->request->get('redirectUrl');
             <div class="row nom">
                 <div class="col-xs-12" style="padding:15px 0; border:1px solid;">
                     <div class="col-xs-12">
-                        <?= $form->field($model, 'nome')->textInput(['placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_name'), 'readonly' => (!empty($model->nome))])->label('') ?>
+                        <?= $form->field($model, 'nome')->textInput(['placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_name'), 'readonly' => true])->label('') ?>
                         <?= AmosIcons::show('user', '', AmosIcons::IC) ?>
                     </div>
                     <div class="col-xs-12">
-                        <?= $form->field($model, 'cognome')->textInput(['placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_surname'), 'readonly' => (!empty($model->cognome))])->label('') ?>
+                        <?= $form->field($model, 'cognome')->textInput(['placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_surname'), 'readonly' => true])->label('') ?>
                         <?= AmosIcons::show('user', '', AmosIcons::IC) ?>
                     </div>
                     <div class="col-xs-12">

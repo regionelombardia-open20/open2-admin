@@ -150,7 +150,7 @@ JS;
         $loggedUserId = Yii::$app->user->id;
         $title = '';
         $titleLink = '';
-        $buttonUrl = "javascript:void(0);";
+        $buttonUrl = null;
         $dataTarget = '';
         $dataToggle = '';
         $invited = false;

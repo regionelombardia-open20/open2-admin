@@ -11,7 +11,6 @@
 
 use open20\amos\admin\AmosAdmin;
 use open20\amos\admin\assets\ModuleAdminAsset;
-use open20\amos\admin\utility\UserProfileUtility;
 use open20\amos\core\forms\ActiveForm;
 use open20\amos\core\helpers\Html;
 use open20\amos\core\icons\AmosIcons;
@@ -94,17 +93,10 @@ if ($isDemoLogin) {
 }
 
 Yii::$app->trigger('BEFORE_LOGIN_FORM');
-
-$dlSemplificationExpired = UserProfileUtility::isExpiredDateDlSemplification();
-$viewLogin = (
-    CoreCommonUtility::platformSeenFromHeadquarter() ||
-    (!$adminModule->hideStandardLoginPageSection && !$dlSemplificationExpired)
-);
-
 ?>
 
 <?php
-if (!$dlSemplificationExpired && !Yii::$app->getRequest()->getCookies()->has('dl_semplification_modal_cookie')) {
+if (!Yii::$app->getRequest()->getCookies()->has('dl_semplification_modal_cookie')) {
     $js = <<<JS
     $('#modal-dl-semplification').modal('show');
     $('#modal-dl-semplification-dont-show-again-link').on('click', function(event) {
@@ -147,20 +139,20 @@ Modal::end();
             <?= $this->render('parts' . DIRECTORY_SEPARATOR . 'spid'); ?>
         </div>
     <?php endif; ?>
-    
-    <?php if ($viewLogin): ?>
-        <div class="login-block col-xs-12 nop">
+
+    <div class="login-block col-xs-12 nop">
         <?php if (!isset(Yii::$app->params['logo']) || !Yii::$app->params['logo']) : ?>
             <p class="welcome-message"><?= AmosAdmin::t('amosadmin', '#login_welcome_message') ?></p>
         <?php endif; ?>
-    
+        
+        <?php if (CoreCommonUtility::platformSeenFromHeadquarter() || !$adminModule->hideStandardLoginPageSection): ?>
             <?php $form = ActiveForm::begin(['id' => 'login-form']); ?>
             <div class="login-body">
                 <?= Html::tag('h2', AmosAdmin::t('amosadmin', '#fullsize_login'), ['class' => 'title-login col-xs-12 nop nom-b']) ?>
                 <?= Html::tag('p', '(' . AmosAdmin::t('amosadmin', '#fullsize_login_dl_semplification_valid_until') . ')') ?>
 
                 <div class="row nom">
-                    <?php if ($viewLogin) : ?>
+                    <?php if (CoreCommonUtility::platformSeenFromHeadquarter() || !$adminModule->hideStandardLoginPageSection) : ?>
                         <div class="col-xs-12" style="padding:15px 0; border:1px solid;">
                             <?php if (isset(\Yii::$app->params['template-amos']) && \Yii::$app->params['template-amos']): ?>
                                 <div class="col-xs-12">
@@ -214,8 +206,8 @@ Modal::end();
                     ['class' => 'remember-me', 'title' => AmosAdmin::t('amosadmin', '#remember_access')]) ?>
             </div>
             <?php ActiveForm::end(); ?>
-        </div>
-    <?php endif; ?>
+        <?php endif; ?>
+    </div>
     
     <?php if ($socialAuthModule && $socialAuthModule->enableLogin && !$socialMatch) : ?>
         <div class="social-block col-xs-12 nop">
