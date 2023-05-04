@@ -10,6 +10,8 @@
  */
 
 return [
+    '#passwords_dont_match' => 'Le password non coincidono',
+    
     'Accepted at' => 'Accepted at',
     'accepted your connection invitation and is now active in your contact list' => 'accepted your connection invitation and is now active in your contact list',
     'Accept invitation' => 'Accept invitation',
@@ -387,7 +389,9 @@ return [
     '#insert_auth_data_token_expired_message_click_here' => "by clicking here",
     '#insert_auth_data_token_expired_message_contact_assistance' => "Contact assistance",
     '#insert_auth_data_token_expired_message_forgot_password_else' => "or retrieve the password",
+    '#insert_auth_data_token_expired_message_forgot_password' => "Retrieve the password",
     '#insert_auth_data_token_expired_message' => "The user registration and activation period has expired, please contact support.",
+    '#insert_auth_data_token_expired_message_2' => "The user registration and activation period has expired.",
     '#insert_email_reg' => 'Enter the registration email.',
     'Insights' => 'Insights',
     'Interests' => 'Interests',
@@ -838,9 +842,6 @@ return [
     '#remove_prevalent_partnerhip_cancel_title_link' => 'Cancel the removal of the prevailing collaboration',
     '#select_prevalent_partnerhip_cancel_title_link' => 'Cancel the selection of the prevailing collaboration',
     '#icon_name_title_link' => 'View profile',
-    '#login_spid_title' => 'Enter SPID (Digital Identity Public System)',
-    '#login_spid_text' => 'Enter SPID',
-    '#login_spid_text2' => '[Digital Identity Public System]',
     '#user_in_elimination_had_activites_pending' => 'User {userNameSurname} had activities to complete that are transferred to you. Following there is a recap of the activites to complete.',
     '#find_all_activities_pending_in_plugin' => 'All the activities stated above can be completed entering into the "my activities" plugin in the dashboard.',
     '#login_spid_title' => 'Enter With SPID/CNS (Digital Identity Public System)',
@@ -912,4 +913,15 @@ return [
     "Visualizza gli utenti non attivi" => "Show not active users",
     "Visualizza la lista degli utenti della mia rete" => "Show the list of users of my network",
     '#profile_users' => 'Profiles',
+    'Informativa sulla privacy' => 'Privacy Policy',
+    'Consenso al trattamento dei dati personali' => 'Consent to personal data processing',
+    'Visualizza informativa sul trattamento dei dati personali' => 'Show Cookie Policy',
+    'Acconsento' => 'I agree',
+    'Non acconsento' => 'I don\'t agree',
+    '#disable_collaborations_notifications_title' => 'Disable Collaboration Proposals notifications',
+    '#disable_collaborations_notifications_text' => 'Do you want to disable notifications relating to new Collaboration Proposals from the summary email?',
+    '#disable_collaborations_notifications_submit_button' => 'Disable',
+    '#disable_collaborations_notifications_submit_button_title' => 'Disable collaboration proposals notifications',
+    '#disable_notification_info_message' => 'You can re-enable notifications related to collaboration proposals from the "Notifications" section of your profile.',
+    '#disable_notification_message_already_disabled' => 'Notifications already disabled'
 ];

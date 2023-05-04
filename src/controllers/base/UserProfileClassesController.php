@@ -222,4 +222,36 @@ class UserProfileClassesController extends CrudController
         }
         return $this->redirect(['index']);
     }
+	
+	public function actionClone($id){
+        $this->model = $this->findModel($id);
+        
+        $allPermissions = ArrayHelper::map(UserProfileClassesAuthMm::findAll(['user_profile_classes_id' => $id]),
+                'item_id', 'item_id');
+		
+         if ($this->model) {
+             $newModel = new UserProfileClasses();
+			 $newModel->name =  $this->model->name."_copy".($this->model->id+1);
+			 $newModel->description =  $this->model->description;
+			 $newModel->code =  $this->model->code;
+			 $newModel->type =  $this->model->type;
+			 $newModel->enabled =  $this->model->enabled;
+			 $newModel->configuration = $this->model->configuration;
+			 if($newModel->save()){
+				  foreach ($allPermissions as $v) {
+					$newAuth                          = new UserProfileClassesAuthMm();
+					$newAuth->user_profile_classes_id = $newModel->id;
+					$newAuth->item_id                 = $v;
+					$newAuth->save(false);
+				}
+				Yii::$app->getSession()->addFlash('success', BaseAmosModule::t('amoscore', 'Item created'));
+			 }else {
+                Yii::$app->getSession()->addFlash('danger',
+                    BaseAmosModule::t('amoscore', 'Item not copied, check data'));
+            }
+         } else {
+            Yii::$app->getSession()->addFlash('danger', BaseAmosModule::tHtml('amoscore', 'Element not found.'));
+        }
+        return $this->redirect(['index']);
+    }
 }

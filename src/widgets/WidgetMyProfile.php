@@ -160,9 +160,9 @@ class WidgetMyProfile extends Widget
         /** @var  $contact UserContact */
         foreach ($contacts as $contact) {
             if ($contact->user_id != \Yii::$app->user->id) {
-                $userProfile = UserProfile::find()->andWhere(['user_id' => $contact->user_id])->one();
+                $userProfile = UserProfile::find()->andWhere(['user_id' => $contact->user_id, 'attivo'=>1])->one();
             } else {
-                $userProfile = UserProfile::find()->andWhere(['user_id' => $contact->contact_id])->one();
+                $userProfile = UserProfile::find()->andWhere(['user_id' => $contact->contact_id, 'attivo'=>1])->one();
 
             }
             if ($userProfile) {

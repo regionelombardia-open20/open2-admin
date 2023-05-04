@@ -428,7 +428,7 @@ class UserProfileUtility
             $subject = Email::renderMailPartial($subjectView, ['profile' => $model, 'socialAccount' => $socialAccount], $model->user->id);
             $mail = Email::renderMailPartial($contentView, ['profile' => $model, 'community' => $community, 'socialAccount' => $socialAccount], $model->user->id);
             
-            return Email::sendMail(Yii::$app->params['supportEmail'], [$model->user->email], $subject, $mail, [], [], ['profile' => $model, 'community' => $community, 'socialAccount' => $socialAccount]);
+            return Email::sendMail(Yii::$app->params['supportEmail'], [$model->user->email], $subject, $mail, [], [], ['profile' => $model->toArray(), 'community' => $community, 'socialAccount' => $socialAccount]);
         } catch (\Exception $ex) {
             \Yii::getLogger()->log($ex->getTraceAsString(), Logger::LEVEL_ERROR);
         }
@@ -860,5 +860,17 @@ class UserProfileUtility
             return false;
         }
         return false;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getGenderValues()
+    {
+        return [
+            'None' => AmosAdmin::t('amosadmin', '#undefinded'),
+            'Maschio' => AmosAdmin::t('amosadmin', '#man'),
+            'Femmina' => AmosAdmin::t('amosadmin', '#women')
+        ];
     }
 }

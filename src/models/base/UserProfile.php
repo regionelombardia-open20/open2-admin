@@ -13,6 +13,7 @@ namespace open20\amos\admin\models\base;
 
 use open20\amos\admin\AmosAdmin;
 use open20\amos\admin\interfaces\OrganizationsModuleInterface;
+use open20\amos\admin\utility\UserProfileUtility;
 use open20\amos\core\helpers\Html;
 use open20\amos\core\validators\StringHtmlValidator;
 use open20\amos\notificationmanager\record\NotifyAuditRecord;
@@ -313,10 +314,10 @@ class UserProfile extends NotifyAuditRecord
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => $this->adminModule->model('User'), 'targetAttribute' => ['user_id' => 'id']],
             [['user_profile_stati_civili_id'], 'exist', 'skipOnError' => true, 'targetClass' => $this->adminModule->model('UserProfileStatiCivili'), 'targetAttribute' => ['user_profile_stati_civili_id' => 'id']],
             [['user_profile_role_other'], 'required', 'when' => function ($model) {
-                return ($this->user_profile_role_id == \open20\amos\admin\models\UserProfileRole::OTHER);
-            }, 'whenClient' => "function (attribute, value) {
-                return ($('#" . Html::getInputId($this, 'user_profile_role_id') . "').val() == " . \open20\amos\admin\models\UserProfileRole::OTHER . ");
-            }"],
+                return ($this->user_profile_role_id == $this->adminModule->roleFreeTextFieldId);
+            }/*, 'whenClient' => "function (attribute, value) {
+                return ($('#" . Html::getInputId($this, 'user_profile_role_id') . "').val() == " . $this->adminModule->roleFreeTextFieldId . ");
+            }"*/],
             [['user_profile_area_other'], 'required', 'when' => function ($model) {
                 return ($this->user_profile_area_id == \open20\amos\admin\models\UserProfileArea::OTHER);
             }, 'whenClient' => "function (attribute, value) {
@@ -700,11 +701,7 @@ class UserProfile extends NotifyAuditRecord
      */
     public function getSexValues()
     {
-        return [
-            'None' => AmosAdmin::t('amosadmin', 'Non Definito'),
-            'Maschio' => AmosAdmin::t('amosadmin', 'Male'),
-            'Femmina' => AmosAdmin::t('amosadmin', 'Female')
-        ];
+        return UserProfileUtility::getGenderValues();
     }
 
     /**

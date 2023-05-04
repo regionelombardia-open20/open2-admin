@@ -14,7 +14,7 @@ namespace open20\amos\admin\models;
 use open20\amos\admin\AmosAdmin;
 use open20\amos\core\user\User;
 use Yii;
-use yii\base\Model;
+use open20\amos\core\models\AmosModel as Model;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -259,7 +259,7 @@ class LoginForm extends Model
             } else {
                 $time = $hoursToStop - $deltaHours;
 
-                Yii::$app->getSession()->addFlash('danger', 'Maximum number of attempts passed. 
+                Yii::$app->getSession()->addFlash('danger', 'Maximum number of attempts passed.
                     Try again in ' . $this->convertTime($time) . '.');
 
                 return true;

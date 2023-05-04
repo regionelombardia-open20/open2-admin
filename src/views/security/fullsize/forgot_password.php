@@ -40,13 +40,10 @@ ModuleAdminAsset::register(Yii::$app->view);
 <div id="bk-formDefaultLogin" class="loginContainerFullsize">
     <div class="login-block forgotpwd-block col-xs-12 nop">
         <div class="login-body">
-            <h2 class="title-login"><?= AmosAdmin::t('amosadmin', '#fullsize_forgotpwd'); ?></h2>
-            <h3 class="title-login"><?= AmosAdmin::t('amosadmin', '#fullsize_forgotpwd_subtitle'); ?></h3>
             <?php $form = ActiveForm::begin(['id' => 'login-form']); ?>
             <div class="row">
                 <div class="col-xs-12">
-                    <?= $form->field($model, 'email')->textInput(['placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_email_forgotpwd')])->label('') ?>
-                    <?= AmosIcons::show('mail', '', AmosIcons::IC) ?>
+                    <?= $form->field($model, 'email')->textInput(['placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_email_forgotpwd')])->label(AmosIcons::show('mail', '', AmosIcons::IC) . AmosAdmin::t('amosadmin', '#fullsize_forgotpwd_subtitle')) ?>
                 </div>
                 <div class="col-xs-12 action">
                     <?= Html::submitButton(AmosAdmin::t('amosadmin', '#forgot_pwd_send'), ['class' => 'btn btn-navigation-primary', 'name' => 'login-button', 'title' => AmosAdmin::t('amosadmin', '#forgot_pwd_send_title')]) ?>

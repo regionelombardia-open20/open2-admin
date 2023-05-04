@@ -10,6 +10,8 @@
  */
 
 return [
+    '#passwords_dont_match' => 'Le password non coincidono',
+    
     'Accepted at' => 'Data accettazione',
     'accepted your connection invitation and is now active in your contact list' => 'ha accettato la tua richiesta di collegamento ed è ora un tuo contatto attivo',
     'Accept invitation' => 'Accetta invito',
@@ -389,9 +391,11 @@ return [
     'Inserisci' => 'Inserisci',
     'Inserisci la tua password per confermare la cancellazione.' => 'Inserisci la tua password per confermare la cancellazione.',
     '#insert_auth_data_token_expired_message_click_here' => "cliccando qui",
-    '#insert_auth_data_token_expired_message_contact_assistance' => "Contatta l'assitenza",
+    '#insert_auth_data_token_expired_message_contact_assistance' => "Contatta l'assistenza",
     '#insert_auth_data_token_expired_message_forgot_password_else' => "o recupera la password",
+    '#insert_auth_data_token_expired_message_forgot_password' => "Recupera la password",
     '#insert_auth_data_token_expired_message' => "Il periodo di registrazione ed attivazione dell'utente è scaduto, contatta l'assistenza.",
+    '#insert_auth_data_token_expired_message_2' => "Il periodo di registrazione ed attivazione dell'utente è scaduto.",
     '#insert_email_reg' => 'Inserisci la mail di registrazione.',
     'Insights' => 'Approfondimenti',
     'Interests' => 'Interessi',
@@ -665,7 +669,7 @@ return [
     '#short_presentation' => 'Lunghezza massima {maxlength} caratteri',
     '#short_presentation_placeholder' => 'Inserisci una breve presentazione di max 140 caratteri, che apparirà sotto al tuo nome',
     "#showAll" => "Visualizza tutto",
-    'Show privacy informations' => 'Visualizza informativa',
+    'Show privacy informations' => 'Visualizza informativa sulla privacy',
     'si è cancellato dalla piattaforma <br> Inserire un nuovo community manager alla community con id: ' => 'si è cancellato dalla piattaforma <br> Inserire un nuovo community manager alla community con id: ',
     'Si &egrave; verificato un errore durante il reperimento delle coordinate del tuo indirizzo, verifica la correttezza dei dati forniti.' => 'Si è verificato un errore durante il reperimento delle coordinate del tuo indirizzo, verifica la correttezza dei dati forniti.',
     'Si &egrave; verificato un errore durante il salvataggio' => 'Si è verificato un errore durante il salvataggio',
@@ -926,4 +930,10 @@ return [
     "#beforeActionSubtitleSectionGuest" => "Per partecipare, {ctaLoginRegister}",
     "#beforeActionSubtitleSectionLogged" => "",
     '#profile_users' => 'Profili',
+    '#disable_collaborations_notifications_title' => 'Disabilita notifiche Proposte di Collaborazione',
+    '#disable_collaborations_notifications_text' => 'Vuoi disabilitare le notifiche relative alle nuove Proposte di Collaborazione dalla email di riepilogo?',
+    '#disable_collaborations_notifications_submit_button' => 'Disabilita',
+    '#disable_collaborations_notifications_submit_button_title' => 'Disabilita notifiche proposte di collaborazione',
+    '#disable_notification_info_message' => 'Puoi riabilitare le notifiche relative alle proposte di collaborazione dalla sezione "Notifiche" del tuo profilo.',
+    '#disable_notification_message_already_disabled' => 'Notifiche già disabilitate'
     ];

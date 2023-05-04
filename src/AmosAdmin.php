@@ -18,6 +18,7 @@ use open20\amos\admin\widgets\graphics\WidgetGraphicMyProfile;
 use open20\amos\admin\widgets\graphics\WidgetGraphicsUsers;
 use open20\amos\admin\widgets\icons\WidgetIconMyProfile;
 use open20\amos\admin\widgets\icons\WidgetIconUserProfile;
+use open20\amos\core\interfaces\BreadcrumbInterface;
 use open20\amos\core\interfaces\SearchModuleInterface;
 use open20\amos\core\module\AmosModule;
 use open20\amos\core\user\User;
@@ -29,7 +30,7 @@ use open20\amos\core\interfaces\CmsModuleInterface;
  * Class AmosAdmin
  * @package open20\amos\admin
  */
-class AmosAdmin extends AmosModule implements SearchModuleInterface, CmsModuleInterface
+class AmosAdmin extends AmosModule implements SearchModuleInterface, CmsModuleInterface, BreadcrumbInterface
 {
     const site_key_param               = 'google_recaptcha_site_key';
     const secret_param                 = 'google_recaptcha_secret';
@@ -351,7 +352,7 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface, CmsModuleIn
      * @var bool $createContentInMyOwnCommunityOnly
      */
     public $createContentInMyOwnCommunityOnly = false;
-    
+
     /**
      * @var bool $disableInvitations This params completely disable the invitations from admin plugin.
      */
@@ -490,13 +491,21 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface, CmsModuleIn
      * @var bool
      */
     public $facilitatorCanValidateOnlyOwnUser = false;
-    
-    
+
     /**
      * @var bool $cardTagsView If true show the new CardTagWidgetAreeInteresse widget.
      */
     public $cardTagsView = false;
-    
+
+    /**
+     * @var int $roleFreeTextFieldId
+     */
+    public $roleFreeTextFieldId = 1;
+
+    /** Id dei profili da visualizzare nell'elenco degli operatori
+     * @var int[] $idProfileClassesOperators
+     */
+    public $idProfileClassesOperators = [1,2];
 
     /**
      * @return string
@@ -567,8 +576,10 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface, CmsModuleIn
         \Yii::setAlias('@open20/amos/'.static::getModuleName().'/controllers', __DIR__.'/controllers/');
         // initialize the module with the configuration loaded from config.php
         $config = require(__DIR__ . DIRECTORY_SEPARATOR . self::$CONFIG_FOLDER . DIRECTORY_SEPARATOR . 'config.php');
-        \Yii::configure($this,  ArrayHelper::merge($config, $this));
-
+        if(!empty($this->params)){
+            $config['params'] = $this->params;
+        }
+        \Yii::configure($this, $config);
         $this->confManager = new ConfigurationManager([
             'fieldsConfigurations' => $this->fieldsConfigurations
         ]);
@@ -671,7 +682,7 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface, CmsModuleIn
             $this->enableUserCanChangeProfile &&
             $this->enableMultiUsersSameCF &&
             Yii::$app->user->can('CHANGE_USER_PROFILE')
-            );
+        );
     }
 
     /**
@@ -689,7 +700,7 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface, CmsModuleIn
                                      $urlFirstAccessRedirectUrl = null)
     {
         return UserProfileUtility::createNewAccount($name, $surname, $email, $privacy, $sendCredentials, $community,
-                $urlFirstAccessRedirectUrl);
+            $urlFirstAccessRedirectUrl);
     }
 
     /**
@@ -811,5 +822,54 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface, CmsModuleIn
             //}
         }
         return $menu;
+    }
+
+    /**
+     * @return array
+     */
+    public function getIndexActions()
+    {
+        return [
+            'news/index',
+            'news-categorie/index',
+            'news/all-news',
+            'news/redaction-all-news',
+            'news/own-news',
+            'news/admin-all-news',
+            'news/to-validate-news',
+            'news/own-interest-news'
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function defaultControllerIndexRoute()
+    {
+        return [
+            'user-profile' => '/amosadmin/user-profile/operators',
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function defaultControllerIndexRouteSlogged()
+    {
+        return [
+            'user-profile' => '/amosadmin/user-profile/operators',
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function getControllerNames()
+    {
+        $names = [
+            'user-profile' => self::t('amosadmin', "Utenti"),
+        ];
+
+        return $names;
     }
 }

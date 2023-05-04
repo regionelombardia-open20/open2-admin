@@ -39,6 +39,22 @@ $this->params['breadcrumbs'][] = $this->title;
                 'enabled:statosino',
                 [
                     'class' => 'open20\amos\core\views\grid\ActionColumn',
+                    'template' => '{clone}{update}{delete}',
+                    'buttons' => [
+                        'clone' => function ($url, $model) { 
+                            return \yii\helpers\Html::a(
+                                AmosAdmin::t('amosadmin', 'Copia'),
+                                [
+                                    '/'.AmosAdmin::getModuleName().'/user-profile-classes/clone',
+                                    'id' => $model->id,
+                                ],
+                                [
+                                    'class' => 'btn btn-tools-secondary',
+                                    'title' => AmosAdmin::t('amosadmin', 'Copia'),
+                                ]
+                            );
+                        }
+                    ],
                 ],
             ],
         ],

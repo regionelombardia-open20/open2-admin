@@ -39,9 +39,11 @@ IMPORT AMOS-LAYOUT VARIABLES
             padding: 2px 6px;
             margin-right: 0 !important;
             font-size: 16px;
+
             .am {
                 font-size: 18px !important;
             }
+
             .am-chevron-down {
                 display: none;
             }
@@ -149,6 +151,7 @@ IMPORT AMOS-LAYOUT VARIABLES
 
             .icon-info-avatar {
                 margin: 0 1px;
+
                 &.icon-facilitator {
                     width: 22px;
                     height: 22px;
@@ -188,9 +191,11 @@ IMPORT AMOS-LAYOUT VARIABLES
         font-weight: 300;
         margin-left: 25px;
         width: 100%;
+
         .name-manage {
             display: flex;
         }
+
         .avatar-name {
             margin-bottom: 0;
             font-weight: 700;
@@ -387,7 +392,7 @@ IMPORT AMOS-LAYOUT VARIABLES
     .flexbox;
     .flexbox-row;
     align-items: center;
-
+    flex-wrap: wrap;
     .img-profile {
         background: none;
         border: none;
@@ -425,6 +430,7 @@ IMPORT AMOS-LAYOUT VARIABLES
         align-items: center;
         border: none;
         border-bottom: solid @border-color-default 0.3px;
+
         @media (max-width: 575px) {
             position: relative;
             flex-wrap: nowrap;
@@ -438,40 +444,51 @@ IMPORT AMOS-LAYOUT VARIABLES
     .font-weight-bold {
         font-weight: bold;
     }
-    .avatar-wrapper.avatar-extra-text{
+
+    .avatar-wrapper.avatar-extra-text {
         width: auto;
     }
-    .user-info-wrapper{
+
+    .user-info-wrapper {
         flex-grow: 1;
-        .first-row{
+
+        .first-row {
             justify-content: space-between;
             align-items: center;
+
             .badge {
                 font-size: 75%;
             }
+
             .new-manage-container {
                 @media (max-width: 575px) {
                     position: absolute;
                     right: 0;
                     top: 10px;
                 }
-            } 
-            .info-container{
+            }
+
+            .info-container {
                 align-items: center;
                 flex-grow: 1;
                 justify-content: space-between;
-                .name-manage{
+
+                .name-manage {
                     align-items: center;
+
                     h3.h5 {
-                        font-size: 1.333rem;;
+                        font-size: 1.333rem;
+                        ;
                     }
                 }
-                .tooltips{
+
+                .tooltips {
                     flex-grow: 1;
                     justify-content: center;
                     align-items: center;
                     display: flex;
-                    span.mdi{
+
+                    span.mdi {
                         color: @tertiary-color;
                         border: 1px solid @tertiary-color;
                         border-radius: 50%;
@@ -484,23 +501,27 @@ IMPORT AMOS-LAYOUT VARIABLES
                     }
                 }
             }
-            
+
         }
+
         .second-row {
             .user-mail {
                 color: black;
                 word-break: break-word;
             }
         }
-        .third-row{
+
+        .third-row {
             display: flex;
             flex-wrap: wrap;
             align-items: center;
+
             .community-image {
                 width: 70px;
                 height: 50px;
                 overflow: hidden;
                 border-radius: 4px;
+
                 img {
                     object-position: center;
                     object-fit: cover;
@@ -511,9 +532,11 @@ IMPORT AMOS-LAYOUT VARIABLES
                 }
             }
         }
-        .fourth-row{
+
+        .fourth-row {
             align-items: flex-end;
             justify-content: space-between;
+
             @media (max-width: 575px) {
                 flex-direction: column;
                 align-items: flex-start;
@@ -529,12 +552,14 @@ IMPORT AMOS-LAYOUT VARIABLES
             @media (min-width:576px) {
                 min-height: 275px;
             }
+
             .change-user-card-body {
                 flex-direction: column;
                 width: 100%;
+
                 .change-user-cta {
                     .am-check-circle {
-                        color: lighten(@primary-color,15%);
+                        color: lighten(@primary-color, 15%);
                         border-radius: 50%;
                         background-color: white;
                     }
@@ -547,22 +572,77 @@ IMPORT AMOS-LAYOUT VARIABLES
 /**
 CHECKBOX ADMIN FORM GESTIONE PERMESSI
 */
-.userprofile-profiles-checkbox{
-    > .checkbox{
+.userprofile-profiles-checkbox {
+    >.checkbox {
         .flexbox;
         align-items: center;
-        input{
+
+        input {
             margin-top: 0;
             margin-left: 0;
         }
-        label{
-            .avatar-wrapper{
+
+        label {
+            .avatar-wrapper {
                 align-items: center;
-                .avatar-body{
+
+                .avatar-body {
                     margin-left: 5px;
                 }
             }
         }
     }
 }
-  
+
+
+.account-admin-section {
+    .alert-box-admin {
+        position: relative;
+        padding: 1rem 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid #b1b1b3;
+        background-color: rgba(0, 0, 0, 0);
+        border-radius: 0;
+        color: #19191a;
+        border-left: 8px solid hsl(36deg, 100%, 32.5%);
+        display: flex;
+
+        .alert-text {
+            width: 100%;
+        }
+
+        .icon-alert {
+            padding-right: 1rem;
+        }
+    }
+
+    >div:last-child {
+        display: inherit;
+        text-align: inherit;
+    }
+}
+
+.social-admin-section {
+    padding-top: 30px;
+    border-top: 1px dotted #576F84;
+    margin-top: 30px;
+
+    .wrap-btn-social .btn {
+        &.btn-spid {
+            display: block !important;
+            white-space: normal;
+            padding: 7px !important;
+            width: 100% !important;
+            height: auto;
+        }
+    }
+
+}
+.section-data { 
+    border-top: 1px dotted #576F84;
+    padding-top: 20px !important;
+    margin-top: 30px;
+    .section-data {
+        border-top: none;
+    }
+}

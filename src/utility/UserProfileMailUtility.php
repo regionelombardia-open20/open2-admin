@@ -189,7 +189,7 @@ class UserProfileMailUtility
                     <li>{cognome}</li>
                     <li>{linkProfile}</li>
                 </ul>
-                <br>Clicca <a href='{linkDelete}'>qui</a>  per cancellare l'utente, hai a disposizione 1gg per completare l'operazione.
+                <br>Clicca <a href='{linkDelete}'>qui</a> ed effettua il login per cancellare l'utente, hai a disposizione 1gg per completare l'operazione.
                 <br><br>L'operazione è irreversibile; se confermi, il tuo account e tutti i dati a te associati verranno eliminati.", [
             'nome' => $userProfile->nome,
             'cognome' => $userProfile->cognome,

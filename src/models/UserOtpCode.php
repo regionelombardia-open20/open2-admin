@@ -57,9 +57,9 @@ class UserOtpCode extends \open20\amos\admin\models\base\UserOtpCode
     }
 
 
-    public static function getEditFields()
+    public function getEditFields()
     {
-        $labels = self::attributeLabels();
+        $labels = $this->attributeLabels();
 
         return [
             [

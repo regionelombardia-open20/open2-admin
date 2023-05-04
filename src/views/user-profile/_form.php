@@ -62,6 +62,7 @@ $loggedUser = Yii::$app->user->identity;
 $loggedUserProfile = $loggedUser->getProfile();
 //$ajaxUrl = Url::to(['/'.AmosAdmin::getModuleName().'/user-profile/is-default-facilitator', 'id' => $loggedUserProfile->id]);
 $ajaxUrl = Url::to(['/' . AmosAdmin::getModuleName() . '/user-profile/def-facilitator-present', 'id' => $model->id]);
+
 $js = "
 
 $('.has-error').each(function() {
@@ -81,7 +82,7 @@ $('.saveBtn').on('click', function(e) {
 
 function checkErrors(e){
 	e.preventDefault();
-	
+
 	var haserror = $('.has-error');
 	var checkerror = $('.help-block-error');
 	if (haserror.length > 0) {
@@ -231,7 +232,7 @@ $form = ActiveForm::begin([
 <?php } ?>
 
 <div class="loading" id="loader" hidden></div>
-<div class="user-form col-xs-12">
+<div class="user-form">
     <div id="card-section" class="row">
         <div class="col-xs-12">
             <?= Html::tag('h2', AmosAdmin::t('amosadmin', '#settings_general_title'), ['class' => 'subtitle-form']) ?>
@@ -415,13 +416,14 @@ $form = ActiveForm::begin([
                             <?= $this->render('boxes/box_questio', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
                         <?php endif; ?>
 
-                        <?php if (Yii::$app->user->can('ADMIN') && $model->isFacilitator() && $adminModule->confManager->isVisibleField('default_facilitatore', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
-                            <div class="col-xs-12 nop">
-                                <?= $form->field($model, 'default_facilitatore')->checkbox()->label(AmosAdmin::t('amosadmin', 'Is default facilitator') . '?') ?>
-                            </div>
-                        <?php endif; ?>
+
                         <?php if (Yii::$app->user->can('ADMIN') && $adminModule->showFacilitatorForModuleSelect) : ?>
                             <?= $this->render('boxes/box_facilitator_roles', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
+                        <?php endif; ?>
+                        <?php if (Yii::$app->user->can('ADMIN') && $model->isFacilitator() && $adminModule->confManager->isVisibleField('default_facilitatore', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
+                            <div class="default_facilitatore">
+                                <?= $form->field($model, 'default_facilitatore')->checkbox()->label(AmosAdmin::t('amosadmin', 'Is default facilitator') . '?') ?>
+                            </div>
                         <?php endif; ?>
                         <?php if ($adminModule->confManager->isVisibleBox('box_social_account', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                             <?= $this->render('boxes/box_social_account', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
@@ -487,7 +489,7 @@ $form = ActiveForm::begin([
                     'options' => ['id' => $idTabAdministration],
                 ];
             } else {
-                if (Yii::$app->user->can('PRIVILEGES_MANAGER')) :
+                if (Yii::$app->user->can('PRIVILEGES_MANAGER') || Yii::$app->user->can('SUPERUSER')) :
                     ?>
                     <?php $privilegesModule = Yii::$app->getModule('privileges'); ?>
                     <?php if (!empty($privilegesModule)) : ?>
@@ -558,11 +560,11 @@ $form = ActiveForm::begin([
         </div>
     </div>
 
-    <div class="row">
+    <div class="section-data">
         <?php if ($adminModule->confManager->isVisibleBox('box_privacy', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
             <!-- ADMIN cannot check the privacy checkbox of other users -->
             <?php if ((\Yii::$app->user->can('ADMIN') || \Yii::$app->user->can('AMMINISTRATORE_UTENTI')) && ($user->id !== \Yii::$app->user->id)) : ?>
-                <div class='col-xs-12 form-group'><strong><?= $model->getAttributeLabel('privacy'); ?>
+                <div class='form-group'><strong><?= $model->getAttributeLabel('privacy'); ?>
                         : </strong><?= \Yii::$app->formatter->asBoolean($model->privacy); ?></div>
             <?php else : ?>
                 <?= $this->render('boxes/box_privacy', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
@@ -696,4 +698,5 @@ $form = ActiveForm::begin([
 
 </div>
 
-<?php ActiveForm::end(); ?>
+<?php ActiveForm::end();
+echo $this->render('/layouts/fullsize/parts/_modalConfirmNetworkTab');?>

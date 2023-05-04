@@ -51,9 +51,9 @@ class TokenGroup extends \open20\amos\admin\models\base\TokenGroup
     }
 
 
-    public static function getEditFields()
+    public function getEditFields()
     {
-        $labels = self::attributeLabels();
+        $labels = $this->attributeLabels();
 
         return [
             [

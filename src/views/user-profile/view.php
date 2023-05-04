@@ -81,8 +81,8 @@ $this->registerJs($jsReadMore);
 
 <div class="profile">
     <!-- HEADER -->
-    <div class="col-xs-12 info-view-header nop">
-        <div class="col-md-3 col-sm-4 col-xs-12 nop">
+    <div class="info-view-header row">
+        <div class="col-md-3 col-sm-4 col-xs-12">
             <div class="img-profile">
                 <div class="img-profile-circle">
                 <?php if (($adminModule->confManager->isVisibleBox('box_foto', ConfigurationManager::VIEW_TYPE_VIEW)) &&

@@ -11,6 +11,7 @@
 use open20\amos\admin\AmosAdmin;
 use open20\amos\admin\base\ConfigurationManager;
 use open20\amos\admin\models\UserProfileAgeGroup;
+use open20\amos\admin\utility\UserProfileUtility;
 use open20\amos\core\forms\editors\Select;
 use open20\amos\core\helpers\Html;
 use open20\amos\core\icons\AmosIcons;
@@ -66,11 +67,7 @@ $this->registerJs($js, View::POS_READY);
                 ])->widget(Select::classname(),
                     [
                     'options' => ['placeholder' => AmosAdmin::t('amosadmin', 'Select/Choose').'...', 'disabled' => false],
-                    'data' => [
-                        'None' => AmosAdmin::t('amosadmin', '#undefinded'),
-                        'Maschio' => AmosAdmin::t('amosadmin', '#man'),
-                        'Femmina' => AmosAdmin::t('amosadmin', '#women')
-                    ]
+                    'data' => UserProfileUtility::getGenderValues()
                 ])->label($model->getAttributeLabel(AmosAdmin::t('amosadmin', '#sex')).' '.AmosIcons::show('lock',
                         ['title' => AmosAdmin::t('amosadmin', '#confidential')]));
                 ?>

@@ -13,6 +13,7 @@ namespace open20\amos\admin\models\search;
 use open20\amos\admin\AmosAdmin;
 use open20\amos\admin\base\ConfigurationManager;
 use open20\amos\admin\models\UserProfile;
+use open20\amos\admin\models\UserProfileClassesUserMm;
 use open20\amos\core\user\User;
 use open20\amos\core\interfaces\SearchModelInterface;
 use open20\amos\core\record\SearchResult;
@@ -99,9 +100,9 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface, Cms
     public function attributeLabels()
     {
         return ArrayHelper::merge(parent::attributeLabels(),
-                [
+            [
                 'userProfileStatus' => AmosAdmin::t('amosadmin', 'Stato profilo utente'),
-        ]);
+            ]);
     }
 
     /**
@@ -151,7 +152,7 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface, Cms
                     ->innerJoin($mmTable.' '.$mmTableAlis, $mmTableAlis.'.user_id = user_profile.user_id ')
                     ->andWhere([
                         $mmTableAlis.'.'.$entityField => $entityId
-                ]);
+                    ]);
             }
         }
 
@@ -180,7 +181,7 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface, Cms
                     ->andWhere(["{$tightCouplingModel::tableName()}.user_id" => $myUserId])
                     ->select("{$tightCouplingModel::tableName()}.{$tightCouplingField}");
                 $query->innerJoin($tightCouplingModel::tableName(),
-                        "{$tightCouplingModel::tableName()}.user_id = user_profile.user_id")
+                    "{$tightCouplingModel::tableName()}.user_id = user_profile.user_id")
                     ->andWhere(['in', "{$tightCouplingModel::tableName()}.{$tightCouplingField}", $myGroups]);
             }
         }
@@ -204,7 +205,7 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface, Cms
 
         if (!empty($this->tags)) {
             $query->innerJoin('cwh_tag_owner_interest_mm',
-                    'cwh_tag_owner_interest_mm.record_id = '.UserProfile::tableName().'.id and cwh_tag_owner_interest_mm.deleted_at is null')
+                'cwh_tag_owner_interest_mm.record_id = '.UserProfile::tableName().'.id and cwh_tag_owner_interest_mm.deleted_at is null')
                 ->andFilterWhere(['cwh_tag_owner_interest_mm.tag_id' => $this->tags]);
         }
 
@@ -319,6 +320,11 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface, Cms
     {
         $query = $this->baseSearch($params);
         $query->andWhere([UserProfile::tableName().'.attivo' => 1]);
+
+        if(isset($params['profileClasses'])) {
+            $query->leftJoin(UserProfileClassesUserMm::tableName(), UserProfileClassesUserMm::tableName() . '.user_id = ' . User::tableName() . '.id');
+            $query->andWhere(['IN', UserProfileClassesUserMm::tableName() . '.user_profile_classes_id', $params['profileClasses']]);
+        }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query
@@ -683,7 +689,7 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface, Cms
         $params = array_merge($params, Yii::$app->request->get());
         $this->load($params);
         $query  = $this->baseUsersQuery($params);
-      
+
         $dataProvider = new \yii\data\ActiveDataProvider([
             'query' => $query,
             'sort' => [

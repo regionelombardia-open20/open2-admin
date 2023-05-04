@@ -8,6 +8,7 @@
  */
 
 namespace open20\amos\admin\controllers;
+use Yii;
 use yii\filters\AccessControl;
 use yii\filters\AccessRule;
 use yii\filters\VerbFilter;
@@ -25,6 +26,39 @@ class UserProfileClassesController extends \open20\amos\admin\controllers\base\U
     /**
      * @inheritdoc
      */
+    
+    public function behaviors()
+    {
+        $result = ArrayHelper::merge(
+            parent::behaviors(), 
+            [
+                'access' => [
+                    'class' => AccessControl::class,
+                    'ruleConfig' => [
+                        'class' => AccessRule::class,
+                    ],
+                    'rules' => [
+                        [
+                            'allow' => true,
+                            'actions' => [
+                                'clone',
+                            ],
+                            'roles' => ['ADMIN', 'AMMINISTRATORE_UTENTI']
+                        ],
+                    ],
+                ],
+                'verbs' => [
+                    'class' => VerbFilter::class,
+                    'actions' => [
+                        'remove-prevalent-partnership' => ['post'],
+                        'delete' => ['post', 'get']
+                    ]
+                ]
+            ]
+        );
+
+        return $result;
+    }
     public function beforeAction($action)
     {
         if (\Yii::$app->user->isGuest) {
@@ -42,7 +76,7 @@ class UserProfileClassesController extends \open20\amos\admin\controllers\base\U
 
             $labelLink        = $labelSigninOrSignup;
             $titleLink        = $titleSigninOrSignup;
-            $socialAuthModule = Yii::$app->getModule('socialauth');
+            $socialAuthModule = \Yii::$app->getModule('socialauth');
             if ($socialAuthModule && ($socialAuthModule->enableRegister == false)) {
                 $labelLink = $labelSignin;
                 $titleLink = $titleSignin;

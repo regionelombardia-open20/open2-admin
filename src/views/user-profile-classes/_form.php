@@ -86,8 +86,6 @@ use softark\duallistbox\DualListbox;
                     'items' => $items,
                     'options' => $options,
                     'clientOptions' => [
-                        'infoTextEmpty' => AmosAdmin::t('amosadmin', 'Lista vuota'),
-                        'moveAllLabel' => AmosAdmin::t('amosadmin', 'Assegna tutti'),
                         'moveSelectedLabel' => AmosAdmin::t('amosadmin', 'Assegna'),
                         'removeSelectedLabel' => AmosAdmin::t('amosadmin', 'Rimuovi'),
                         'removeAllLabel' => AmosAdmin::t('amosadmin', 'Rimuovi tutti'),

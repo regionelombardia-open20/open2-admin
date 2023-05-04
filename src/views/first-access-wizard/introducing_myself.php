@@ -11,6 +11,7 @@
 
 use open20\amos\admin\AmosAdmin;
 use open20\amos\admin\models\UserProfileAgeGroup;
+use open20\amos\admin\utility\UserProfileUtility;
 use open20\amos\attachments\components\AttachmentsInput;
 use open20\amos\core\forms\ActiveForm;
 use open20\amos\core\forms\editors\Select;
@@ -93,11 +94,7 @@ $this->registerJs($js);
                     'template' => "{label}\n{hint}\n{beginWrapper}\n{input}\n{error}\n{endWrapper}",
                 ])->widget(Select::classname(), [
                     'options' => ['placeholder' => AmosAdmin::t('amosadmin', 'Select/Choose') . '...', 'disabled' => false],
-                    'data' => [
-                        'None' => AmosAdmin::t('amosadmin', '#undefinded'),
-                        'Maschio' => AmosAdmin::t('amosadmin', 'Maschio'),
-                        'Femmina' => AmosAdmin::t('amosadmin', 'Femmina')
-                    ]
+                    'data' => UserProfileUtility::getGenderValues()
                 ])->hint($model->getAttributeHint('sesso'), ['class' => 'text-danger clearfix bold']); ?>
             </div>
             <div class="col-md-6 col-xs-12">

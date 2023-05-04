@@ -43,7 +43,13 @@ $nome        = $arr[0];
 $cognome     = $arr[1];
 $initials    = strtoupper(substr($nome, 0, 1) . substr($cognome, 0, 1));
 
-$viewUrl = "/" . AmosAdmin::getModuleName() . "/user-profile/view?id=" . $model->id;
+if (Yii::$app->user->can('ADMIN') || ($userId == Yii::$app->user->id)){
+    $viewUrl = "/" . AmosAdmin::getModuleName() . "/user-profile/update?id=" . $model->id;
+} else {
+
+    $viewUrl = null;
+}
+
 
 $prevalentPartnershipTruncated = '';
 $prevalentPartnershipName      = '';
@@ -59,7 +65,7 @@ if (!is_null($model->prevalentPartnership)) {
         if (($adminModule->confManager->isVisibleBox('box_foto', ConfigurationManager::VIEW_TYPE_VIEW)) &&
             ($adminModule->confManager->isVisibleField('userProfileImage', ConfigurationManager::VIEW_TYPE_VIEW))
         ) :
-        ?>
+            ?>
             <?php
             $url                                       = $model->getAvatarUrl('card_users');
             Yii::$app->imageUtility->methodGetImageUrl = 'getAvatarUrl';
@@ -85,13 +91,13 @@ if (!is_null($model->prevalentPartnership)) {
             'css_class' => 'badge badge-left'
         ]);
         ?>
-        
+
         <?= MiniStatusIconWidget::widget([
             'model' => $model,
             'adminModule' => $adminModule
         ]); ?>
-            
-            <div class="info-box-avatar">
+
+        <div class="info-box-avatar">
             <?php
             if ($model->isFacilitator()) {
                 $facilitatorIcon = '<span class="mdi mdi-assistant"></span>';
@@ -123,21 +129,21 @@ if (!is_null($model->prevalentPartnership)) {
                 );
             }
             ?>
-            </div>
+        </div>
 
     </div>
 
     <div class="ml-2 avatar-body">
-    <div class="name-manage">
-        <p class="avatar-name font-weight-bold mb-0"><?= Html::a(
-                                                            $model->getNomeCognome(),
-                                                            $viewUrl,
-                                                            ['title' => AmosAdmin::t('amosadmin', '#icon_name_title_link') . ' ' . $model->getNomeCognome(), 'data-gui' => 'icon-view-profiles']
-                                                        );
-                                                        ?>
+        <div class="name-manage">
+            <p class="avatar-name font-weight-bold mb-0"><?= Html::a(
+                    $model->getNomeCognome(),
+                    $viewUrl,
+                    ['title' => AmosAdmin::t('amosadmin', '#icon_name_title_link') . ' ' . $model->getNomeCognome(), 'data-gui' => 'icon-view-profiles']
+                );
+                ?>
 
-        </p>
-        
+            </p>
+
             <?=
             ContextMenuWidget::widget([
                 'model' => $model,
@@ -145,7 +151,7 @@ if (!is_null($model->prevalentPartnership)) {
                 'disableDelete' => true
             ])
             ?>
-       
+
         </div>
         <?php
         if (
@@ -153,7 +159,7 @@ if (!is_null($model->prevalentPartnership)) {
             &&
             ($adminModule->confManager->isVisibleField('prevalent_partnership_id', ConfigurationManager::VIEW_TYPE_VIEW))
         ) :
-        ?>
+            ?>
             <!-- "additionalInfo" -->
             <small class="avatar-info font-weight-normal mb-0">
                 <?= (!empty($prevalentPartnershipTruncated)) ? $prevalentPartnershipTruncated : ''; ?>

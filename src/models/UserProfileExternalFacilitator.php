@@ -52,9 +52,9 @@ class UserProfileExternalFacilitator extends \open20\amos\admin\models\base\User
     }
 
 
-    public static function getEditFields()
+    public function getEditFields()
     {
-        $labels = self::attributeLabels();
+        $labels = $this->attributeLabels();
 
         return [
             [

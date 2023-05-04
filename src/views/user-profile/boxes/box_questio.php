@@ -27,7 +27,7 @@ $adminModule = Yii::$app->controller->module;
     <h2>
         <?= AmosAdmin::tHtml('amosadmin', 'Questio') ?>
     </h2>
-    <div class="row">
+    <div>
         <!-- TODO creare qui la sezione di questio -->
     </div>
 </section>

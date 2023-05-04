@@ -12,7 +12,7 @@
 namespace open20\amos\admin\models;
 
 use open20\amos\admin\AmosAdmin;
-use yii\base\Model;
+use open20\amos\core\models\AmosModel as Model;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -25,37 +25,37 @@ class RegisterForm extends Model
      * @var string $nome
      */
     public $nome;
-    
+
     /**
      * @var string $cognome
      */
     public $cognome;
-    
+
     /**
      * @var string $email
      */
     public $email;
-    
+
     /**
      * @var int $privacy
      */
     public $privacy;
-    
+
     /**
      * @var string $moduleName
      */
     public $moduleName;
-    
+
     /**
      * @var string $contextModelId
      */
     public $contextModelId;
-    
+
     /**
      * @var string $captcha
      */
     public $reCaptcha;
-    
+
     /**
      * @inheritdoc
      */
@@ -80,7 +80,7 @@ class RegisterForm extends Model
 
         return $config;
     }
-    
+
     /**
      * @inheritdoc
      */

@@ -26,9 +26,9 @@ $adminModule = Yii::$app->controller->module;
 
 <section class="section-data">
 
-    <div class="row">
+    <div>
         <?php if ($manage_profile) { ?>
-            <div class="col-xs-12">
+            <div>
                 <a href="/<?= AmosAdmin::getModuleName() ?>/user-profile-classes/index" class="btn btn-action-primary pull-right"><?=
                                                                                                                                     AmosAdmin::t('amosadmin', 'Gestisci i profili')
                                                                                                                                     ?></a>
@@ -36,7 +36,7 @@ $adminModule = Yii::$app->controller->module;
         <?php
         }
         ?>
-        <div class="col-xs-12">
+        <div>
             <?php
             if ($permission) {
             ?>
@@ -51,7 +51,7 @@ $adminModule = Yii::$app->controller->module;
                             <?php
                             if (empty($profiles)) {
                             ?>
-                                <div class="checkbox col-xs-12">
+                                <div class="checkbox">
                                     <?=
                                     AmosAdmin::t('amosadmin', 'Nessun profilo disponibile.');
                                     ?>
@@ -64,7 +64,7 @@ $adminModule = Yii::$app->controller->module;
                                     if (!empty($item)) {
                                 ?>
 
-                                        <div class="checkbox col-xs-12">
+                                        <div class="checkbox">
                                             <input type="checkbox" id="UserProfile[profiles][]<?= $k ?>" name="UserProfile[profiles][]" value="<?= $k ?>" <?=
                                                                                                                                                             (array_key_exists($k, $model->profiles) ? 'checked' : '')
                                                                                                                                                             ?>>
@@ -109,7 +109,7 @@ $adminModule = Yii::$app->controller->module;
                 if (!empty($profileClasses)) {
                 ?>
                     <h2><?= $model->getAttributeLabel('profiles') ?></h2>
-                    <div class="permission-container row">
+                    <div class="permission-container">
                         <?php foreach ($profileClasses as $item) { ?>
 
                             <div class="avatar-wrapper avatar-extra-text mb-0">

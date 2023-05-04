@@ -31,7 +31,7 @@ $otherRoleId = Html::getInputId($model, 'user_profile_role_other');
 $otherAreaId = Html::getInputId($model, 'user_profile_area_other');
 $js = "
 $('input[name=\"" . $roleName . "\"]').on('change', function(event) {
-    if ($(this).val() != " . UserProfileRole::OTHER . ") {
+    if ($(this).val() != " . $adminModule->roleFreeTextFieldId . ") {
         $('#" . $otherRoleId . "').attr('disabled', true).val('');
         $('#" . $otherRoleId . "').hide();
     } else {
@@ -49,7 +49,7 @@ $('input[name=\"" . $areaName . "\"]').on('change', function(event) {
     }
 });
 
-if($('input[name=\"" . $roleName . "\"][value=\"".UserProfileRole::OTHER."\"]').attr('checked') == 'checked') {
+if($('input[name=\"" . $roleName . "\"][value=\"".$adminModule->roleFreeTextFieldId."\"]').attr('checked') == 'checked') {
     $('#" . $otherRoleId . "').show();
 }
 
@@ -103,7 +103,7 @@ $this->registerCss("
                 <?= $form->field($model, 'user_profile_role_other')->textInput([
                     'maxlength' => true,
                     'readonly' => false,
-                    'disabled' => ($model->user_profile_role_id != UserProfileRole::OTHER),
+                    'disabled' => ($model->user_profile_role_id != $adminModule->roleFreeTextFieldId),
                     'placeholder' => AmosAdmin::t('amosadmin', 'Other Role')
                 ])->label(false) ?>
             </div>

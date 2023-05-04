@@ -28,7 +28,7 @@ class BiSendMessageToUserWidget extends Widget
 {
     const MODAL_CONFIRM_BTN_OPTIONS = ['class' => 'btn btn-primary btn-connect-to-user'];
     const MODAL_CANCEL_BTN_OPTIONS = [
-        'class' => 'btn btn-outline-primary btn-connect-to-user',
+        'class' => 'btn btn-outline-primary btn-connect-to-user mr-2',
         'data-dismiss' => 'modal'
     ];
     const BTN_CLASS_DFL = 'btn btn-xs btn-primary btn-connect-to-user mt-2';
@@ -114,7 +114,7 @@ class BiSendMessageToUserWidget extends Widget
             return '';
         }
 
-        $currentAsset = open20\design\assets\BootstrapItaliaDesignAsset::register($this);
+        $currentAsset = \open20\design\assets\BootstrapItaliaDesignAsset::register($this->view);
 
         // Register javascript to send private message to connected users
         $js = <<<JS

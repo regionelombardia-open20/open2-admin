@@ -13,7 +13,7 @@ use open20\amos\admin\AmosAdmin;
  * @var yii\web\View $this
  * @var open20\amos\admin\models\UserProfileClasses $model
  */
-$this->title                   = AmosAdmin::t('amosadmin', 'Crea');
+$this->title                   = AmosAdmin::t('amosadmin', 'Crea profilo');
 $this->params['breadcrumbs'][] = ['label' => '', 'url' => ['/admin']];
 $this->params['breadcrumbs'][] = ['label' => AmosAdmin::t('amosadmin', 'Profili'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;

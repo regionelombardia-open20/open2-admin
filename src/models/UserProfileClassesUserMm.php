@@ -49,9 +49,9 @@ class UserProfileClassesUserMm extends \open20\amos\admin\models\base\UserProfil
         ]);
     }
 
-    public static function getEditFields()
+    public function getEditFields()
     {
-        $labels = self::attributeLabels();
+        $labels = $this->attributeLabels();
 
         return [
             [

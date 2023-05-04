@@ -27,7 +27,7 @@ class ChangeUserSearch extends UserProfile
      * @var string $email
      */
     public $email = '';
-    
+
     /**
      * @inheritdoc
      */
@@ -42,7 +42,7 @@ class ChangeUserSearch extends UserProfile
             ], 'safe'],
         ];
     }
-    
+
     /**
      * @inheritdoc
      */
@@ -51,7 +51,7 @@ class ChangeUserSearch extends UserProfile
         // bypass scenarios() implementation in the parent class
         return Model::scenarios();
     }
-    
+
     /**
      * This is the base search.
      * @param array $params
@@ -61,16 +61,16 @@ class ChangeUserSearch extends UserProfile
     {
         /** @var ActiveQuery $query */
         $query = $this->adminModule->createModel('UserProfile')->find()->innerJoinWith(['user']);
-        
+
         // Init the default search values
         $this->initOrderVars();
-        
+
         // Check params to get orders value
         $this->setOrderVars($params);
-        
+
         return $query;
     }
-    
+
     /**
      * @param ActiveQuery $query
      * @return mixed
@@ -83,7 +83,7 @@ class ChangeUserSearch extends UserProfile
             ->andFilterWhere(['like', User::tableName() . '.email', $this->email]);
         return $query;
     }
-    
+
     /**
      * Search all active users.
      * @param array $params
@@ -103,17 +103,17 @@ class ChangeUserSearch extends UserProfile
             $query->where('0');
         }
 
-        
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query
         ]);
-        
+
         if (!($this->load($params) && $this->validate())) {
             return $dataProvider;
         }
-        
+
         $this->baseFilter($query);
-        
+
         return $dataProvider;
     }
 }

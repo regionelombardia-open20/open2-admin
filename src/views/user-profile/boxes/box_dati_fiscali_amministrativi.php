@@ -30,11 +30,11 @@ $checkIBAN = ($adminModule->confManager->isVisibleField('iban', ConfigurationMan
 
 ?>
 <?php if ($checkCF || $checkPIVA || $checkIBAN): ?>
-    <section class="section-data">
-        <h2 class="subtitle-form">
+    <section class="section-data m-t-30">
+        <h3>
             <?= AmosIcons::show('case'); ?>
             <?= AmosAdmin::tHtml('amosadmin', 'Dati Fiscali e Amministrativi') ?>
-        </h2>
+        </h3>
         <!--
         <div class="bk-testoBoxInfo">
             <p>< ?= AmosAdmin::tHtml('amosadmin', "I dati amministrativi consentono la fatturazione e il pagamento delle parcelle, assicurarsi che i dati inseriti siano corretti."); ?></p>

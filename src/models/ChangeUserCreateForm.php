@@ -12,7 +12,7 @@
 namespace open20\amos\admin\models;
 
 use open20\amos\admin\AmosAdmin;
-use yii\base\Model;
+use open20\amos\core\models\AmosModel as Model;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -22,7 +22,7 @@ use yii\helpers\ArrayHelper;
 class ChangeUserCreateForm extends Model
 {
     public $email;
-    
+
     /**
      * @inheritdoc
      */
@@ -33,7 +33,7 @@ class ChangeUserCreateForm extends Model
             ['email', 'email'],
         ];
     }
-    
+
     /**
      * @inheritdoc
      */

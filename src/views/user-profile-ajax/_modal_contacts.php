@@ -240,5 +240,5 @@ echo \open20\amos\core\views\AmosGridView::widget([
     'id' => 'share-to-contacts-btn',
     'class' => 'btn btn-navigation-primary pull-right'
 ]);
-?>
+
 

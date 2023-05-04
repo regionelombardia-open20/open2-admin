@@ -59,9 +59,9 @@ class UserProfileClasses extends \open20\amos\admin\models\base\UserProfileClass
         ]);
     }
 
-    public static function getEditFields()
+    public function getEditFields()
     {
-        $labels = self::attributeLabels();
+        $labels = $this->attributeLabels();
 
         return [
             [
@@ -149,7 +149,6 @@ class UserProfileClasses extends \open20\amos\admin\models\base\UserProfileClass
                     ? 'route' : 'permission');
             unset($available[$item->name]);
         }
-        unset($available[$this->name]);
         ksort($available);
         ksort($assigned);
 

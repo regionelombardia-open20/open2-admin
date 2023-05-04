@@ -334,7 +334,7 @@ class UserProfileController extends CrudController
             );
             $this->setTightCouplingUser($profile->user_id, $postTightCoupling);
 
-            $this->assignProfileClasses($this->model, \Yii::$app->request->post(), []);
+            $this->assignProfileClasses($profile, \Yii::$app->request->post(), []);
 
             //setting personal validation scope for contents if cwh module is enabled
             if ($savedProfile) {
@@ -398,7 +398,11 @@ class UserProfileController extends CrudController
 
             /** @var AmosAdmin $adminModule */
             $adminModule = \Yii::$app->getModule(AmosAdmin::getModuleName());
-            Yii::$app->getAuthManager()->assign(Yii::$app->getAuthManager()->getRole($adminModule->defaultUserRole), $user->id);
+
+            // Se il ruolo non è associato all'utente, lo si aggiunge
+            if(!in_array($adminModule->defaultUserRole, array_keys(Yii::$app->getAuthManager()->getRolesByUser($user->id)))) {
+                Yii::$app->getAuthManager()->assign(Yii::$app->getAuthManager()->getRole($adminModule->defaultUserRole), $user->id);
+            }
             Yii::$app->getSession()->addFlash('success', AmosAdmin::t('amosadmin', 'Utente creato correttamente.'));
             //return $this->redirect(['view', 'id' => $this->model->id]);
             return $this->redirectOnCreate($profile);
@@ -533,6 +537,9 @@ class UserProfileController extends CrudController
                         \Yii::$app->request->post()['UserProfile']['tightCouplingField'] :
                         []
                     );
+
+                    $this->operationsAfterSave();
+
                     $this->setTightCouplingUser($this->model->user_id, $postTightCoupling);
 
                     $this->assignFacilitator($isFacilitatorRoleRemoved);
@@ -564,6 +571,8 @@ class UserProfileController extends CrudController
                             $smsFrequency = Yii::$app->request->post()[NotifyFrequencyWidget::smsFrequencySelectorName()];
                         }
                         if ($atLeastOne) {
+                            $notificationConfContentParams = \Yii::$app->request->post('notificationContent');
+                            $post['notify_contents'] = $notificationConfContentParams;
                             $ok = $notifyModule->saveNotificationConf($this->model->user->id, $emailFrequency,
                                 $smsFrequency, $post);
                             if (!$ok) {
@@ -1005,8 +1014,9 @@ class UserProfileController extends CrudController
     {
 
         try {
-            if ($model->user_id > 1 && !empty($post[StringHelper::basename(get_class($model))]['profiles'])) {
-                $profiles = $post[StringHelper::basename(get_class($this->model))]['profiles'];
+
+            if ($model->user_id > 1 && isset($post[StringHelper::basename(get_class($model))]['profiles'])) {
+                $profiles = (array) $post[StringHelper::basename(get_class($this->model))]['profiles'];
                 UserProfileClassesUserMm::deleteAll(['user_id' => $model->user_id]);
                 $auth     = \Yii::$app->authManager;
                 if ($this->adminModule->enableForceRoleByProfiles == true) {
@@ -1029,7 +1039,17 @@ class UserProfileController extends CrudController
                 $model->assignProfiles($profiles);
             }
         } catch (\Exception $e) {
-            \Yii::getLogger()->log($e->getMessage(), Logger::LEVEL_ERROR);
+            \Yii::getLogger()->log($e->getMessage(), \yii\log\Logger::LEVEL_ERROR);
         }
+    }
+
+    /**
+     * Empty function useful for overwriting controller (and this function) in poi-platform
+     * without do changes to this controller.
+     * @return bool
+     */
+    public function operationsAfterSave()
+    {
+        return true;
     }
 }

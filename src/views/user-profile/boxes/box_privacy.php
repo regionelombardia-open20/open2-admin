@@ -33,13 +33,13 @@ if (isset(\Yii::$app->params['linkConfigurations']['privacyPolicyLinkCommon'])) 
 
 <section class="section-data">
     <?php if ($adminModule->confManager->isVisibleField('privacy', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
-        <div class="row">
+        <div>
             <?php if (!isset(\Yii::$app->params['linkConfigurations']['privacyPolicyLinkCommon'])) : ?>
-                <div class="col-xs-12">
+                <div>
                     <?= $form->field($model, 'privacy')->label('<a data-toggle="modal" href="#" data-target="#modalPrivacy">Visualizza e accetta il documento della privacy</a>')->checkbox() ?>
                 </div>
             <?php else : ?>
-                <div class="col-xs-12">
+                <div>
                     <a href="<?= $linkPrivacy ?>" target='_blank' title="<?= AmosAdmin::t('amosadmin', 'Visualizza il documento della privacy in nuova finestra') ?>">
                         <?= AmosAdmin::t('amosadmin', 'Visualizza il documento della privacy') . ' ' . AmosIcons::show('square-right') ?>
                     </a>

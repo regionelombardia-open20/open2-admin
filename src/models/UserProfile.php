@@ -42,6 +42,7 @@ use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yii\helpers\Url;
+use yii\log\Logger;
 
 /**
  * Class UserProfile
@@ -813,10 +814,12 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
      */
     public function beforeDelete()
     {
-        $userId = Yii::$app->getUser()->getId();
-        if ($userId == $this->user_id) {
-            Yii::$app->getSession()->addFlash('danger', T::tDyn('Impossibile cancellare se stesso.'));
-            return false;
+        if (!\Yii::$app instanceof \yii\console\Application){
+            $userId = Yii::$app->getUser()->getId();
+            if ($userId == $this->user_id) {
+                Yii::$app->getSession()->addFlash('danger', T::tDyn('Impossibile cancellare se stesso.'));
+                return false;
+            }
         }
 
         //L'eliminazione del profilo deve provocare l'eliminazione dell'utente associato
@@ -2068,19 +2071,21 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
             }
             if (!empty($profiles)) {
                 foreach ($profiles as $v) {
-                    $changeDash                       = true;
-                    $newAuth                          = new UserProfileClassesUserMm();
-                    $newAuth->user_id                 = $this->user_id;
-                    $newAuth->user_profile_classes_id = $v;
-                    $newAuth->save(false);
-                    $permissions                      = UserProfileClassesAuthMm::find()->andWhere(['user_profile_classes_id' => $v])->asArray()->all();
-                    foreach ($permissions as $value) {
-                        if (empty($auth->getAssignment($value['item_id'], $this->user_id))) {
-                            $rolePerm = $auth->getRole($value['item_id']);
-                            if (empty($rolePerm)) {
-                                $rolePerm = $auth->getPermission($value['item_id']);
+                    if (!empty($v)) {
+                        $changeDash                       = true;
+                        $newAuth                          = new UserProfileClassesUserMm();
+                        $newAuth->user_id                 = $this->user_id;
+                        $newAuth->user_profile_classes_id = $v;
+                        $newAuth->save(false);
+                        $permissions                      = UserProfileClassesAuthMm::find()->andWhere(['user_profile_classes_id' => $v])->asArray()->all();
+                        foreach ($permissions as $value) {
+                            if (empty($auth->getAssignment($value['item_id'], $this->user_id))) {
+                                $rolePerm = $auth->getRole($value['item_id']);
+                                if (empty($rolePerm)) {
+                                    $rolePerm = $auth->getPermission($value['item_id']);
+                                }
+                                $auth->assign($rolePerm, $this->user_id);
                             }
-                            $auth->assign($rolePerm, $this->user_id);
                         }
                     }
                 }
@@ -2088,7 +2093,7 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
                     \open20\amos\dashboard\utility\DashboardUtility::resetDashboardsByUser($this->user_id);
                 }
             }
-        } catch (Exception $ex) {
+        } catch (Exception $ex) {            
             \Yii::getLogger()->log($ex->getMessage(), Logger::LEVEL_ERROR);
         }
     }

@@ -14,7 +14,7 @@ namespace open20\amos\admin\models;
 use open20\amos\core\user\User;
 use kartik\password\StrengthValidator;
 use Yii;
-use yii\base\Model;
+use open20\amos\core\models\AmosModel as Model;
 use open20\amos\admin\AmosAdmin;
 
 
