@@ -267,10 +267,11 @@ class UserContactController extends CrudController
                     $contactProfile = $invitedUser->getProfile();
                     $message = AmosAdmin::t('amosadmin',"accepted your connection invitation and is now active in your contact list");
                     $messageLink = AmosAdmin::t('amosadmin', "and open the network section in your profile to check the status of your contacts");
+                    $url = Yii::$app->urlManager->createAbsoluteUrl([AmosAdmin::getModuleName() . '/user-profile/update', 'id' => $user->getProfile()->id, '#' => 'tab-network']);
                 }
             }
             if (!isset($url)){
-                $url = Yii::$app->urlManager->createAbsoluteUrl([AmosAdmin::getModuleName() . '/user-profile/update', 'id' => $invitedUser->id, '#' => 'tab-network']);
+                $url = Yii::$app->urlManager->createAbsoluteUrl([AmosAdmin::getModuleName() . '/user-profile/update', 'id' => $invitedUser->getProfile()->id, '#' => 'tab-network']);
             }
             $subject = $contactProfile->getNomeCognome() . " " . $message;
             $text = $this->renderMailPartial('email', [

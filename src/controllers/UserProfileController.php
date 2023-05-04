@@ -447,11 +447,14 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
     {
         $model = $this->actionUpdate($id, false);
 
+        $profiles = ArrayHelper::map(UserProfileClasses::find()->andWhere(['enabled' => 1])->all(), 'id', 'name');
+        
         return $this->render(
                 'update_profile',
                 [
                 'user' => $model->user,
                 'model' => $model,
+                'profiles' => $profiles,
                 'tipologiautente' => $model->tipo_utente,
                 'permissionSave' => 'USERPROFILE_UPDATE',
                 ]
@@ -2102,8 +2105,10 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
             ];
         }
 
-        if (\Yii::$app->getModule('invitations') && (\Yii::$app->getUser()->can('INVITATIONS_BASIC_USER') || \Yii::$app->getUser()->can('INVITATIONS_ADMINISTRATOR'))
-            &&
+        if (
+            !AmosAdmin::instance()->disableInvitations &&
+            \Yii::$app->getModule('invitations') &&
+            (\Yii::$app->getUser()->can('INVITATIONS_BASIC_USER') || \Yii::$app->getUser()->can('INVITATIONS_ADMINISTRATOR')) &&
             !\Yii::$app->getModule(AmosAdmin::getModuleName())->checkManageInviteBlackList() //aggiunta chiamata metodo checkMAnageInviteBlackList
         ) {
             $widget = new \open20\amos\invitations\widgets\icons\WidgetIconInvitations();

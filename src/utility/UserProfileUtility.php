@@ -14,6 +14,7 @@ namespace open20\amos\admin\utility;
 use open20\amos\admin\AmosAdmin;
 use open20\amos\admin\models\UserContact;
 use open20\amos\admin\models\UserProfile;
+use open20\amos\core\rbac\DbManagerCached;
 use open20\amos\core\user\User;
 use open20\amos\core\utilities\Email;
 use open20\amos\cwh\utility\CwhUtil;
@@ -342,17 +343,46 @@ class UserProfileUtility
      */
     public static function setBasicUserRoleToUser($userId, $module_name = null)
     {
-        /** @var AmosAdmin $adminModule */
-        $adminModule = \Yii::$app->getModule((empty($module_name) ? AmosAdmin::getModuleName() : $module_name));
-        $basicUserRole = \Yii::$app->getAuthManager()->getRole($adminModule->defaultUserRole);
-        if (is_null($basicUserRole)) {
-            return false;
-        }
-        $ok = true;
         try {
-            \Yii::$app->getAuthManager()->assign($basicUserRole, $userId);
+            /** @var AmosAdmin $adminModule */
+            $adminModule   = \Yii::$app->getModule((empty($module_name) ? AmosAdmin::getModuleName() : $module_name));
+            $basic         = true;
+            /** @var DbManagerCached $auth */
+            $auth          = \Yii::$app->getAuthManager();
+            if ($adminModule->disablePrivilegesEnableProfiles && !empty($adminModule->defaultProfiles)) {
+                foreach ($adminModule->defaultProfiles as $v) {
+                    $basic                            = false;
+                    $ok                               = true;
+                    $newAuth                          = new \open20\amos\admin\models\UserProfileClassesUserMm();
+                    $newAuth->user_id                 = $userId;
+                    $newAuth->user_profile_classes_id = $v;
+                    $newAuth->save(false);
+                    $permissions                      = \open20\amos\admin\models\UserProfileClassesAuthMm::find()->andWhere([
+                            'user_profile_classes_id' => $v])->asArray()->all();
+                    foreach ($permissions as $value) {
+                        if (empty($auth->getAssignment($value['item_id'], $userId))) {
+                            $rolePerm = $auth->getRole($value['item_id']);
+                            if (empty($rolePerm)) {
+                                $rolePerm = $auth->getPermission($value['item_id']);
+                            }
+                            $auth->assign($rolePerm, $userId);
+                        }
+                    }
+                }
+            }
+            if ($basic) {
+                $basicUserRole = $auth->getRole($adminModule->defaultUserRole);
+
+                if (is_null($basicUserRole)) {
+                    return false;
+                }
+                $ok = true;
+                if (empty($auth->getAssignment($adminModule->defaultUserRole, $userId))) {
+                    $auth->assign($basicUserRole, $userId);
+                }
+            }
         } catch (\Exception $exception) {
-            \Yii::getLogger()->log($exception->getMessage(), Logger::LEVEL_ERROR);
+            \Yii::getLogger()->log($exception->getTraceAsString(), Logger::LEVEL_ERROR);
             $ok = false;
         }
         return $ok;
@@ -394,12 +424,13 @@ class UserProfileUtility
             /** @var AmosAdmin $adminModule */
             $adminModule = \Yii::$app->getModule((empty($module_name) ? AmosAdmin::getModuleName() : $module_name));
             $subjectView = $adminModule->htmlMailSubject;
-            $contentView = $adminModule->htmlMailContent;
+            $contentView = $adminModule->htmlMailContent; 
             $subject = Email::renderMailPartial($subjectView, ['profile' => $model, 'socialAccount' => $socialAccount], $model->user->id);
             $mail = Email::renderMailPartial($contentView, ['profile' => $model, 'community' => $community, 'socialAccount' => $socialAccount], $model->user->id);
+            
             return Email::sendMail(Yii::$app->params['supportEmail'], [$model->user->email], $subject, $mail, [], [], ['profile' => $model, 'community' => $community, 'socialAccount' => $socialAccount]);
         } catch (\Exception $ex) {
-            \Yii::getLogger()->log($ex->getMessage(), Logger::LEVEL_ERROR);
+            \Yii::getLogger()->log($ex->getTraceAsString(), Logger::LEVEL_ERROR);
         }
         return false;
     }
@@ -425,7 +456,7 @@ class UserProfileUtility
             $mail = Email::renderMailPartial($contentView, ['profile' => $model, 'community' => $community, 'urlPrevious' => $urlPrevious], \Yii::$app->getUser()->id);
             return Email::sendMail(Yii::$app->params['supportEmail'], [$model->user->email], $subject, $mail, [], [], ['profile' => $model, 'community' => $community, 'urlPrevious' => $urlPrevious]);
         } catch (\Exception $ex) {
-            \Yii::getLogger()->log($ex->getMessage(), Logger::LEVEL_ERROR);
+            \Yii::getLogger()->log($ex->getTraceAsString(), Logger::LEVEL_ERROR);
         }
         return false;
     }
@@ -463,7 +494,7 @@ class UserProfileUtility
 
             return Email::sendMail(Yii::$app->params['supportEmail'], [$invitationUser->user->email], $subject, $mail, []);
         } catch (\Exception $ex) {
-            \Yii::getLogger()->log($ex->getMessage(), \yii\log\Logger::LEVEL_ERROR);
+            \Yii::getLogger()->log($ex->getTraceAsString(), \yii\log\Logger::LEVEL_ERROR);
         }
 
         return false;
@@ -505,7 +536,7 @@ class UserProfileUtility
             $mail = Email::renderMailPartial($contentView, ['profile' => $model], \Yii::$app->getUser()->id);
             return Email::sendMail(Yii::$app->params['supportEmail'], [$model->user->email], $subject, $mail, []);
         } catch (\Exception $ex) {
-            \Yii::getLogger()->log($ex->getMessage(), \yii\log\Logger::LEVEL_ERROR);
+            \Yii::getLogger()->log($ex->getTraceAsString(), \yii\log\Logger::LEVEL_ERROR);
         }
         return false;
     }

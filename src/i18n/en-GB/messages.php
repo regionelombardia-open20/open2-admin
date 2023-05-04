@@ -911,4 +911,5 @@ return [
     "Visualizza gli utenti facilitatori" => "Show facilitators",
     "Visualizza gli utenti non attivi" => "Show not active users",
     "Visualizza la lista degli utenti della mia rete" => "Show the list of users of my network",
+    '#profile_users' => 'Profiles',
 ];

@@ -29,6 +29,10 @@ use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\log\Logger;
+use open20\amos\admin\models\UserProfileClassesAuthMm;
+use open20\amos\admin\models\UserProfileClassesUserMm;
+use open20\amos\admin\models\UserProfileClasses;
+use yii\helpers\StringHelper;
 
 /**
  * Class UserProfileController
@@ -129,10 +133,12 @@ class UserProfileController extends CrudController
         // Yii::$app->view->params['createNewBtnParams'] = [
         //     'createNewBtnLabel' => AmosAdmin::t('amosadmin', 'Add new user')
         // ];
-
-         if (\Yii::$app->getModule('invitations') && (\Yii::$app->getUser()->can('INVITATIONS_BASIC_USER') || \Yii::$app->getUser()->can('INVITATIONS_ADMINISTRATOR'))
-             &&
-             !$this->adminModule->checkManageInviteBlackList() //aggiunta chiamata metodo checkMAnageInviteBlackList
+    
+        if (
+            !$this->adminModule->disableInvitations &&
+            \Yii::$app->getModule('invitations') &&
+            (\Yii::$app->getUser()->can('INVITATIONS_BASIC_USER') || \Yii::$app->getUser()->can('INVITATIONS_ADMINISTRATOR')) &&
+            !$this->adminModule->checkManageInviteBlackList() //aggiunta chiamata metodo checkMAnageInviteBlackList
          ) {
              $widget                                      = new \open20\amos\invitations\widgets\icons\WidgetIconInvitations();
              $invitations                                 = Html::a(AmosAdmin::t('amosadmin', 'Gestisci inviti'),
@@ -202,11 +208,11 @@ class UserProfileController extends CrudController
         if (!\Yii::$app->user->isGuest) {
             $this->view->params['titleSection'] = AmosAdmin::t('amosadmin', 'Tutti gli utenti');
             if ($this->adminModule->completeBypassWorkflow) {
-                $this->view->params['labelLinkAll'] = AmosAdmin::t('amosadmin', 'Tutti gli utenti');
-                $this->view->params['urlLinkAll']   = '/' . AmosAdmin::getModuleName() . '/user-profile/index';
+                $this->view->params['labelLinkAll'] = AmosAdmin::t('amosadmin', 'La mia rete');
+                $this->view->params['urlLinkAll']   = '/' . AmosAdmin::getModuleName() . '/user-profile/my-network';
                 $this->view->params['titleLinkAll'] = AmosAdmin::t(
                     'amosadmin',
-                    'Visualizza la lista di tutti gli utenti'
+                    'Visualizza gli utenti della mia rete'
                 );
             } else {
                 $this->view->params['labelLinkAll'] = AmosAdmin::t('amosadmin', 'Partecipanti');
@@ -267,6 +273,8 @@ class UserProfileController extends CrudController
         /** @var User $user */
         $user = AmosAdmin::instance()->createModel('User');
 
+        $profiles = ArrayHelper::map(UserProfileClasses::find()->andWhere(['enabled' => 1])->all(), 'id', 'name');
+
         // Salvo l'utente e subito dopo salvo il profilo agganciando l'utente
         if ($user->load(Yii::$app->request->post()) && $user->validate()) {
             if (!($profile->load(Yii::$app->request->post()) && $profile->validate())) {
@@ -277,6 +285,7 @@ class UserProfileController extends CrudController
                 return $this->render('create',
                         [
                         'model' => $profile,
+                        'profiles' => $profiles,
                         'user' => $user,
                         'permissionSave' => 'USERPROFILE_CREATE'
                 ]);
@@ -325,6 +334,7 @@ class UserProfileController extends CrudController
             );
             $this->setTightCouplingUser($profile->user_id, $postTightCoupling);
 
+            $this->assignProfileClasses($this->model, \Yii::$app->request->post(), []);
 
             //setting personal validation scope for contents if cwh module is enabled
             if ($savedProfile) {
@@ -379,6 +389,7 @@ class UserProfileController extends CrudController
                     return $this->render('create',
                             [
                             'model' => $profile,
+                            'profiles' => $profiles,
                             'user' => $user,
                             'permissionSave' => 'USERPROFILE_CREATE',
                     ]);
@@ -398,6 +409,7 @@ class UserProfileController extends CrudController
             return $this->render('create',
                     [
                     'model' => $profile,
+                    'profiles' => $profiles,
                     'user' => $user,
                     'permissionSave' => 'USERPROFILE_CREATE',
             ]);
@@ -428,6 +440,13 @@ class UserProfileController extends CrudController
 
         // Finding the user profile model
         $this->model = $this->findModel($id);
+
+        $this->model->profiles = ArrayHelper::map($this->model->profileClasses, 'id', 'id');
+
+        $previousPermissions = ArrayHelper::map(UserProfileClassesUserMm::find()->andWhere(['user_id' => $this->model->user_id])->asArray()->all(),
+                'user_profile_classes_id', 'user_profile_classes_id');
+
+        $profiles = ArrayHelper::map(UserProfileClasses::find()->andWhere(['enabled' => 1])->all(), 'id', 'name');
 
         $this->model->tightCouplingField = $this->getTightCouplingUser($this->model->user_id);
         // Setting the dynamic scenario. It's compiled dinamically by the
@@ -486,7 +505,8 @@ class UserProfileController extends CrudController
                 } else {
                     $this->model->notify_from_editorial_staff = 1;
                 }
-                if ($setRuoli) {
+
+                if ($setRuoli && !$this->adminModule->disablePrivilegesEnableProfiles) {
                     if (!empty($this->forzaListaRuoli)) {
                         // Se mi hanno forzato i ruoli, prendo buoni quelli passati
                         $this->model->setRuoli($this->forzaListaRuoli);
@@ -516,6 +536,8 @@ class UserProfileController extends CrudController
                     $this->setTightCouplingUser($this->model->user_id, $postTightCoupling);
 
                     $this->assignFacilitator($isFacilitatorRoleRemoved);
+
+                    $this->assignProfileClasses($this->model, \Yii::$app->request->post(), $previousPermissions);
 
                     if (empty($this->model->userProfileImage)) {
                         $adminmodule = AmosAdmin::instance();
@@ -552,6 +574,7 @@ class UserProfileController extends CrudController
                                             [
                                             'user' => $this->model->user,
                                             'model' => $this->model,
+                                            'profiles' => $profiles,
                                             'tipologiautente' => $this->model->tipo_utente,
                                             'permissionSave' => 'USERPROFILE_UPDATE',
                                             'tabActive' => $tabActive,
@@ -591,6 +614,7 @@ class UserProfileController extends CrudController
                     [
                     'user' => $this->model->user,
                     'model' => $this->model,
+                    'profiles' => $profiles,
                     'tipologiautente' => $this->model->tipo_utente,
                     'permissionSave' => 'USERPROFILE_UPDATE',
                     'tabActive' => $tabActive,
@@ -968,6 +992,44 @@ class UserProfileController extends CrudController
                     $model->save(false);
                 }
             }
+        }
+    }
+
+    /**
+     *
+     * @param UserProfile $model
+     * @param array $post
+     * @param array $previousPermissions
+     */
+    public function assignProfileClasses($model, $post, $previousPermissions)
+    {
+
+        try {
+            if ($model->user_id > 1 && !empty($post[StringHelper::basename(get_class($model))]['profiles'])) {
+                $profiles = $post[StringHelper::basename(get_class($this->model))]['profiles'];
+                UserProfileClassesUserMm::deleteAll(['user_id' => $model->user_id]);
+                $auth     = \Yii::$app->authManager;
+                if ($this->adminModule->enableForceRoleByProfiles == true) {
+                    $auth->revokeAll($model->user_id);
+                } else {
+                    foreach ($previousPermissions as $del) {
+                        if (!in_array($del, $profiles)) {
+                            $permissionsDel = UserProfileClassesAuthMm::find()->andWhere(['user_profile_classes_id' => $del])->asArray()->all();
+                            foreach ($permissionsDel as $valueDel) {
+
+                                $rolePermD = $auth->getRole($valueDel['item_id']);
+                                if (empty($rolePermD)) {
+                                    $rolePermD = $auth->getPermission($valueDel['item_id']);
+                                }
+                                $auth->revoke($rolePermD, $model->user_id);
+                            }
+                        }
+                    }
+                }
+                $model->assignProfiles($profiles);
+            }
+        } catch (\Exception $e) {
+            \Yii::getLogger()->log($e->getMessage(), Logger::LEVEL_ERROR);
         }
     }
 }

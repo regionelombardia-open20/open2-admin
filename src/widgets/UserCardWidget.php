@@ -109,7 +109,7 @@ class UserCardWidget extends Widget
         }
 
         $model = $this->model;
-        // $roundImage = Yii::$app->imageUtility->getRoundImage($model);
+        $roundImage = Yii::$app->imageUtility->getRoundImage($model);
 
         if ($this->customUserAvatarImageAlt) {
             $alt = $this->customUserAvatarImageAlt;
@@ -144,8 +144,13 @@ class UserCardWidget extends Widget
         // }
 
         $htmlOptions = [
+            'class' => $roundImage['class'],
+            'style' => "max-width:100%; margin-left: " . $roundImage['margin-left'] . "%; margin-top: " . $roundImage['margin-top'] . "%;",
             'alt' => $alt
         ];
+
+        $url = $this->model->getAvatarWebUrl($this->avatarDimension);
+
         $htmlTag = Html::img($url, $htmlOptions);
 
         $img = Html::tag(

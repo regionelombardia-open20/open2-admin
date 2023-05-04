@@ -94,7 +94,7 @@ return [
     '#change_irreversible' => 'Questa operazione è irreversibile',
     'Change prevalent partnership' => 'Cambia collaborazione prevalente',
     '#change_user_create_new_user_profile' => "Crea un nuovo profilo utente",
-    '#change_user_create_new_user_profile_goback_btn_label' => "Tonra alla lista utenti",
+    '#change_user_create_new_user_profile_goback_btn_label' => "Torna alla lista utenti",
     '#change_user_create_new_user_profile_submit_btn_label' => "Crea nuovo profilo utente",
     '#change_user_currently_logged' => 'Utente attualmente loggato',
     '#change_user_error_empty_cf' => "Il tuo utente non ha il codice fiscale",
@@ -925,4 +925,5 @@ return [
     "#beforeActionCtaLoginTitle" => "Clicca per accedere alla piattaforma {platformName}",
     "#beforeActionSubtitleSectionGuest" => "Per partecipare, {ctaLoginRegister}",
     "#beforeActionSubtitleSectionLogged" => "",
+    '#profile_users' => 'Profili',
     ];

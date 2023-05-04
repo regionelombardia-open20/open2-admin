@@ -99,6 +99,12 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
     public $validatori;
 
     /**
+     * List of profiles that map the roles and permissions assigned to the user
+     * @var array
+     */
+    public $profiles;
+
+    /**
      * @inheritdoc
      */
     public function getViewUrl()
@@ -148,7 +154,7 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
                 ['tightCouplingField', 'safe'],
                 ['telefono', \open20\amos\core\validators\PhoneValidator::className()],
                 ['codice_fiscale', CfPivaValidator::className()],
-                [['avatar_id', 'listaRuoli', 'listaProgetti'], 'safe'],
+                [['avatar_id', 'listaRuoli', 'listaProgetti', 'profiles'], 'safe'],
                 [[
                     'privacy', 'domicilio_provincia_id', 'domicilio_cap', 'domicilio_comune_id', 'created_by', 'updated_by',
                     'deleted_by'
@@ -169,6 +175,7 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
             [
                 'userProfileImage' => AmosAdmin::t('amosadmin', 'Profile image'),
                 'tightCouplingField' => AmosAdmin::t('amosadmin', 'Gruppo di appartenenza'),
+                'profiles' => AmosAdmin::t('amosadmin', '#profile_users'),
             ]
         );
     }
@@ -2047,5 +2054,42 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
         return $id;
     }
 
-
+    /**
+     *
+     * @param array $profiles
+     */
+    public function assignProfiles($profiles = [])
+    {
+        try {
+            $changeDash = false;
+            $auth       = \Yii::$app->authManager;
+            if (empty($profiles) && !empty($this->adminModule->defaultProfiles)) {
+                $profiles = $this->adminModule->defaultProfiles;
+            }
+            if (!empty($profiles)) {
+                foreach ($profiles as $v) {
+                    $changeDash                       = true;
+                    $newAuth                          = new UserProfileClassesUserMm();
+                    $newAuth->user_id                 = $this->user_id;
+                    $newAuth->user_profile_classes_id = $v;
+                    $newAuth->save(false);
+                    $permissions                      = UserProfileClassesAuthMm::find()->andWhere(['user_profile_classes_id' => $v])->asArray()->all();
+                    foreach ($permissions as $value) {
+                        if (empty($auth->getAssignment($value['item_id'], $this->user_id))) {
+                            $rolePerm = $auth->getRole($value['item_id']);
+                            if (empty($rolePerm)) {
+                                $rolePerm = $auth->getPermission($value['item_id']);
+                            }
+                            $auth->assign($rolePerm, $this->user_id);
+                        }
+                    }
+                }
+                if ($changeDash && $this->adminModule->resetDashboardAfterUpdateProfiles) {
+                    \open20\amos\dashboard\utility\DashboardUtility::resetDashboardsByUser($this->user_id);
+                }
+            }
+        } catch (Exception $ex) {
+            \Yii::getLogger()->log($ex->getMessage(), Logger::LEVEL_ERROR);
+        }
+    }
 }

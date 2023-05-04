@@ -55,8 +55,10 @@ class UserDropController extends Controller
      */
     public function dropEventsInvitation($user){
         if(\Yii::$app->getModule('events')){
-            \open20\amos\events\models\EventInvitation::deleteAll(['user_id' => $user->id]);
-            \open20\amos\events\models\EventInvitation::deleteAll(['email' => $user->email]);
+            $invitation =  \open20\amos\events\models\EventInvitation::find()->andWhere(['OR',['email' => $user->email],['user_id' => $user->id]])->all();
+            foreach($invitation as $item){
+                $item->delete();
+            }
         }
     }
 

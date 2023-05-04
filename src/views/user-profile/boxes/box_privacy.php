@@ -36,7 +36,7 @@ if (isset(\Yii::$app->params['linkConfigurations']['privacyPolicyLinkCommon'])) 
         <div class="row">
             <?php if (!isset(\Yii::$app->params['linkConfigurations']['privacyPolicyLinkCommon'])) : ?>
                 <div class="col-xs-12">
-                    <?= $form->field($model, 'privacy')->label('<a data-toggle="modal" data-target="#modalPrivacy">Visualizza e accetta il documento della privacy</a>')->checkbox() ?>
+                    <?= $form->field($model, 'privacy')->label('<a data-toggle="modal" href="#" data-target="#modalPrivacy">Visualizza e accetta il documento della privacy</a>')->checkbox() ?>
                 </div>
             <?php else : ?>
                 <div class="col-xs-12">

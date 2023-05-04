@@ -35,6 +35,7 @@ $this->params['breadcrumbs'][] = AmosAdmin::t('amosadmin', 'Aggiorna');
         'model' => $model,
         'tipologiautente' => $tipologiautente,
         'permissionSave' => $permissionSave,
+        'profiles' => $profiles,
         'tabActive' => $tabActive
     ]) ?>
 </div>

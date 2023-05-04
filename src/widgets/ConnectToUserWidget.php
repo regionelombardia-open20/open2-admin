@@ -29,11 +29,12 @@ use yii\redactor\widgets\Redactor;
  */
 class ConnectToUserWidget extends Widget
 {
-    const MODAL_CONFIRM_BTN_OPTIONS = ['class' => 'btn btn-primary btn-connect-to-user btn-connect-to-user-confirm', 'tabindex' => 1];
+    const MODAL_CONFIRM_BTN_OPTIONS = ['class' => 'btn btn-primary btn-connect-to-user btn-connect-to-user-confirm', 'tabindex' => 0];
     const MODAL_CANCEL_BTN_OPTIONS = [
         'class' => 'btn btn-secondary btn-connect-to-user btn-connect-to-user-cancel',
         'data-dismiss' => 'modal',
-        'tabindex' => 1
+        'tabindex' => 0,
+        'href' =>'#'
     ];
     const BTN_CLASS_DFL = 'btn btn-primary btn-connect-to-user';
 

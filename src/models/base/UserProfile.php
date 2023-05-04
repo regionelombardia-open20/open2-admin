@@ -95,6 +95,7 @@ use yii\helpers\ArrayHelper;
  * @property integer $user_id
  * @property integer $delete_token
  * @property integer $notify_from_editorial_staff
+ * @property integer $notify_tagging_user_in_content
  * @property string $created_at
  * @property string $updated_at
  * @property string $deleted_at
@@ -252,7 +253,8 @@ class UserProfile extends NotifyAuditRecord
                 'prevalent_partnership_id',
                 'enable_facilitator_box',
                 'external_facilitator_id',
-                'count_logins'
+                'count_logins',
+                'notify_tagging_user_in_content'
             ], 'integer'],
             [[
                 'nascita_data',
@@ -732,4 +734,10 @@ class UserProfile extends NotifyAuditRecord
         return $this->hasOne(\open20\amos\admin\models\UserProfileExternalFacilitator::className(), ['user_profile_id' => 'id'])->orderBy('id DESC');
     }
 
+    public function getProfileClasses()
+    {
+        return $this->hasMany(\open20\amos\admin\models\UserProfileClasses::className(),
+                ['id' => 'user_profile_classes_id'])->viaTable(\open20\amos\admin\models\UserProfileClassesUserMm::tableName(),
+                ['user_id' => 'user_id']);
+    }
 }

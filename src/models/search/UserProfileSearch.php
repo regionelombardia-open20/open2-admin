@@ -24,6 +24,8 @@ use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\data\Pagination;
 use open20\amos\admin\models\UserContact;
+use open20\amos\core\interfaces\CmsModelInterface;
+use open20\amos\core\record\CmsField;
 
 /**
  * Class UserProfileSearch
@@ -34,7 +36,7 @@ use open20\amos\admin\models\UserContact;
  *
  * @package open20\amos\admin\models\search
  */
-class UserProfileSearch extends UserProfile implements SearchModelInterface
+class UserProfileSearch extends UserProfile implements SearchModelInterface, CmsModelInterface
 {
     /**
      * @var string $username
@@ -657,5 +659,107 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
         }
 
         return $searchResult;
+    }
+
+    public function baseUsersQuery($params)
+    {
+
+//        $tableName = $this->tableName();
+        $query = $this->baseSearch($params)
+            ->andWhere(['user_profile.validato_almeno_una_volta' => 1]);
+
+        return $query;
+    }
+
+    /**
+     * Search method useful to retrieve news to show in frontend (with cms)
+     *
+     * @param $params
+     * @param int|null $limit
+     * @return ActiveDataProvider
+     */
+    public function cmsSearch($params, $limit = null)
+    {
+        $params = array_merge($params, Yii::$app->request->get());
+        $this->load($params);
+        $query  = $this->baseUsersQuery($params);
+      
+        $dataProvider = new \yii\data\ActiveDataProvider([
+            'query' => $query,
+            'sort' => [
+                'defaultOrder' => [
+                    'cognome' => SORT_ASC,
+                    'nome' => SORT_ASC,
+                ],
+            ],
+        ]);
+
+        if (!empty($params["withPagination"])) {
+            $dataProvider->setPagination(['pageSize' => $limit]);
+            $query->limit(null);
+        } else {
+            $query->limit($limit);
+        }
+
+        if (!empty($params["conditionSearch"])) {
+            $commands = explode(";", $params["conditionSearch"]);
+            foreach ($commands as $command) {
+                $query->andWhere(eval("return ".$command.";"));
+            }
+        }
+
+        return $dataProvider;
+    }
+
+    /**
+     * @return array
+     */
+    public function cmsViewFields()
+    {
+        $viewFields = [];
+
+//    array_push($viewFields, new CmsField("titolo", "TEXT", 'amosnews', $this->attributeLabels()["titolo"]));
+//    array_push($viewFields, new CmsField("descrizione_breve", "TEXT", 'amosnews', $this->attributeLabels()['descrizione_breve']));
+//    array_push($viewFields, new CmsField("newsImage", "IMAGE", 'amosnews', $this->attributeLabels()['newsImage']));
+//    array_push($viewFields, new CmsField("data_pubblicazione", "DATE", 'amosnews', $this->attributeLabels()['data_pubblicazione']));
+
+        $viewFields[] = new CmsField("nome", "TEXT", 'amosadmin', $this->attributeLabels()["nome"]);
+        $viewFields[] = new CmsField("cognome", "TEXT", 'amosadmin', $this->attributeLabels()['descrizione_breve']);
+        $viewFields[] = new CmsField("userProfileImage", "IMAGE", 'amosadmin',
+            $this->attributeLabels()['userProfileImage']);
+        $viewFields[] = new CmsField("created_at", "DATE", 'amosadmin', $this->attributeLabels()['created_at']);
+
+        return $viewFields;
+    }
+
+    /**
+     * @return array
+     */
+    public function cmsSearchFields()
+    {
+        $searchFields = [];
+
+        $searchFields[] = new CmsField("nome", "TEXT");
+        $searchFields[] = new CmsField("cognome", "TEXT");
+
+        return $searchFields;
+    }
+
+    /**
+     * @param int $id
+     * @return boolean
+     */
+    public function cmsIsVisible($id)
+    {
+        $retValue = false;
+
+        if (isset($id)) {
+            $md = $this->findOne($id);
+            if (!is_null($md)) {
+                $retValue = $md->validato_almeno_una_volta;
+            }
+        }
+
+        return $retValue;
     }
 }

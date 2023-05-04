@@ -657,9 +657,9 @@ class ChangeUserController extends CrudController
      */
     protected function duplicateUserAvatar($oldUserProfile, $newUserProfile, $userProfileClassName)
     {
-        $oldUserImage = File::findOne(['model' => $userProfileClassName, 'attribute' => 'userProfileImage', 'itemId' => $oldUserProfile->id]);
+        $oldUserImage = File::findOne(['model' => $userProfileClassName, 'attribute' => 'userProfileImage', 'item_id' => $oldUserProfile->id]);
         if (!is_null($oldUserImage)) {
-            $newUserImage = File::findOne(['model' => $userProfileClassName, 'attribute' => 'userProfileImage', 'itemId' => $newUserProfile->id]);
+            $newUserImage = File::findOne(['model' => $userProfileClassName, 'attribute' => 'userProfileImage', 'item_id' => $newUserProfile->id]);
             if (is_null($newUserImage)) {
                 $newUserImage = new File();
                 $newUserImage->setAttributes($oldUserImage->attributes);
@@ -669,10 +669,10 @@ class ChangeUserController extends CrudController
                 $newUserImage->setAttributes($oldUserImage->attributes);
                 $newUserImage->id = $newUserFileId;
             }
-            $newUserImage->itemId = $newUserProfile->id;
+            $newUserImage->item_id = $newUserProfile->id;
             $ok = $newUserImage->save(false);
         } elseif (empty($newUserProfile->userProfileImage)) {
-            $newUserImage = File::findOne(['model' => $userProfileClassName, 'attribute' => 'userProfileImage', 'itemId' => $newUserProfile->id]);
+            $newUserImage = File::findOne(['model' => $userProfileClassName, 'attribute' => 'userProfileImage', 'item_id' => $newUserProfile->id]);
             if (!is_null($newUserImage)) {
                 $ok = true;
             } else {

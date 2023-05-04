@@ -231,7 +231,6 @@ $form = ActiveForm::begin([
 <?php } ?>
 
 <div class="loading" id="loader" hidden></div>
-<input type="hidden" name="_csrf" value="<?=\Yii::$app->request->csrfToken;?>">
 <div class="user-form col-xs-12">
     <div id="card-section" class="row">
         <div class="col-xs-12">
@@ -468,19 +467,43 @@ $form = ActiveForm::begin([
 
 
             <!-- ADMIN -->
-            <?php if (Yii::$app->user->can('PRIVILEGES_MANAGER')) : ?>
-                <?php $privilegesModule = Yii::$app->getModule('privileges'); ?>
-                <?php if (!empty($privilegesModule)) : ?>
-                    <?php $this->beginBlock($idTabAdministration); ?>
-                    <?php if ($model->isNewRecord) : ?>
-                        <?= Alert::widget([
-                            'type' => Alert::TYPE_WARNING,
-                            'body' => AmosAdmin::t('amosadmin', 'Prima di poter gestire le classi di utenza &egrave; necessario salvare l\'utente.'),
-                            'closeButton' => false
-                        ]) ?>
-                    <?php else : ?>
-                        <?php
-                        $this->registerJs("
+            <!-- ADMIN -->
+            <?php
+            if ($adminModule->disablePrivilegesEnableProfiles == true) {
+
+                $this->beginBlock($idTabAdministration);
+                $canPrivileges = Yii::$app->user->can($adminModule->roleOfEditingProfiles);
+                ?>
+                <?=
+                $this->render('boxes/box_profiles',
+                    ['form' => $form, 'model' => $model, 'user' => $user, 'profiles' => $profiles, 'permission' => ($canPrivileges
+                    && \Yii::$app->user->id != $model->user_id), 'manage_profile' => $canPrivileges]);
+                ?>
+                <?php
+                $this->endBlock();
+                $itemsTab[]    = [
+                    'label' => AmosAdmin::t('amosadmin', 'Administration'),
+                    'content' => $this->blocks[$idTabAdministration],
+                    'options' => ['id' => $idTabAdministration],
+                ];
+            } else {
+                if (Yii::$app->user->can('PRIVILEGES_MANAGER')) :
+                    ?>
+                    <?php $privilegesModule = Yii::$app->getModule('privileges'); ?>
+                    <?php if (!empty($privilegesModule)) : ?>
+                        <?php $this->beginBlock($idTabAdministration); ?>
+                        <?php if ($model->isNewRecord) : ?>
+                            <?=
+                            Alert::widget([
+                                'type' => Alert::TYPE_WARNING,
+                                'body' => AmosAdmin::t('amosadmin',
+                                    'Prima di poter gestire le classi di utenza &egrave; necessario salvare l\'utente.'),
+                                'closeButton' => false
+                            ])
+                            ?>
+                        <?php else : ?>
+                            <?php
+                            $this->registerJs("
                             $(\"ajax-privileges-loading\").hide();
                             $.ajax({
                                     url: \"/amosadmin/user-profile/privileges-ajax?userId={$model->user_id}\",
@@ -496,20 +519,23 @@ $form = ActiveForm::begin([
                                     }
                             });
                             ", \yii\web\View::POS_READY);
+                            ?>
+                            <div id="ajax-privileges-loading" class="loading"></div>
+                            <div id="ajax-privileges"></div>
+                        <?php endif; ?>
+                        <?php $this->endBlock(); ?>
+                        <?php
+                        $itemsTab[] = [
+                            'label' => AmosAdmin::t('amosadmin', 'Administration'),
+                            'content' => $this->blocks[$idTabAdministration],
+                            'options' => ['id' => $idTabAdministration],
+                        ];
                         ?>
-                        <div id="ajax-privileges-loading" class="loading"></div>
-                        <div id="ajax-privileges"></div>
                     <?php endif; ?>
-                    <?php $this->endBlock(); ?>
                     <?php
-                    $itemsTab[] = [
-                        'label' => AmosAdmin::t('amosadmin', 'Administration'),
-                        'content' => $this->blocks[$idTabAdministration],
-                        'options' => ['id' => $idTabAdministration],
-                    ];
-                    ?>
-                <?php endif; ?>
-            <?php endif; ?>
+                endif;
+            }
+            ?>
 
             <?php
             if (isset($tabActive)) {
@@ -523,7 +549,8 @@ $form = ActiveForm::begin([
             <?= Tabs::widget([
                 'encodeLabels' => false,
                 'items' => $itemsTab,
-                'hideTagsTab' => !Yii::$app->user->can('FORM_TAG_TABS_PERMISSION')
+                'hideTagsTab' => !Yii::$app->user->can('FORM_TAG_TABS_PERMISSION'),
+                'cardTagsView' => $adminModule->cardTagsView,
                 /* 'clientEvents' => [
                   'shown.bs.tab' => new JsExpression('reloadGoogleMaps')
                   ] */

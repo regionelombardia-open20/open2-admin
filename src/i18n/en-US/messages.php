@@ -896,5 +896,6 @@ return [
     "#beforeActionCtaLogin" => "log in on the platform",
     "#beforeActionCtaLoginTitle" => "Click here to log in on the platform {platformName}",
     "#beforeActionSubtitleSectionGuest" => "To participate, {ctaLoginRegister}",
-    "#beforeActionSubtitleSectionLogged" => ""
+    "#beforeActionSubtitleSectionLogged" => "",
+    '#profile_users' => 'Profiles',
 ];

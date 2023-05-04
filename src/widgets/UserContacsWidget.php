@@ -126,7 +126,7 @@ class UserContacsWidget extends Widget
                     }
                     return Html::a($name, ['/'.((!empty(\Yii::$app->params['befe']) && \Yii::$app->params['befe'] == true)? 'amosadmin' : AmosAdmin::getModuleName()).'/user-profile/view', 'id' => $userProfile->id ], [
                         'title' => AmosAdmin::t('amoscommunity', 'Apri il profilo di {nome_profilo}', ['nome_profilo' => $name]),
-                        'data' => $confirm
+                        'data-url-confirm' => $confirm
                     ]);
                 }
             ],
@@ -278,9 +278,7 @@ class UserContacsWidget extends Widget
     public function getConfirm(){
         $controller = Yii::$app->controller;
         $isActionUpdate = ($controller->action->id == 'update');
-        $confirm = $isActionUpdate ? [
-            'confirm' => \open20\amos\core\module\BaseAmosModule::t('amoscore', '#confirm_exit_without_saving')
-        ] : null;
+        $confirm = $isActionUpdate ? \open20\amos\core\module\BaseAmosModule::t('amoscore', '#confirm_exit_without_saving') : null;
         return $confirm;
     }
 }

@@ -108,13 +108,19 @@ $this->registerJs($jsReadMore);
                     <!-- IMPERSONATE -->
                     <?php
                     if ($model->user_id != Yii::$app->user->id && Yii::$app->user->can('IMPERSONATE_USERS')) {
-                        echo Html::a(
-                            AmosIcons::show('assignment-account', ['class' => 'btn-cancel-search']) . Html::tag('span',AmosAdmin::t('amosadmin', 'Impersonate')),
-                            \Yii::$app->urlManager->createUrl(['/'.AmosAdmin::getModuleName().'/security/impersonate',
-                                'user_id' => $model->user_id
-                            ]),
-                            ['class' => 'btn btn-secondary']
+                        $user = new \open20\amos\core\user\AmosUser();
+                        $user->setIdentity(
+                            \open20\amos\core\user\User::findOne(['id' => $model->user_id])
                         );
+                        if(Yii::$app->user->can('ADMIN') || !$user->can("ADMIN")){
+                            echo Html::a(
+                                AmosIcons::show('assignment-account', ['class' => 'btn-cancel-search']) . AmosAdmin::t('amosadmin', 'Impersonate'),
+                                \Yii::$app->urlManager->createUrl(['/'.AmosAdmin::getModuleName().'/security/impersonate',
+                                    'user_id' => $model->user_id
+                                ]),
+                                ['class' => 'btn btn-action-primary']
+                            );
+                        }
                     }
                     ?>
                     <!-- end IMPERSONATE -->
@@ -352,13 +358,29 @@ $this->registerJs($jsReadMore);
             <!-- end NETWORK -->
 
             <!-- ADMIN - PRIVILEGES -->
-            <?php if (Yii::$app->user->can('PRIVILEGES_MANAGER')) {
-                $accordionAdmin = '';
+            <?php
+            $privilegesView = false;
+            $accordionAdmin = '';
+            if ($adminModule->disablePrivilegesEnableProfiles == true) {
+                $profileClasses = $model->profileClasses;
+                $privilegesView = true;
+                if (!empty($profileClasses)) {
+                    $accordionAdmin .= '<ul>';
+                    foreach ($model->profileClasses as $item) {
+                        $accordionAdmin .= '<li><strong>'.$item->name.'</strong> '.$item->description.'</li>';
+                    }
+                    $accordionAdmin .= '</ul>';
+                } else {
+                    $accordionAdmin .= AmosAdmin::t('amosadmin', 'Nessun profilo associato');
+                }
+            } else if (Yii::$app->user->can('PRIVILEGES_MANAGER')) {
+
                 $privilegesModule = Yii::$app->getModule('privileges');
                 if (!empty($privilegesModule)) {
                     $accordionAdmin = \open20\amos\privileges\widgets\UserPrivilegesWidget::widget(['userId' => $model->user_id]);
                 }
-                
+            }
+            if ($privilegesView) {
                 echo AccordionWidget::widget([
                     'items' => [
                         [
@@ -379,7 +401,8 @@ $this->registerJs($jsReadMore);
                         'class' => 'sede-accordion'
                     ]
                 ]);
-            } ?>
+            }
+            ?>
             <!-- end ADMIN - PRIVILEGES -->
         </div>
 

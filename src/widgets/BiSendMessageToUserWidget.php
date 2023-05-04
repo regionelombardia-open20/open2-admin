@@ -17,7 +17,6 @@ use open20\amos\core\helpers\Html;
 use open20\amos\core\user\User;
 use Yii;
 use yii\base\Widget;
-use yii\bootstrap\Modal;
 use yii\helpers\ArrayHelper;
 use yii\redactor\widgets\Redactor;
 
@@ -25,16 +24,14 @@ use yii\redactor\widgets\Redactor;
  * Class SendMessageToUserWidget
  * @package open20\amos\admin\widgets
  */
-class SendMessageToUserWidget extends Widget
+class BiSendMessageToUserWidget extends Widget
 {
-    const MODAL_CONFIRM_BTN_OPTIONS = ['class' => 'btn btn-primary btn-connect-to-user', 'tabindex' => 0];
+    const MODAL_CONFIRM_BTN_OPTIONS = ['class' => 'btn btn-primary btn-connect-to-user'];
     const MODAL_CANCEL_BTN_OPTIONS = [
-        'class' => 'btn btn-secondary btn-connect-to-user',
-        'data-dismiss' => 'modal',
-        'tabindex' => 0
-
+        'class' => 'btn btn-outline-primary btn-connect-to-user',
+        'data-dismiss' => 'modal'
     ];
-    const BTN_CLASS_DFL = 'btn btn-primary btn-connect-to-user';
+    const BTN_CLASS_DFL = 'btn btn-xs btn-primary btn-connect-to-user mt-2';
 
     /**
      * @var int $userId
@@ -117,6 +114,8 @@ class SendMessageToUserWidget extends Widget
             return '';
         }
 
+        $currentAsset = open20\design\assets\BootstrapItaliaDesignAsset::register($this);
+
         // Register javascript to send private message to connected users
         $js = <<<JS
         $(".send-message-btn").on("click",function(e) {
@@ -160,39 +159,65 @@ JS;
             $titleLink = AmosAdmin::t('amosadmin', 'Send message');
             $dataToggle = 'modal';
             $dataTarget = '#sendMessagePopup-' . $recipientId;
-            if (!$this->onlyButton) {
-                Modal::begin([
-                    'id' => 'sendMessagePopup-' . $recipientId,
-                    'header' => AmosAdmin::t('amosadmin', "Send message to") . " " . $recipientName
-                ]);
-                echo
-                    '<div class="col-xs-12 nop">'
-                    . '<label class="hidden" for="chat-message">' . AmosAdmin::tHtml('amosadmin',
-                        'Message') . '</label>'
-                    . Redactor::widget([
-                        'name' => 'text',
-                        'options' => [
-                            'id' => 'chat-message_' . $recipientId,
-                            'class' => 'form-control send-message',
-                            'placeholder' => AmosAdmin::t('amosadmin', 'Write message...')
-                        ],
-                        'clientOptions' => [
-                            'focus' => true,
-                            'buttons' => $chatModule->formRedactorButtons,
-                            'lang' => substr(Yii::$app->language, 0, 2)
-                        ]
-                    ]);
+            $modalId = 'sendMessagePopup-' . $recipientId;
 
-                $btnOptions = array_merge($this->modalButtonConfirmationOptions);
-                $btnOptions['class'] .= ' send-message-btn';
-                echo Html::tag('div',
-                        Html::a(AmosAdmin::t('amosadmin', 'Cancel'), null,
-                            $this->modalButtonCancelOptions)
-                        . Html::a(AmosAdmin::t('amosadmin', 'Send message'), '/chat/default/send-message?contactId=' . $recipientId,
-                            ArrayHelper::merge($btnOptions, ['id' => 'send-message-btn-' . $recipientId, 'data-recipient_id' => $recipientId])),
-                        ['class' => 'pull-right m-15-0']
-                    ) . '</div>';
-                Modal::end();
+            $modalTitle = AmosAdmin::t('amosadmin', "Send message to") . " " . $recipientName;
+
+            $modalBody = '<label class="sr-only" for="chat-message">' . AmosAdmin::tHtml('amosadmin', 'Message') . '</label>' .
+                Redactor::widget([
+                    'name' => 'text',
+                    'options' => [
+                        'id' => 'chat-message_' . $recipientId,
+                        'class' => 'form-control send-message',
+                        'placeholder' => AmosAdmin::t('amosadmin', 'Write message...')
+                    ],
+                    'clientOptions' => [
+                        'focus' => true,
+                        'buttons' => $chatModule->formRedactorButtons,
+                        'lang' => substr(Yii::$app->language, 0, 2)
+                    ]
+                ]);
+
+            $btnOptions = array_merge($this->modalButtonConfirmationOptions);
+            $btnOptions['class'] .= ' send-message-btn';
+
+            $modalFooter = Html::tag(
+                'div',
+                Html::button(
+                    AmosAdmin::t('amosadmin', 'Cancel'),
+                    $this->modalButtonCancelOptions
+                )
+                    . Html::a(
+                        AmosAdmin::t('amosadmin', 'Send message'),
+                        '/chat/default/send-message?contactId=' . $recipientId,
+                        ArrayHelper::merge($btnOptions, ['id' => 'send-message-btn-' . $recipientId, 'data-recipient_id' => $recipientId])
+                    ),
+                ['class' => '']
+            );
+
+            if (!$this->onlyButton) {
+
+                echo '<div class="modal alert-modal" tabindex="-1" role="dialog" id="' . $modalId . '">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <svg class="icon">
+                        <use xlink:href="' . $currentAsset->baseUrl . '/sprite/material-sprite.svg#forum"></use>
+                        </svg>
+                        <h5 class="modal-title">' . $modalTitle . '</h5>
+                      </div>
+                      <div class="modal-body">
+                      ' . $modalBody . '
+                      </div>
+                      <div class="modal-footer">
+                      ' . $modalFooter . '
+                      </div>
+                    </div>
+                  </div>
+                </div>';
+
+
+                
             }
         }
 
@@ -206,11 +231,16 @@ JS;
         if (!empty($dataTarget) && !empty($dataToggle)) {
             $this->btnOptions = ArrayHelper::merge($this->btnOptions, [
                 'data-target' => $dataTarget,
-                'data-toggle' => $dataToggle,
-                'href' => '#'
+                'data-toggle' => $dataToggle
             ]);
         }
-        $btn = Html::a($title, $buttonUrl, $this->btnOptions);
+        
+        if(is_null($buttonUrl)){
+            $btn = Html::button($title, $this->btnOptions);
+        } else {
+            $btn = Html::a($title, $buttonUrl, $this->btnOptions);
+        }
+
         if (!empty($this->divClassBtnContainer)) {
             $btn = Html::tag('div', $btn, ['class' => $this->divClassBtnContainer]);
         }
