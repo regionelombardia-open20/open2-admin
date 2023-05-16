@@ -24,7 +24,9 @@ $appName = Yii::$app->name;
 
 $this->title = AmosAdmin::t('amosadmin', 'Reimposta password {appName}', ['appName' => $appName]);
 $this->registerCssFile('http://fonts.googleapis.com/css?family=Roboto');
-
+if(!empty($profile)) {
+    $this->params['profile'] = $profile;
+}
 ?>
 
 <table style="line-height: 18px;" width=" 600" border="0" cellpadding="0" cellspacing="0" align="center">

@@ -32,6 +32,10 @@ $regWihSpid = \Yii::$app->request->post('reg_with_spid');
 $this->title = AmosAdmin::t('amosadmin', 'Registrazione {appName}', ['appName' => $appName]);
 $this->registerCssFile('http://fonts.googleapis.com/css?family=Roboto');
 
+if(!empty($profile)) {
+    $this->params['profile'] = $profile;
+}
+
 ?>
 
 <table style="line-height: 18px;" width=" 600" border="0" cellpadding="0" cellspacing="0" align="center">

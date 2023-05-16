@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
         <div class="col-xs-12 col-sm-6 m-t-30">
             <?php $label = AmosAdmin::t('amosadmin', 'Confirm email');
             if($inserisciCodice){
-                $label = AmosAdmin::t('amosadmin', 'Invia dinuovo il codice');
+                $label = AmosAdmin::t('amosadmin', 'Invia di nuovo il codice');
             }?>
             <?php echo \open20\amos\core\helpers\Html::submitButton($label, [
                     'class' => 'btn btn-primary',

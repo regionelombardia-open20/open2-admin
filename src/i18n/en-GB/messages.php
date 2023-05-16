@@ -923,5 +923,6 @@ return [
     '#disable_collaborations_notifications_submit_button' => 'Disable',
     '#disable_collaborations_notifications_submit_button_title' => 'Disable collaboration proposals notifications',
     '#disable_notification_info_message' => 'You can re-enable notifications related to collaboration proposals from the "Notifications" section of your profile.',
-    '#disable_notification_message_already_disabled' => 'Notifications already disabled'
+    '#disable_notification_message_already_disabled' => 'Notifications already disabled',
+    "Invia di nuovo il codice" => "Send code again"
 ];
