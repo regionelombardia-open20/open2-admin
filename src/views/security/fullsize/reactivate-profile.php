@@ -45,22 +45,21 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?= $form->field($model, 'email')->textInput([
                             'maxlength' => true,
                             'placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_email_reactivate')
-                    ])->label('')?>
-                    <?= AmosIcons::show('mail', '', AmosIcons::IC) ?>
+                    ])?>
                 </div>
                 <div class="col-xs-12">
                     <?= $form->field($model, 'message')->textarea([
                             'maxlength' => true,
                             'rows' => 6,
                             'placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_msg_reactivate')
-                    ])->label('')?>
+                    ])?>
                 </div>
                 <div class="col-xs-12 action">
                     <?= Html::submitButton(AmosAdmin::t('amosadmin', '#reactivate_profile_send'), ['class' => 'btn btn-secondary', 'title' => AmosAdmin::t('amosadmin', '#reactivate_profile_send_title')]) ?>
                     <?php if (\Yii::$app->request->get() && array_key_exists("userdisabled", \Yii::$app->request->get())) { ?>
-                        <?= Html::a(AmosAdmin::t('amosadmin', '#go_to_login'), ['/admin/security/login'], ['class' => 'btn btn-navigation-primary', 'title' => AmosAdmin::t('amosadmin', '#go_to_login_title')]) ?>
+                        <?= Html::a(AmosAdmin::t('amosadmin', '#go_to_login'), ['/'.AmosAdmin::getModuleName().'/security/login'], ['class' => 'btn btn-navigation-primary', 'title' => AmosAdmin::t('amosadmin', '#go_to_login_title')]) ?>
                     <?php } else { ?>
-                        <?= Html::a(AmosAdmin::t('amosadmin', '#go_to_register'), ['/admin/security/register'], ['class' => 'btn btn-navigation-primary', 'title' => AmosAdmin::t('amosadmin', '#go_to_register_title')]) ?>
+                        <?= Html::a(AmosAdmin::t('amosadmin', '#go_to_register'), ['/'.AmosAdmin::getModuleName().'/security/register'], ['class' => 'btn btn-navigation-primary', 'title' => AmosAdmin::t('amosadmin', '#go_to_register_title')]) ?>
                     <?php } ?>
                 </div>
             </div>

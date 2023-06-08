@@ -29,6 +29,10 @@ use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\log\Logger;
+use open20\amos\admin\models\UserProfileClassesAuthMm;
+use open20\amos\admin\models\UserProfileClassesUserMm;
+use open20\amos\admin\models\UserProfileClasses;
+use yii\helpers\StringHelper;
 
 /**
  * Class UserProfileController
@@ -88,7 +92,7 @@ class UserProfileController extends CrudController
 
         $this->iconView = [
             'name' => 'icon',
-            'label' => AmosIcons::show('grid').Html::tag('p', AmosAdmin::t('amosadmin', 'Icone')),
+            'label' => AmosIcons::show('view-module').Html::tag('p', AmosAdmin::t('amosadmin', 'Card')),
             'url' => '?currentView=icon'
         ];
 
@@ -101,8 +105,8 @@ class UserProfileController extends CrudController
         $this->forceDefaultViewType = $this->adminModule->forceDefaultViewType;
         $this->defaultViews         = [
             'icon' => $this->iconView,
-            'grid' => $this->gridView,
             'list' => $this->listView,
+            'grid' => $this->gridView,
         ];
         $availableViews             = [];
         foreach ($this->adminModule->defaultListViews as $view) {
@@ -126,28 +130,29 @@ class UserProfileController extends CrudController
      */
     protected function setCreateNewBtnParams()
     {
-        Yii::$app->view->params['createNewBtnParams'] = [
-            'createNewBtnLabel' => AmosAdmin::t('amosadmin', 'Add new user')
-        ];
-
-        if (\Yii::$app->getModule('invitations') && (\Yii::$app->getUser()->can('INVITATIONS_BASIC_USER') || \Yii::$app->getUser()->can('INVITATIONS_ADMINISTRATOR'))
-            &&
+        // Yii::$app->view->params['createNewBtnParams'] = [
+        //     'createNewBtnLabel' => AmosAdmin::t('amosadmin', 'Add new user')
+        // ];
+    
+        if (
+            !$this->adminModule->disableInvitations &&
+            \Yii::$app->getModule('invitations') &&
+            (\Yii::$app->getUser()->can('INVITATIONS_BASIC_USER') || \Yii::$app->getUser()->can('INVITATIONS_ADMINISTRATOR')) &&
             !$this->adminModule->checkManageInviteBlackList() //aggiunta chiamata metodo checkMAnageInviteBlackList
-        ) {
-            $widget                                      = new \open20\amos\invitations\widgets\icons\WidgetIconInvitations();
-            $invitations                                 = Html::a(AmosAdmin::t('amosadmin', 'Gestisci inviti'),
-                    $widget->url, ['class' => 'btn btn-navigation-primary']);
-            Yii::$app->view->params['additionalButtons'] = [
-                'htmlButtons' => [$invitations]
-            ];
-        }
+         ) {
+             $widget                                      = new \open20\amos\invitations\widgets\icons\WidgetIconInvitations();
+             $invitations                                 = Html::a(AmosAdmin::t('amosadmin', 'Gestisci inviti'),
+                     $widget->url, ['class' => 'btn btn-navigation-primary']);
+             Yii::$app->view->params['additionalButtons'] = [
+                 'htmlButtons' => [$invitations]
+             ];
+         }
 
-        $createNewBtnParams = yii\helpers\ArrayHelper::merge(Yii::$app->view->params['createNewBtnParams'],
-                [
-                'layout' => "{buttonCreateNew}"
-        ]);
-
-        Yii::$app->view->params['createNewBtnParams'] = $createNewBtnParams;
+//         $createNewBtnParams = yii\helpers\ArrayHelper::merge(Yii::$app->view->params['createNewBtnParams'],
+//                 [
+//                 'layout' => "{buttonCreateNew}"
+//         ]);
+//        Yii::$app->view->params['createNewBtnParams'] = $createNewBtnParams;
     }
 
     /**
@@ -200,6 +205,24 @@ class UserProfileController extends CrudController
         $this->setTitleAndBreadcrumbs(AmosAdmin::t('amosadmin', 'All users'));
         $this->view->params['currentDashboard'] = $this->getCurrentDashboard();
 
+        if (!\Yii::$app->user->isGuest) {
+            $this->view->params['titleSection'] = AmosAdmin::t('amosadmin', 'Tutti gli utenti');
+            if ($this->adminModule->completeBypassWorkflow) {
+                $this->view->params['labelLinkAll'] = AmosAdmin::t('amosadmin', 'La mia rete');
+                $this->view->params['urlLinkAll']   = '/' . AmosAdmin::getModuleName() . '/user-profile/my-network';
+                $this->view->params['titleLinkAll'] = AmosAdmin::t(
+                    'amosadmin',
+                    'Visualizza gli utenti della mia rete'
+                );
+            } else {
+                $this->view->params['labelLinkAll'] = AmosAdmin::t('amosadmin', 'Partecipanti');
+                $this->view->params['urlLinkAll']   = '/' . AmosAdmin::getModuleName() . '/user-profile/validated-users';
+                $this->view->params['titleLinkAll'] = AmosAdmin::t(
+                    'amosadmin',
+                    'Visualizza la lista di tutti gli utenti validati'
+                );
+            }
+        }       
         return parent::actionIndex($this->layout);
     }
 
@@ -215,6 +238,11 @@ class UserProfileController extends CrudController
         $this->setUpLayout('main');
 
         $this->model = $this->findModel($id);
+
+        if(\Yii::$app->request->post() && $this->model->load(\Yii::$app->request->post())){
+            $this->model->save(false);
+            return $this->redirect(['view','id'=> $id]);
+        }
 
         return $this->render(
                 'view', [
@@ -245,6 +273,8 @@ class UserProfileController extends CrudController
         /** @var User $user */
         $user = AmosAdmin::instance()->createModel('User');
 
+        $profiles = ArrayHelper::map(UserProfileClasses::find()->andWhere(['enabled' => 1])->all(), 'id', 'name');
+
         // Salvo l'utente e subito dopo salvo il profilo agganciando l'utente
         if ($user->load(Yii::$app->request->post()) && $user->validate()) {
             if (!($profile->load(Yii::$app->request->post()) && $profile->validate())) {
@@ -255,6 +285,7 @@ class UserProfileController extends CrudController
                 return $this->render('create',
                         [
                         'model' => $profile,
+                        'profiles' => $profiles,
                         'user' => $user,
                         'permissionSave' => 'USERPROFILE_CREATE'
                 ]);
@@ -290,17 +321,20 @@ class UserProfileController extends CrudController
             }
 
             //If admin module bypasses workflow flag is set, user profile is already validated
-            if (($profile->status == UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) || $this->adminModule->bypassWorkflow) {
+            if (($profile->status == UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) || ($this->adminModule->bypassWorkflow || $this->adminModule->completeBypassWorkflow)) {
                 $profile->validato_almeno_una_volta = 1;
             }
 
             $savedProfile = $profile->save();
 
 
-            $postTightCoupling = (!empty(\Yii::$app->request->post()['UserProfile']['tightCouplingField']) ? \Yii::$app->request->post()['UserProfile']['tightCouplingField']
-                    : []);
+            $postTightCoupling = (!empty(\Yii::$app->request->post()['UserProfile']['tightCouplingField']) ?
+                \Yii::$app->request->post()['UserProfile']['tightCouplingField'] :
+                []
+            );
             $this->setTightCouplingUser($profile->user_id, $postTightCoupling);
 
+            $this->assignProfileClasses($profile, \Yii::$app->request->post(), []);
 
             //setting personal validation scope for contents if cwh module is enabled
             if ($savedProfile) {
@@ -351,11 +385,11 @@ class UserProfileController extends CrudController
                     $ok = $notifyModule->setDefaultNotificationsConfs($user->id);
                 }
                 if (!$ok) {
-                    Yii::$app->getSession()->addFlash('danger',
-                        AmosAdmin::t('amosadmin', 'Error while saving email frequency'));
+                    Yii::$app->getSession()->addFlash('danger', AmosAdmin::t('amosadmin', 'Error while saving email frequency'));
                     return $this->render('create',
                             [
                             'model' => $profile,
+                            'profiles' => $profiles,
                             'user' => $user,
                             'permissionSave' => 'USERPROFILE_CREATE',
                     ]);
@@ -364,8 +398,11 @@ class UserProfileController extends CrudController
 
             /** @var AmosAdmin $adminModule */
             $adminModule = \Yii::$app->getModule(AmosAdmin::getModuleName());
-            Yii::$app->getAuthManager()->assign(Yii::$app->getAuthManager()->getRole($adminModule->defaultUserRole),
-                $user->id);
+
+            // Se il ruolo non è associato all'utente, lo si aggiunge
+            if(!in_array($adminModule->defaultUserRole, array_keys(Yii::$app->getAuthManager()->getRolesByUser($user->id)))) {
+                Yii::$app->getAuthManager()->assign(Yii::$app->getAuthManager()->getRole($adminModule->defaultUserRole), $user->id);
+            }
             Yii::$app->getSession()->addFlash('success', AmosAdmin::t('amosadmin', 'Utente creato correttamente.'));
             //return $this->redirect(['view', 'id' => $this->model->id]);
             return $this->redirectOnCreate($profile);
@@ -376,6 +413,7 @@ class UserProfileController extends CrudController
             return $this->render('create',
                     [
                     'model' => $profile,
+                    'profiles' => $profiles,
                     'user' => $user,
                     'permissionSave' => 'USERPROFILE_CREATE',
             ]);
@@ -397,15 +435,22 @@ class UserProfileController extends CrudController
 
         $this->setUpLayout('form');
 
-        $url = Yii::$app->urlManager->createUrl(['/admin/user-profile/update-profile', 'id' => $id]);
-
+        $url = Yii::$app->urlManager->createUrl(['/'.AmosAdmin::getModuleName().'/user-profile/update-profile', 'id' => $id]);
+ 
         if ($render) {
-            $url = Yii::$app->urlManager->createUrl(['/admin/user-profile/update', 'id' => $id]);
+            $url = Yii::$app->urlManager->createUrl(['/'.AmosAdmin::getModuleName().'/user-profile/update', 'id' => $id]);
         }
 
 
         // Finding the user profile model
         $this->model = $this->findModel($id);
+
+        $this->model->profiles = ArrayHelper::map($this->model->profileClasses, 'id', 'id');
+
+        $previousPermissions = ArrayHelper::map(UserProfileClassesUserMm::find()->andWhere(['user_id' => $this->model->user_id])->asArray()->all(),
+                'user_profile_classes_id', 'user_profile_classes_id');
+
+        $profiles = ArrayHelper::map(UserProfileClasses::find()->andWhere(['enabled' => 1])->all(), 'id', 'name');
 
         $this->model->tightCouplingField = $this->getTightCouplingUser($this->model->user_id);
         // Setting the dynamic scenario. It's compiled dinamically by the
@@ -464,7 +509,8 @@ class UserProfileController extends CrudController
                 } else {
                     $this->model->notify_from_editorial_staff = 1;
                 }
-                if ($setRuoli) {
+
+                if ($setRuoli && !$this->adminModule->disablePrivilegesEnableProfiles) {
                     if (!empty($this->forzaListaRuoli)) {
                         // Se mi hanno forzato i ruoli, prendo buoni quelli passati
                         $this->model->setRuoli($this->forzaListaRuoli);
@@ -474,7 +520,7 @@ class UserProfileController extends CrudController
                     }
                 }
 
-                if (($this->model->status == UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) || $this->adminModule->bypassWorkflow) {
+                if (($this->model->status == UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) || ($this->adminModule->bypassWorkflow || $this->adminModule->completeBypassWorkflow)) {
                     $this->model->validato_almeno_una_volta = 1;
                 }
 
@@ -482,24 +528,29 @@ class UserProfileController extends CrudController
                 if (!empty(\Yii::$app->request->post()['UserProfile']['isProfileModified'])) {
                     $isProfileModified = \Yii::$app->request->post()['UserProfile']['isProfileModified'];
                 }
-                if (($currentStatus == UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) && !empty($isProfileModified)
-                    && $isProfileModified == 1) {
+                if (($currentStatus == UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) && !empty($isProfileModified) && $isProfileModified == 1) {
                     $this->model->status = UserProfile::USERPROFILE_WORKFLOW_STATUS_TOVALIDATE;
                 }
 
                 if ($this->model->save() && $this->model->user->save()) {
-                    $postTightCoupling = (!empty(\Yii::$app->request->post()['UserProfile']['tightCouplingField']) ? \Yii::$app->request->post()['UserProfile']['tightCouplingField']
-                            : []);
+                    $postTightCoupling = (!empty(\Yii::$app->request->post()['UserProfile']['tightCouplingField']) ?
+                        \Yii::$app->request->post()['UserProfile']['tightCouplingField'] :
+                        []
+                    );
+
+                    $this->operationsAfterSave();
+
                     $this->setTightCouplingUser($this->model->user_id, $postTightCoupling);
 
                     $this->assignFacilitator($isFacilitatorRoleRemoved);
+
+                    $this->assignProfileClasses($this->model, \Yii::$app->request->post(), $previousPermissions);
 
                     if (empty($this->model->userProfileImage)) {
                         $adminmodule = AmosAdmin::instance();
                         if (!is_null($adminmodule)) {
                             $fileImport = new FileImport();
-                            $ok         = $fileImport->importFileForModel($this->model, 'userProfileImage',
-                                \Yii::getAlias($adminmodule->defaultProfileImagePath), false);
+                            $ok = $fileImport->importFileForModel($this->model, 'userProfileImage', \Yii::getAlias($adminmodule->defaultProfileImagePath), false);
                         }
                     }
 
@@ -520,6 +571,8 @@ class UserProfileController extends CrudController
                             $smsFrequency = Yii::$app->request->post()[NotifyFrequencyWidget::smsFrequencySelectorName()];
                         }
                         if ($atLeastOne) {
+                            $notificationConfContentParams = \Yii::$app->request->post('notificationContent');
+                            $post['notify_contents'] = $notificationConfContentParams;
                             $ok = $notifyModule->saveNotificationConf($this->model->user->id, $emailFrequency,
                                 $smsFrequency, $post);
                             if (!$ok) {
@@ -530,6 +583,7 @@ class UserProfileController extends CrudController
                                             [
                                             'user' => $this->model->user,
                                             'model' => $this->model,
+                                            'profiles' => $profiles,
                                             'tipologiautente' => $this->model->tipo_utente,
                                             'permissionSave' => 'USERPROFILE_UPDATE',
                                             'tabActive' => $tabActive,
@@ -569,6 +623,7 @@ class UserProfileController extends CrudController
                     [
                     'user' => $this->model->user,
                     'model' => $this->model,
+                    'profiles' => $profiles,
                     'tipologiautente' => $this->model->tipo_utente,
                     'permissionSave' => 'USERPROFILE_UPDATE',
                     'tabActive' => $tabActive,
@@ -737,14 +792,14 @@ class UserProfileController extends CrudController
             $redirectToUpdatePage = true;
         }
 
-        if (Yii::$app->getUser()->can('UserProfileWorkflow/VALIDATED', ['model' => $model])) {
+        if (Yii::$app->getUser()->can(UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED, ['model' => $model])) {
             $redirectToUpdatePage = true;
         }
 
         if ($redirectToUpdatePage) {
-            return $this->redirect(['/admin/user-profile/update', 'id' => $model->id]);
+            return $this->redirect(['/' . AmosAdmin::getModuleName(). '/user-profile/update', 'id' => $model->id]);
         } else {
-            return $this->redirect('/admin/user-profile/validated-users');
+            return $this->redirect('/' . AmosAdmin::getModuleName(). '/user-profile/index');
         }
     }
 
@@ -770,10 +825,10 @@ class UserProfileController extends CrudController
             } elseif (($model->status == UserProfile::USERPROFILE_WORKFLOW_STATUS_DRAFT) && ($previousStatus == UserProfile::USERPROFILE_WORKFLOW_STATUS_TOVALIDATE)) {
                 return $this->redirect(BreadcrumbHelper::lastCrumbUrl());
             } else {
-                return $this->redirect(['/admin/user-profile/update', 'id' => $model->id]);
+                return $this->redirect(['/' . AmosAdmin::getModuleName(). '/user-profile/update', 'id' => $model->id]);
             }
         } else {
-            return $this->redirect('/admin/user-profile/validated-users');
+            return $this->redirect('/' . AmosAdmin::getModuleName(). '/user-profile/index');
         }
     }
 
@@ -947,5 +1002,54 @@ class UserProfileController extends CrudController
                 }
             }
         }
+    }
+
+    /**
+     *
+     * @param UserProfile $model
+     * @param array $post
+     * @param array $previousPermissions
+     */
+    public function assignProfileClasses($model, $post, $previousPermissions)
+    {
+
+        try {
+
+            if ($model->user_id > 1 && isset($post[StringHelper::basename(get_class($model))]['profiles'])) {
+                $profiles = (array) $post[StringHelper::basename(get_class($this->model))]['profiles'];
+                UserProfileClassesUserMm::deleteAll(['user_id' => $model->user_id]);
+                $auth     = \Yii::$app->authManager;
+                if ($this->adminModule->enableForceRoleByProfiles == true) {
+                    $auth->revokeAll($model->user_id);
+                } else {
+                    foreach ($previousPermissions as $del) {
+                        if (!in_array($del, $profiles)) {
+                            $permissionsDel = UserProfileClassesAuthMm::find()->andWhere(['user_profile_classes_id' => $del])->asArray()->all();
+                            foreach ($permissionsDel as $valueDel) {
+
+                                $rolePermD = $auth->getRole($valueDel['item_id']);
+                                if (empty($rolePermD)) {
+                                    $rolePermD = $auth->getPermission($valueDel['item_id']);
+                                }
+                                $auth->revoke($rolePermD, $model->user_id);
+                            }
+                        }
+                    }
+                }
+                $model->assignProfiles($profiles);
+            }
+        } catch (\Exception $e) {
+            \Yii::getLogger()->log($e->getMessage(), \yii\log\Logger::LEVEL_ERROR);
+        }
+    }
+
+    /**
+     * Empty function useful for overwriting controller (and this function) in poi-platform
+     * without do changes to this controller.
+     * @return bool
+     */
+    public function operationsAfterSave()
+    {
+        return true;
     }
 }

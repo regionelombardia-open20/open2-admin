@@ -21,6 +21,7 @@ use open20\amos\core\module\BaseAmosModule;
 use open20\amos\notificationmanager\forms\NewsWidget;
 use Yii;
 use yii\bootstrap\Widget;
+use yii\helpers\ArrayHelper;
 use yii\web\Application;
 
 /**
@@ -34,7 +35,7 @@ class UserCardWidget extends Widget
      */
     public $model;
     public $onlyAvatar = true;
-    public $absoluteUrl = false;
+    public $absoluteUrl = true;
     public $avatarXS = false;
     public $enableLink = true;
     public $containerAdditionalClass = '';
@@ -71,6 +72,11 @@ class UserCardWidget extends Widget
     public $squareAvatar = false;
 
     /**
+     * @var array $creatorLinkOptions
+     */
+    public $creatorLinkOptions = [];
+
+    /**
      * widget initialization
      */
     public function init()
@@ -81,7 +87,7 @@ class UserCardWidget extends Widget
             throw new \Exception(AmosAdmin::t('amosadmin', 'Missing model'));
         }
 
-        $this->adminModule = Yii::$app->getModule('admin');
+        $this->adminModule = Yii::$app->getModule(AmosAdmin::getModuleName());
     }
 
     /**
@@ -115,31 +121,41 @@ class UserCardWidget extends Widget
             $alt = $model->getNomeCognome();
         }
 
-        if ($this->absoluteUrl) {
-            $class = $roundImage['class'];
-            if ($class == 'full-width') {
-                $style = "width: 100%; height: auto; margin-top:" . $roundImage['margin-top'] . "%;";
-            } elseif ($class == 'full-height') {
-                $style = "height: 100%; width: auto; margin-left: " . $roundImage['margin-left'] . "%;";
-            } else {
-                $style = " width: 100%; height: auto;";
-            }
+        // if ($this->absoluteUrl) {
+        //     $class = $roundImage['class'];
+        //     if ($class == 'full-width') {
+        //         $style = "width: 100%; height: auto; margin-top:" . $roundImage['margin-top'] . "%;";
+        //     } elseif ($class == 'full-height') {
+        //         $style = "height: 100%; width: auto; margin-left: " . $roundImage['margin-left'] . "%;";
+        //     } else {
+        //         $style = " width: 100%; height: auto;";
+        //     }
 
-            $htmlOptions = [
-                'style' => $style,
-                'alt' => $alt
-            ];
-        } else {
-            $htmlOptions = [
-                'class' => $roundImage['class'],
-                'style' => "margin-left: " . $roundImage['margin-left'] . "%; margin-top: " . $roundImage['margin-top'] . "%;",
-                'alt' => $alt
-            ];
-        }
+        //     $htmlOptions = [
+        //         'style' => $style,
+        //         'alt' => $alt
+        //     ];
+        // } else {
+        //     $htmlOptions = [
+        //         'class' => $roundImage['class'],
+        //         'style' => "margin-left: " . $roundImage['margin-left'] . "%; margin-top: " . $roundImage['margin-top'] . "%;",
+        //         'alt' => $alt
+        //     ];
+        // }
+
+        $htmlOptions = [
+            'class' => $roundImage['class'],
+            'style' => "max-width:100%; margin-left: " . $roundImage['margin-left'] . "%; margin-top: " . $roundImage['margin-top'] . "%;",
+            'alt' => $alt
+        ];
+
+        $url = $this->model->getAvatarWebUrl($this->avatarDimension);
 
         $htmlTag = Html::img($url, $htmlOptions);
-        $img = ($this->absoluteUrl) ? $htmlTag : Html::tag(
-            'div', $htmlTag,
+
+        $img = Html::tag(
+            'div',
+            $htmlTag,
             [
                 'class' => ((!$this->squareAvatar && !(isset(\Yii::$app->params['userCardWidgetSquareAvatar']) && (\Yii::$app->params['userCardWidgetSquareAvatar'] === true))) ? 'container-round-img-'
                     . (($this->avatarXS) ? 'xs' : 'sm')
@@ -167,13 +183,22 @@ class UserCardWidget extends Widget
                     $title = AmosAdmin::t('amosadmin', 'Apri il profilo di {nome_profilo}', ['nome_profilo' => $model->getNomeCognome()]);
                 }
 
+                $defaultLinkOptions = [
+                    'title' => $title,
+                    'data' => $confirm
+                ];
+                if (!empty($this->creatorLinkOptions)) {
+                    $linkOptions = ArrayHelper::merge($defaultLinkOptions, $this->creatorLinkOptions);
+                } else if (isset(\Yii::$app->params['customUserCardWidgetCreatorLinkOptions']) && is_array(\Yii::$app->params['customUserCardWidgetCreatorLinkOptions'])) {
+                    $linkOptions = ArrayHelper::merge($defaultLinkOptions, \Yii::$app->params['customUserCardWidgetCreatorLinkOptions']);
+                } else {
+                    $linkOptions = $defaultLinkOptions;
+                }
+
                 $html .= Html::a(
                     $img,
                     $link,
-                    [
-                        'title' => $title,
-                        'data' => $confirm
-                    ]
+                    $linkOptions
                 );
             } else {
                 $html .= $img;
@@ -184,21 +209,31 @@ class UserCardWidget extends Widget
                 'onlyModals' => true
             ]);
 
+            $defaultLinkOptions = [
+                'data' => [
+                    'toggle' => 'tooltip',
+                    'html' => true,
+                    'placement' => 'right',
+                    'delay' => ['show' => 100, 'hide' => 5000],
+                    'trigger' => 'hover',
+                    'template' => '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner" style="background-color:transparent"></div></div>',
+                ],
+                'title' => $this->getHtmlTooltip(),
+                'style' => 'border-color:transparent;'
+            ];
+            if (!empty($this->creatorLinkOptions)) {
+                $linkOptions = ArrayHelper::merge($defaultLinkOptions, $this->creatorLinkOptions);
+            } else if (isset(\Yii::$app->params['customUserCardWidgetCreatorLinkOptions']) && is_array(\Yii::$app->params['customUserCardWidgetCreatorLinkOptions'])) {
+                $linkOptions = ArrayHelper::merge($defaultLinkOptions, \Yii::$app->params['customUserCardWidgetCreatorLinkOptions']);
+            } else {
+                $linkOptions = $defaultLinkOptions;
+            }
+
             $html = $modals . Html::a(
-                    $img, null,
-                    [
-                        'data' => [
-                            'toggle' => 'tooltip',
-                            'html' => true,
-                            'placement' => 'right',
-                            'delay' => ['show' => 100, 'hide' => 5000],
-                            'trigger' => 'hover',
-                            'template' => '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner" style="background-color:transparent"></div></div>',
-                        ],
-                        'title' => $this->getHtmlTooltip(),
-                        'style' => 'border-color:transparent;'
-                    ]
-                );
+                $img,
+                null,
+                $linkOptions
+            );
         }
 
         return $html;
@@ -232,7 +267,8 @@ class UserCardWidget extends Widget
 
         $viewUrl = $this->getCreatorLink();
         $url = $model->getAvatarUrl(
-            'original', [
+            'original',
+            [
                 'class' => 'img-responsive'
             ]
         );
@@ -254,7 +290,7 @@ class UserCardWidget extends Widget
         $tooltip = '<div class="icon-view"><div class="card-container col-xs-12 nop">' .
             ContextMenuWidget::widget([
                 'model' => $model,
-                'actionModify' => "/admin/user-profile/update?id=" . $model->id,
+                'actionModify' => "/" . AmosAdmin::getModuleName() . "/user-profile/update?id=" . $model->id,
                 'disableDelete' => true
             ])
             . '<div class="icon-header grow-pict">
@@ -288,22 +324,26 @@ class UserCardWidget extends Widget
                 $title = AmosAdmin::t('amosadmin', 'Profile Validated');
             }
             //TODO replace check-all with cockade
-            $statusIcon = AmosIcons::show('check-all',
+            $statusIcon = AmosIcons::show(
+                'check-all',
                 [
                     'class' => 'am-2 ',
                     'style' => 'color: ' . $color,
                     'title' => $title
-                ]);
+                ]
+            );
             $icons .= $statusIcon;
             $facilitatorUserIds = Yii::$app->getAuthManager()->getUserIdsByRole("FACILITATOR");
             if (in_array($model->user_id, $facilitatorUserIds)) {
                 //TODO replace account with man dressing tie and jacket
-                $facilitatorIcon = AmosIcons::show('account',
+                $facilitatorIcon = AmosIcons::show(
+                    'account',
                     [
                         'class' => 'am-2',
                         'style' => 'color: green',
                         'title' => AmosAdmin::t('amosadmin', 'Facilitator')
-                    ]);
+                    ]
+                );
                 $icons .= $facilitatorIcon;
             }
             $tooltip .= Html::tag('div', $icons);
@@ -317,10 +357,14 @@ class UserCardWidget extends Widget
         }
 
         if (
-            ($this->adminModule->confManager->isVisibleBox('box_prevalent_partnership',
-                ConfigurationManager::VIEW_TYPE_VIEW)) &&
-            ($this->adminModule->confManager->isVisibleField('prevalent_partnership_id',
-                ConfigurationManager::VIEW_TYPE_VIEW))
+            ($this->adminModule->confManager->isVisibleBox(
+                'box_prevalent_partnership',
+                ConfigurationManager::VIEW_TYPE_VIEW
+            )) &&
+            ($this->adminModule->confManager->isVisibleField(
+                'prevalent_partnership_id',
+                ConfigurationManager::VIEW_TYPE_VIEW
+            ))
         ) {
             $tooltip .= '<p>' . (!is_null($model->prevalentPartnership) ? $model->prevalentPartnership->name : AmosAdmin::t('amosadmin', 'Prevalent partnership not specified')) . '</p>';
         }

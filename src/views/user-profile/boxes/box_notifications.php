@@ -24,9 +24,9 @@ use open20\amos\notificationmanager\widgets\NotifyFrequencyWidget;
 $adminModule = Yii::$app->controller->module;
 
 ?>
-    <h2><?= AmosAdmin::t('amosadmin', 'Configure notifications') . '.' ?></h2>
+    <h2 class="subtitle-form"><?= AmosAdmin::t('amosadmin', 'Configure notifications') . '.' ?></h2>
     <p><?= AmosAdmin::t('amosadmin', 'If the frequency is not indicated, you will receive the notifications as automatically set by the system') . '.' ?></p>
-    <div class="col-xs-12 nop m-t-15">
+    <div class="row m-t-15">
         <?= \open20\amos\notificationmanager\widgets\NotifyFrequencyAdvancedWidget::widget([
             'model' => $model
         ]) ?>

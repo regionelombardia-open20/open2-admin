@@ -37,7 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => ['class' => 'form-horizontal', 'autocomplete' => 'off'],
         ]) ?>
         <div class="col-sm-5 col-xs-12">
-            <?= $form->field($model, 'vecchiaPassword')->passwordInput()->label('Password') ?>
+            <?= $form->field($model, 'vecchiaPassword')->passwordInput(['autocomplete' => 'off'])->label('Password') ?>
         </div>
         <div class="clearfix"></div>
 

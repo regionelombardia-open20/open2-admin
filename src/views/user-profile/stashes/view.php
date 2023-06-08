@@ -92,13 +92,19 @@ JS;
                     <!-- IMPERSONATE -->
                     <?php
                     if ($model->user_id != Yii::$app->user->id && Yii::$app->user->can('IMPERSONATE_USERS')) {
-                        echo Html::a(
-                            AmosIcons::show('assignment-account', ['class' => 'btn-cancel-search']) . AmosAdmin::t('amosadmin', 'Impersonate'),
-                            \Yii::$app->urlManager->createUrl(['/admin/security/impersonate',
-                                'user_id' => $model->user_id
-                            ]),
-                            ['class' => 'btn btn-action-primary']
+                        $user = new \open20\amos\core\user\AmosUser();
+                        $user->setIdentity(
+                            \open20\amos\core\user\User::findOne(['id' => $model->user_id])
                         );
+                        if(Yii::$app->user->can('ADMIN') || !$user->can("ADMIN")){
+                            echo Html::a(
+                                AmosIcons::show('assignment-account', ['class' => 'btn-cancel-search']) . AmosAdmin::t('amosadmin', 'Impersonate'),
+                                \Yii::$app->urlManager->createUrl(['/'.AmosAdmin::getModuleName().'/security/impersonate',
+                                    'user_id' => $model->user_id
+                                ]),
+                                ['class' => 'btn btn-action-primary']
+                            );
+                        }
                     }
                     ?>
                     <!-- end IMPERSONATE -->
@@ -142,7 +148,7 @@ JS;
         <div class="col-md-9 col-sm-8 col-xs-12">
             <?= ContextMenuWidget::widget([
                 'model' => $model,
-                'actionModify' => "/admin/user-profile/update?id=" . $model->id,
+                'actionModify' => "/'.AmosAdmin::getModuleName().'/user-profile/update?id=" . $model->id,
                 'disableDelete' => true
             ]) ?>
             <!-- SCHEDA -->

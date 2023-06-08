@@ -27,7 +27,7 @@ class WidgetIconValidatedUserProfiles extends WidgetIcon
 {
 
     /**
-     * @inheritdoc
+     * @inheritdoc  
      */
     public function init()
     {
@@ -46,10 +46,10 @@ class WidgetIconValidatedUserProfiles extends WidgetIcon
             $this->setIcon('user');
             $paramsClassSpan = [];
         } else {
-            $this->setIcon('users');
+            $this->setIcon('users'); 
         }
 
-        $this->setUrl(['/admin/user-profile/validated-users']);
+        $this->setUrl(['/'. AmosAdmin::getModuleName(). '/user-profile/validated-users']);
         $this->setCode('VALIDATED_USERS');
         $this->setModuleName(AmosAdmin::getModuleName());
         $this->setNamespace(__CLASS__);
@@ -66,11 +66,6 @@ class WidgetIconValidatedUserProfiles extends WidgetIcon
             ->from(UserProfile::tableName())
             ->where([UserProfile::tableName().'.attivo' => UserProfile::STATUS_ACTIVE])
             ->andWhere([UserProfile::tableName().'.deleted_at' => null]);
-
-        $this->setBulletCount(
-            $this->makeBulletCounter(
-                Yii::$app->getUser()->getId(), AmosAdmin::instance()->model('UserProfile'), $query
-            )
-        );
+      
     }
 }

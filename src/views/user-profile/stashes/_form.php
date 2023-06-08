@@ -54,8 +54,8 @@ $defaultFacilitatorId = Html::getInputId($model, 'default_facilitatore');
 $loggedUser = Yii::$app->user->identity;
 /** @var UserProfile $loggedUserProfile */
 $loggedUserProfile = $loggedUser->getProfile();
-//$ajaxUrl = Url::to(['/admin/user-profile/is-default-facilitator', 'id' => $loggedUserProfile->id]);
-$ajaxUrl = Url::to(['/admin/user-profile/def-facilitator-present', 'id' => $model->id]);
+//$ajaxUrl = Url::to(['/'.AmosAdmin::getModuleName().'/user-profile/is-default-facilitator', 'id' => $loggedUserProfile->id]);
+$ajaxUrl = Url::to(['/'.AmosAdmin::getModuleName().'/user-profile/def-facilitator-present', 'id' => $model->id]);
 $js = "
 var isPreviousChecked = $('#$defaultFacilitatorId').is(':checked');
 var isProfileModified = 0;
@@ -415,19 +415,19 @@ $form = ActiveForm::begin([
         </div>
     </div>
 
-    <div class="row">
+    <div>
         <?php if ($adminModule->confManager->isVisibleBox('box_privacy', ConfigurationManager::VIEW_TYPE_FORM)): ?>
             <!-- ADMIN cannot check the privacy checkbox of other users -->
             <?php if ((\Yii::$app->user->can('ADMIN') || \Yii::$app->user->can('AMMINISTRATORE_UTENTI')) && ($user->id !== \Yii::$app->user->id)): ?>
-                <div class='col-xs-12 form-group'><strong><?= $model->getAttributeLabel('privacy'); ?>: </strong><?= \Yii::$app->formatter->asBoolean($model->privacy); ?></div>
+                <div class='form-group'><strong><?= $model->getAttributeLabel('privacy'); ?>: </strong><?= \Yii::$app->formatter->asBoolean($model->privacy); ?></div>
             <?php else: ?>
                 <?= $this->render('../boxes/box_privacy', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
             <?php endif; ?>
         <?php endif; ?>
     </div>
 
-    <div class="row">
-        <?= RequiredFieldsTipWidget::widget(['containerClasses' => 'col-xs-12 note_asterisk']) ?>
+    <div>
+        <?= RequiredFieldsTipWidget::widget(['containerClasses' => 'note_asterisk']) ?>
         <?= $form->field($model, 'tipo_utente')->hiddenInput()->label('AmosHidden') ?>
         <!--        <div class="col-xs-12">< ?= CreatedUpdatedWidget::widget(['model' => $model]) ?></div>-->
         <?= $form->field($model, 'isProfileModified')->hiddenInput(['id' => 'isProfileModified', 'value' => '0'])->label(false) ?>

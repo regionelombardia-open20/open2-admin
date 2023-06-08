@@ -1,13 +1,4 @@
 <?php
-
-/**
- * Aria S.p.A.
- * OPEN 2.0
- *
- *
- * @package    Open20Package
- * @category   CategoryName
- */
 use open20\amos\core\helpers\Html;
 use open20\amos\core\icons\AmosIcons;
 use open20\amos\admin\AmosAdmin;
@@ -18,7 +9,7 @@ ModuleAdminAsset::register($this);
 
 $currentUrl = \yii\helpers\Url::current();
 //$this->registerCss('#grid-contact-share .select-on-check-all{ display: none; }');
-
+$amosadmin = AmosAdmin::getModuleName();
 $js = <<<JS
     var selectedProfilesIds = [];
      // event on click on the ckeckbox
@@ -75,7 +66,7 @@ $js = <<<JS
                 $('#alert-error-share').show();
             }else {
                 $.ajax({
-                   url: '/admin/user-profile-ajax/ajax-share-with',
+                   url: '/$amosadmin/user-profile-ajax/ajax-share-with',
                    type: 'post',
                    data: {
                        url: url , 
@@ -103,7 +94,7 @@ $js = <<<JS
         var searchName = $('#search-users-share').val();
 
         $.pjax.reload({
-            url: '/admin/user-profile-ajax/ajax-contact-list?classname='+encodeURIComponent(classname)+'&content_id='+contentId+'&searchName='+searchName,
+            url: '/$amosadmin/user-profile-ajax/ajax-contact-list?classname='+encodeURIComponent(classname)+'&content_id='+contentId+'&searchName='+searchName,
             container:'#pjax-container-contact-share',
             replace : false, // avoid tha change of url in the navigation search bar
             method: 'get',
@@ -119,7 +110,7 @@ $js = <<<JS
         var searchName = $('#search-users-share').val('');
 
         $.pjax.reload({
-            url: '/admin/user-profile-ajax/ajax-contact-list?classname='+encodeURIComponent(classname)+'&content_id='+contentId+'&searchName=',
+            url: '/$amosadmin/user-profile-ajax/ajax-contact-list?classname='+encodeURIComponent(classname)+'&content_id='+contentId+'&searchName=',
             container:'#pjax-container-contact-share',
             replace : false,
             method: 'get',

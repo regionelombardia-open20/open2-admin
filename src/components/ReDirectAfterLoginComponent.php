@@ -11,25 +11,24 @@
 
 namespace open20\amos\admin\components;
 
-use open20\amos\admin\AmosAdmin;
-use open20\amos\admin\models\UserProfile;
-//use yii\base\BootstrapInterface;
 use yii\base\Component;
-//use yii\base\Event;
 
 /**
- * Class FirstAccessWizardComponent
+ * Class ReDirectAfterLoginComponent
  * @package open20\amos\admin\components
  */
-class ReDirectAfterLoginComponent extends Component /*implements BootstrapInterface*/
+class ReDirectAfterLoginComponent extends Component
 {
-
     /**
      * @param $url
      * @return \yii\web\Response
      */
-    public function redirectToUrl($url){
-        return \Yii::$app->controller->redirect([$url]);
-
+    public function redirectToUrl($url)
+    {
+        if (!is_null(\Yii::$app->controller)) {
+            return \Yii::$app->controller->redirect([$url]);
+        } else {
+            return \Yii::$app->response->redirect([$url]);
+        }
     }
 }

@@ -11,6 +11,7 @@
 
 namespace open20\amos\admin\rules;
 
+use open20\amos\admin\AmosAdmin;
 use open20\amos\admin\models\UserProfile;
 use Yii;
 use yii\rbac\Rule;
@@ -33,7 +34,7 @@ class ValidatedBasicUserRule extends Rule
     {
         /** @var UserProfile $loggedUser */
         $loggedUser = \Yii::$app->getUser()->identity->profile;
-        $adminModule = \Yii::$app->getModule('admin');
+        $adminModule = \Yii::$app->getModule(AmosAdmin::getModuleName());
         $communityModule = \Yii::$app->getModule('communty');
         $cwhModule = \Yii::$app->getModule('cwh');
         $scope = (!is_null($cwhModule) ? $cwhModule->getCwhScope() : []);

@@ -19,7 +19,7 @@ use yii\helpers\Html;
  */
 
 $appLink = Yii::$app->urlManager->createAbsoluteUrl(['/']);
-$appLinkPrivacy = Yii::$app->urlManager->createAbsoluteUrl(['/admin/user-profile/privacy']);
+$appLinkPrivacy = Yii::$app->urlManager->createAbsoluteUrl(['/'.AmosAdmin::getModuleName().'/user-profile/privacy']);
 $appName = Yii::$app->name;
 
 $this->title = AmosAdmin::t('amosadmin', 'Reimposta password {appName}', ['appName' => $appName]);
@@ -75,7 +75,13 @@ $this->registerCssFile('http://fonts.googleapis.com/css?family=Roboto');
                                 'supportEmail' => Yii::$app->params['supportEmail']
                             ]); ?>
                             <?php
-                            $link = $appLink . 'admin/security/insert-auth-data?token=' . $profile->user->password_reset_token;
+                            if(\Yii::$app->params['befe']){
+                                $link = $appLink . 'userauthfrontend' . '/default/insert-auth-data?token=' . $profile->user->password_reset_token;
+                            }
+                            else {
+                                $link = $appLink . AmosAdmin::getModuleName() . '/security/insert-auth-data?token=' . $profile->user->password_reset_token;
+                            }
+
                             if(!empty($community)) {
                                 $link .= '&community_id='.$community->id;
                             }
@@ -91,7 +97,7 @@ $this->registerCssFile('http://fonts.googleapis.com/css?family=Roboto');
 
                         <p style="margin-bottom: 20px;">
                             <?= AmosAdmin::tHtml('amosadmin', '#forgot_password_broken_link_message') ?>
-                            <?= AmosAdmin::tHtml('amosadmin', $link) ?>
+                            <?= $link; ?>
                         </p>
 
                         <p style="margin-bottom: 20px;">

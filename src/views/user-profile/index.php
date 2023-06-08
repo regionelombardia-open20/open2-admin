@@ -29,6 +29,7 @@ $fromAction = (isset($fromAction) ? $fromAction : 'index');
 /** @var \open20\amos\admin\controllers\UserProfileController $appController */
 $appController = Yii::$app->controller;
 $adminModule = AmosAdmin::instance();
+
 ?>
 <div class="user-profile-index">
     <?= $this->render(
@@ -98,7 +99,7 @@ $adminModule = AmosAdmin::instance();
                     'label' => $model->getAttributeLabel('facilitatore')
                 ];
             }
-            if (!$adminModule->bypassWorkflow) {
+            if (!$adminModule->bypassWorkflow && !$adminModule->completeBypassWorkflow) {
                 $columns[] = [
                     'attribute' => 'status',
                     'value' => function ($model) {
@@ -137,6 +138,13 @@ $adminModule = AmosAdmin::instance();
         ]
     ];
 
+    if(!Yii::$app->request->get('currentView') || (Yii::$app->request->get('currentView')=='icon')){
+        $dataProvider->pagination= [
+            'pageSize' => 21,
+        ];
+    }
+
+    
     $dataProviderViewWidgetConf = [
         'dataProvider' => $dataProvider,
         //'filterModel' => $model,
@@ -144,12 +152,13 @@ $adminModule = AmosAdmin::instance();
         'iconView' => [
             'itemView' => '_icon'
         ],
-        'gridView' => [
-            'columns' => $columns
-        ],
         'listView' => [
             'itemView' => '_item'
         ],
+        'gridView' => [
+            'columns' => $columns
+        ],
+        
         /* 'mapView' => [
             'itemView' => '_map',
             'markerConfig' => [

@@ -18,9 +18,10 @@ use open20\amos\core\helpers\Html;
 
 ?>
 
-<section>
-    <div class="row">
-        <div class="col-xs-3 col-md-2">
+<section class="m-b-35">
+    
+        <div class="avatar-wizard-profile">
+        <div>
             <div class="img-profile">
                 <?php
                 $url = $model->getAvatarUrl('original', [
@@ -42,15 +43,15 @@ use open20\amos\core\helpers\Html;
                 ]);
                 ?>
             </div>
-        </div>
-        <div class="col-xs-9 col-md-10 nop">
-            <div>
-                <h2><strong><?= $model->getNomeCognome() ?></strong></h2>
             </div>
+        <div>
             <div>
-                <?= ($model->presentazione_breve ? $model->presentazione_breve : '-') ?>
+                <h3><strong><?= $model->getNomeCognome() ?></strong></h3>
+            </div>
+            <div class="text-muted small">
+                <p><?= ($model->presentazione_breve ? $model->presentazione_breve : '-') ?></p>
             </div>
         </div>
-    </div>
+        </div>
 </section>
-<hr>
+

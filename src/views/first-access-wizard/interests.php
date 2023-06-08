@@ -37,10 +37,10 @@ $moduleTag = Yii::$app->getModule('tag');
     <?= $this->render('parts/header', ['model' => $model]) ?>
 
     <section>
-        <div class="row">
-            <div class="col-xs-12">
-                <h4><?= AmosAdmin::t('amosadmin', '#faw_interest_text_1') ?></h4>
-                <h4><?= AmosAdmin::t('amosadmin', '#faw_interest_text_2') ?></h4>
+        
+            <div class="m-b-35">
+                <p class="lead"><?= AmosAdmin::t('amosadmin', '#faw_interest_text_1') ?></p>
+                <p class="lead"><?= AmosAdmin::t('amosadmin', '#faw_interest_text_2') ?></p>
             </div>
             <?php 
             if (isset($moduleCwh) && isset($moduleTag)) {
@@ -51,12 +51,12 @@ $moduleTag = Yii::$app->getModule('tag');
                 ]);
             }
             ?>
-        </div>
+       
     </section>
     
     <?= WizardPrevAndContinueButtonWidget::widget([
         'model' => $model,
-        'previousUrl' => Yii::$app->getUrlManager()->createUrl(['/admin/first-access-wizard/role-and-area'])
+        'previousUrl' => Yii::$app->getUrlManager()->createUrl(['/'.AmosAdmin::getModuleName().'/first-access-wizard/role-and-area'])
     ]) ?>
     <?php ActiveForm::end(); ?>
 </div>

@@ -63,7 +63,7 @@ $usernameFieldOptions = [];
 $usernameInputOptions = ['placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_username')];
 
 $passwordFieldOptions = ['labelOptions' => ['class' => 'no-asterisk']];
-$passwordInputOptions = ['placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_password')];
+$passwordInputOptions = ['autocomplete' => 'off', 'placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_password')];
 
 if ($isDemoLogin) {
     $usernameOrEmailFieldOptions = [
@@ -91,6 +91,7 @@ if ($isDemoLogin) {
     ];
 }
 
+Yii::$app->trigger('BEFORE_LOGIN_FORM');
 ?>
 
 <div id="bk-formDefaultLogin" class="loginContainerFullsize">
@@ -144,7 +145,7 @@ if ($isDemoLogin) {
                                         ]) ?>
                                 </div>
                                 <div class="forgot-password">
-                                    <?= Html::a(AmosAdmin::t('amosadmin', '#forgot_password'), ['/admin/security/forgot-password'],
+                                    <?= Html::a(AmosAdmin::t('amosadmin', '#forgot_password'), ['/'.AmosAdmin::getModuleName().'/security/forgot-password'],
                                         ['title' => AmosAdmin::t('amosadmin', '#forgot_password_title_link'), 'target' => '_self'])
                                     ?>
                                 </div>
@@ -189,7 +190,7 @@ if ($isDemoLogin) {
     <?php if (($adminModule->enableRegister && $adminModule->showLogInRegisterButton) || (!$adminModule->enableRegister && !empty($adminModule->textWarningForRegisterDisabled))): ?>
         <div class="register-block col-xs-12 nop">
             <?php
-            $urlRegister = ['/admin/security/register'];
+            $urlRegister = ['/'.AmosAdmin::getModuleName().'/security/register'];
             if ($communityId) {
                 $urlRegister['community'] = $communityId;
             } else if ($enableRedirect) {

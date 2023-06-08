@@ -13,7 +13,7 @@ namespace open20\amos\admin\models;
 
 use open20\amos\admin\AmosAdmin;
 use open20\amos\core\user\User;
-use yii\base\Model;
+use open20\amos\core\models\AmosModel as Model;
 
 /**
  * Class ForgotPasswordForm
@@ -28,7 +28,7 @@ class ForgotPasswordForm extends Model
      * @var string Username
      */
     public $username;
-    
+
     /**
      * @var string Social Security Number
      */
@@ -38,9 +38,9 @@ class ForgotPasswordForm extends Model
      * @var string user email
      */
     public $email;
-    
+
     private $_user = false;
-    
+
     /**
      * Define Properties rules
      * @inheritdoc
@@ -58,7 +58,7 @@ class ForgotPasswordForm extends Model
             [['email'], 'required', 'message' => AmosAdmin::t('amosadmin', "#forgot_pwd_alert")],
         ];
     }
-    
+
     /**
      * Check Username and Social Security Number existence and pairment
      * @param string $attribute_name the attribute currently being validated
@@ -69,13 +69,13 @@ class ForgotPasswordForm extends Model
     {
         if (empty($this->username) && empty($this->codice_fiscale)) {
             $this->addError($attribute_name, AmosAdmin::t('amosadmin', 'Almeno uno tra USERNAME e CODICE FISCALE deve essere specificato.')); // TODO translate
-            
+
             return false;
         }
-        
+
         return true;
     }
-    
+
     /**
      * Labels for attributes
      * @inheritdoc
@@ -86,7 +86,7 @@ class ForgotPasswordForm extends Model
             'email' => AmosAdmin::t('amosadmin', 'Email di registrazione'),
         ];
     }
-    
+
     /**
      * Returns Logged-in User
      * @return User|null
@@ -96,10 +96,10 @@ class ForgotPasswordForm extends Model
         if ($this->_user === false) {
             $this->_user = User::findByUsername($this->username);
         }
-        
+
         return $this->_user;
     }
-    
+
     /**
      * Check Username existence
      * @param string $username
@@ -111,7 +111,7 @@ class ForgotPasswordForm extends Model
         $verifyUsername = $user->findOne(['username' => $username]);
         return $verifyUsername;
     }
-    
+
     /**
      * Check Social Security Number existence
      * @param string $cf Social Security Number

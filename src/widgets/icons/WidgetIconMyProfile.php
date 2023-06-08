@@ -52,7 +52,7 @@ class WidgetIconMyProfile extends WidgetIcon
         if (!Yii::$app->user->isGuest) {
             $this->setUrl(
                 [
-                    '/admin/user-profile/update',
+                    '/'. AmosAdmin::getModuleName(). '/user-profile/update',
                     'id' => Yii::$app->getUser()->id
                 ]
             );

@@ -4,11 +4,10 @@
  * OPEN 2.0
  *
  * @licence GPLv3
- * @licence https://opensource.org/licenses/gpl-3.0.html GNU General Public License version 3
+ * @licence https://opensource.org/proscriptions/gpl-3.0.html GNU General Public Proscription version 3
  *
  * @package amos-admin
  * @category CategoryName
- * @author Lombardia Informatica S.p.A.
  */
 
 use open20\amos\admin\AmosAdmin;
@@ -21,23 +20,24 @@ use yii\helpers\Url;
 
 ModuleAdminAsset::register(Yii::$app->view);
 
-
-
+/** @var $socialAuthModule \open20\amos\socialauth\Module */
+$socialAuthModule = \open20\amos\socialauth\Module::getInstance();
 ?>
-<?= Html::tag('h2', AmosAdmin::t('amosadmin', '#fullsize_spid'), ['class' => 'title-login']) ?>
-<div class="col-sm-6 col-xs-12 nop">
+<?= Html::tag('h5', AmosAdmin::t('amosadmin', '#fullsize_spid'), ['class' => 'title-login']) ?>
+<div class="m-t-20 m-b-30">
     <?=
     Html::a(
-        AmosIcons::show('account-circle') . AmosAdmin::t('amosadmin', '#fullsize_login_spid_text'),
-        Url::to('/socialauth/shibboleth/endpoint', 'https'),
+        //AmosIcons::show('account-circle') . AmosAdmin::t('amosadmin', $socialAuthModule->shibbolethConfig['buttonLabel']),
+        AmosAdmin::t('amosadmin', $socialAuthModule->shibbolethConfig['buttonLabel']),
+        Url::to("/{$socialAuthModule->id}/shibboleth/endpoint", 'https'),
         [
-            'class' => 'btn btn-spid',
-            'title' => AmosAdmin::t('amosadmin', '#fullsize_login_spid_text'),
+            'class' => 'btn btn-spid btn-block btn-lg',
+            'title' => AmosAdmin::t('amosadmin', $socialAuthModule->shibbolethConfig['buttonLabel']),
             //'target' => '_blank'
         ]
     )
     ?>
 </div>
-<div class="col-xs-12 nop">
-    <p class="spid-text"><?= AmosAdmin::t('amosadmin', '#fullsize_login_spid_text_right') ?></p>
-</div>
+<!--<div class="col-xs-12 nop">
+    <p class="spid-text">< ?= AmosAdmin::t('amosadmin', $socialAuthModule->shibbolethConfig['buttonDescription']) ?></p>
+</div>-->

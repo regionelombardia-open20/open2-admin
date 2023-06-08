@@ -26,18 +26,18 @@ use open20\amos\core\helpers\Html;
                     'name' => $model->nome,
                     'lastname' => $model->cognome,
                 ]) ?></h4>
-            <h4><?= AmosAdmin::tHtml('amosadmin', "#faw_finish_text_2", [
+            <p class="lead"><?= AmosAdmin::tHtml('amosadmin', "#faw_finish_text_2", [
                     'appName' => Yii::$app->name,
-                ]) ?></h4>
-            <h4><?= AmosAdmin::tHtml('amosadmin', "#faw_finish_text_3", [
+                ]) ?></p>
+            <p class="lead"><?= AmosAdmin::tHtml('amosadmin', "#faw_finish_text_3", [
                     'textBtn' => AmosAdmin::tHtml('amosadmin', 'Enter'),
                     'appName' => Yii::$app->name,
-                ]) ?></h4>
+                ]) ?></p>
         </div>
     </div>
     <div class="row">
         <div class="col-xs-12">
-            <?= Html::a(AmosAdmin::tHtml('amosadmin', 'Enter'), ['/dashboard'], ['class' => 'btn btn-primary pull-right']) ?>
+            <?= Html::a(AmosAdmin::tHtml('amosadmin', 'Enter'), ['/'], ['class' => 'btn btn-primary pull-right']) ?>
         </div>
     </div>
 </div>

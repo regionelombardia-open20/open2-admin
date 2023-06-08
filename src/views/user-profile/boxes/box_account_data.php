@@ -41,11 +41,10 @@ $('#reactivate-account-btn').on('click', function(event) {
 });
 ";
 $this->registerJs($js, View::POS_READY);
-
 ?>
 
 <section class="account-admin-section col-xs-12 nop">
-    <h2>
+    <h2 class="subtitle-form">
         <!--        < ?= AmosIcons::show('account') ?>-->
         <?= AmosAdmin::t('amosadmin', 'Account'); ?>
     </h2>
@@ -74,7 +73,7 @@ $this->registerJs($js, View::POS_READY);
 
     <?php if ($model->isActive() && Yii::$app->user->can('DeactivateAccount', ['model' => $model])): ?>
         <div class="col-xs-8 col-sm-6 text-right">
-            <?= Html::a(AmosAdmin::t('amosadmin', 'Deactivate user'), ['/admin/user-profile/deactivate-account', 'id' => $model->id], [
+            <?= Html::a(AmosAdmin::t('amosadmin', 'Deactivate user'), ['/'.AmosAdmin::getModuleName().'/user-profile/deactivate-account', 'id' => $model->id], [
                 'id' => 'deactivate-account-btn',
                 'class' => 'btn btn-danger',
                 'title' => AmosAdmin::t('amosadmin', 'Deactivate user'),
@@ -84,7 +83,7 @@ $this->registerJs($js, View::POS_READY);
     <?php endif; ?>
     <?php if ($model->isDeactivated() && (Yii::$app->user->can('ADMIN') || Yii::$app->user->can('AMMINISTRATORE_UTENTI'))): ?>
         <div class="col-md-6 col-sm-6">
-            <?= Html::a(AmosAdmin::t('amosadmin', 'Reactivate this user'), ['/admin/user-profile/reactivate-account', 'id' => $model->id], [
+            <?= Html::a(AmosAdmin::t('amosadmin', 'Reactivate this user'), ['/'.AmosAdmin::getModuleName().'/user-profile/reactivate-account', 'id' => $model->id], [
                 'id' => 'reactivate-account-btn',
                 'class' => 'btn btn-navigation-primary',
                 'title' => AmosAdmin::t('amosadmin', 'Reactivate this user'),
@@ -95,7 +94,7 @@ $this->registerJs($js, View::POS_READY);
     <div class="clearfix"></div>
 </section>
 <section class="m-t-30">
-    <h2>
+    <h2 >
         <!--        < ?= AmosIcons::show('account') ?>-->
         <?= AmosAdmin::t('amosadmin', 'Delete Account'); ?>
     </h2>
@@ -107,7 +106,12 @@ $this->registerJs($js, View::POS_READY);
     </div>
 
     <div class="col-xs-8 col-sm-6 text-right">
-        <?= Html::a(AmosAdmin::t('amosadmin', 'Delete user'), ['/admin/user-profile/drop-account', 'id' => $model->id], [
+        <?php if(\Yii::$app->user->can('ADMIN')){
+            $urlDropAccount = ['/'.AmosAdmin::getModuleName().'/user-profile/drop-account', 'id' => $model->id];
+        } else {
+            $urlDropAccount = ['/'.AmosAdmin::getModuleName().'/user-profile/drop-account-by-email', 'id' => $model->id];
+        }?>
+        <?= Html::a(AmosAdmin::t('amosadmin', 'Delete user'), $urlDropAccount, [
             'id' => 'drop-account-btn',
             'class' => 'btn btn-danger',
             'title' => AmosAdmin::t('amosadmin', 'Delete user'),

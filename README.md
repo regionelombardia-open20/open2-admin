@@ -230,6 +230,9 @@ If true the model validation doesn't check the unique of che fiscal code.
 * **enableInviteUserToEvent** - boolean, default = false  
 If true enable a link on single user useful to invite a user to a published event with an event community.
 
+* **completeBypassWorkflow** - boolean, default = false  
+Set to true if you want to completely disable the user profile workflow. It disable the 
+
 
 * **createContentInMyOwnCommunityOnly** - boolean, default = false
 If true the validate basic user can create contents only in his/her own Communities

@@ -15,7 +15,7 @@ use open20\amos\admin\AmosAdmin;
 use open20\amos\core\user\User;
 use open20\amos\core\utilities\Email;
 use Yii;
-use yii\base\Model;
+use open20\amos\core\models\AmosModel as Model;
 
 /**
  * Class ProfileReactivationForm

@@ -27,12 +27,14 @@ use yii\redactor\widgets\Redactor;
  */
 class SendMessageToUserWidget extends Widget
 {
-    const MODAL_CONFIRM_BTN_OPTIONS = ['class' => 'btn btn-navigation-primary btn-connect-to-user'];
+    const MODAL_CONFIRM_BTN_OPTIONS = ['class' => 'btn btn-primary btn-connect-to-user', 'tabindex' => 0];
     const MODAL_CANCEL_BTN_OPTIONS = [
         'class' => 'btn btn-secondary btn-connect-to-user',
-        'data-dismiss' => 'modal'
+        'data-dismiss' => 'modal',
+        'tabindex' => 0
+
     ];
-    const BTN_CLASS_DFL = 'btn btn-navigation-primary btn-connect-to-user';
+    const BTN_CLASS_DFL = 'btn btn-primary btn-connect-to-user';
 
     /**
      * @var int $userId
@@ -204,7 +206,8 @@ JS;
         if (!empty($dataTarget) && !empty($dataToggle)) {
             $this->btnOptions = ArrayHelper::merge($this->btnOptions, [
                 'data-target' => $dataTarget,
-                'data-toggle' => $dataToggle
+                'data-toggle' => $dataToggle,
+                'href' => '#'
             ]);
         }
         $btn = Html::a($title, $buttonUrl, $this->btnOptions);

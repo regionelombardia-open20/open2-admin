@@ -114,7 +114,7 @@ class WidgetGraphicsUsers extends WidgetGraphic {
 		return [
 			'users' =>	
 				Html::a(AmosAdmin::t('amosadmin', 'Cerca utenti'), 
-					[ '/admin/user-profile/index?enableSearch=1&UserProfileSearch%5B%5D='], [
+					[ '/'.AmosAdmin::getModuleName().'/user-profile/index?enableSearch=1&UserProfileSearch%5B%5D='], [
 						'class' => 'btn btn-navigation-primary btn-search-users',
 						'title' => AmosAdmin::t('amosadmin', 'Ricerca utenti'),
 						'role' 	=> 'button',

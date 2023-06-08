@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Aria S.p.A.
  * OPEN 2.0
@@ -11,23 +10,22 @@
 
 namespace open20\amos\admin\bootstrap;
 
-use open20\amos\admin\components\FirstAccessWizardComponent;
+use open20\amos\admin\AmosAdmin;
 use open20\amos\admin\components\ReDirectAfterLoginComponent;
 use open20\amos\admin\models\UserProfile;
+use open20\amos\admin\utility\UserProfileUtility;
+use Yii;
 use yii\base\BootstrapInterface;
-use yii\base\Controller;
 use yii\base\Event;
-use yii\base\ViewEvent;
-use yii\base\View;
-use yii\base\WidgetEvent;
-use yii\helpers\Url;
+use yii\rest\Controller;
 use yii\web\User;
-use yii\widgets\Breadcrumbs;
 
-
+/**
+ * Class RedirectAfterLogin
+ * @package open20\amos\admin\bootstrap
+ */
 class RedirectAfterLogin implements BootstrapInterface
 {
-
     /**
      * @param $app
      */
@@ -35,19 +33,32 @@ class RedirectAfterLogin implements BootstrapInterface
     {
         Event::on(User::className(), User::EVENT_AFTER_LOGIN, [$this, 'startUpRedirect']);
     }
-
+    
+    /**
+     * @param $event
+     * @throws \yii\base\InvalidConfigException
+     */
     public function startUpRedirect($event)
     {
-        $adminModule = \Yii::$app->getModule('admin');
-        if (!is_null($adminModule)) {
-            $actionId = \Yii::$app->controller->action->id;
-            // is set the redirect url you skip the  profile wizard,  and go to the url, at the secondo login you kskip the wizard and go in dashboard
-            $userProfile = UserProfile::find()->andWhere(['user_id' => \Yii::$app->user->id])->one();
-            if (!empty($userProfile) && $actionId != 'send-event-mail') {
-                if (!empty($userProfile->first_access_redirect_url)) {
-                    $component = new  ReDirectAfterLoginComponent();
-                    $component->redirectToUrl($userProfile->first_access_redirect_url);
-                    \Yii::$app->response->send();
+        if (!(Yii::$app->controller instanceof Controller)) {
+            $adminModule = Yii::$app->getModule(AmosAdmin::getModuleName());
+            if (!is_null($adminModule)) {
+                //redirect for dl semplificazione
+                if ($adminModule->enableDlSemplification && !UserProfileUtility::isSpidConnected()) {
+                    $userProfileWizard = new ReDirectAfterLoginComponent();
+                    $userProfileWizard->redirectToUrl("/" . AmosAdmin::getModuleName() . "/security/reconciliation");
+                    Yii::$app->response->send();
+                }
+                
+                $actionId = Yii::$app->controller->action->id;
+                // is set the redirect url you skip the  profile wizard,  and go to the url, at the secondo login you kskip the wizard and go in dashboard
+                $userProfile = UserProfile::find()->andWhere(['user_id' => Yii::$app->user->id])->one();
+                if (!empty($userProfile) && $actionId != 'send-event-mail') {
+                    if (!empty($userProfile->first_access_redirect_url)) {
+                        $component = new ReDirectAfterLoginComponent();
+                        $component->redirectToUrl($userProfile->first_access_redirect_url);
+                        Yii::$app->response->send();
+                    }
                 }
             }
         }

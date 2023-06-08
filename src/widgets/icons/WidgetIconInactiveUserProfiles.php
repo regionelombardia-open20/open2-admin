@@ -26,10 +26,10 @@ use yii\helpers\ArrayHelper;
 class WidgetIconInactiveUserProfiles extends WidgetIcon
 {
 
-    /**
+    /** 
      * @inheritdoc
      */
-    public function init()
+    public function init() 
     {
         parent::init();
 
@@ -49,7 +49,7 @@ class WidgetIconInactiveUserProfiles extends WidgetIcon
             $this->setIcon('users');
         }
 
-        $this->setUrl(['/admin/user-profile/inactive-users']);
+        $this->setUrl(['/'. AmosAdmin::getModuleName(). '/user-profile/inactive-users']);
         $this->setCode('INACTIVE_USERS');
         $this->setModuleName(AmosAdmin::getModuleName());
         $this->setNamespace(__CLASS__);
@@ -66,11 +66,6 @@ class WidgetIconInactiveUserProfiles extends WidgetIcon
             ->from(UserProfile::tableName())
             ->where([UserProfile::tableName().'.attivo' => UserProfile::STATUS_DEACTIVATED])
             ->andWhere([UserProfile::tableName().'.deleted_at' => null]);
-
-        $this->setBulletCount(
-            $this->makeBulletCounter(
-                Yii::$app->getUser()->getId(), AmosAdmin::instance()->model('UserProfile'), $query
-            )
-        );
+       
     }
 }

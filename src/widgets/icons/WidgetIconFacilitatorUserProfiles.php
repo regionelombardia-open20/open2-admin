@@ -50,7 +50,7 @@ class WidgetIconFacilitatorUserProfiles extends WidgetIcon
             $this->setIcon('users');
         }
 
-        $this->setUrl(['/admin/user-profile/facilitator-users']);
+        $this->setUrl(['/'. AmosAdmin::getModuleName(). '/user-profile/facilitator-users']);
         $this->setCode('FACILITATOR_USERS');
         $this->setModuleName(AmosAdmin::getModuleName());
         $this->setNamespace(__CLASS__);

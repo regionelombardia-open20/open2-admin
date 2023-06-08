@@ -19,7 +19,7 @@ use yii\helpers\Html;
  */
 
 $appLink = Yii::$app->urlManager->createAbsoluteUrl(['/']);
-$appLinkPrivacy = Yii::$app->urlManager->createAbsoluteUrl(['/admin/user-profile/privacy']);
+$appLinkPrivacy = Yii::$app->urlManager->createAbsoluteUrl(['/'.AmosAdmin::getModuleName().'/user-profile/privacy']);
 $appName = Yii::$app->name;
 
 ?>

@@ -12,6 +12,7 @@
 use open20\amos\core\helpers\Html;
 use open20\amos\core\module\BaseAmosModule;
 use open20\amos\core\utilities\JsUtility;
+use open20\amos\admin\AmosAdmin;
 use yii\web\View;
 
 /**
@@ -50,7 +51,7 @@ $form = \open20\amos\core\forms\ActiveForm::begin();
         </div>
 
         <div class="col-sm-6 col-lg-8">
-            <?= Html::a(BaseAmosModule::t('amoscore', 'Reset'), ['/admin/user-profile/send-request-external-facilitator', 'id' => $model->id ],['class' => 'btn btn-secondary', 'id' => $gridId . '-reset-search-btn']) ?>
+            <?= Html::a(BaseAmosModule::t('amoscore', 'Reset'), ['/'.AmosAdmin::getModuleName().'/user-profile/send-request-external-facilitator', 'id' => $model->id ],['class' => 'btn btn-secondary', 'id' => $gridId . '-reset-search-btn']) ?>
             <?= Html::submitButton(BaseAmosModule::t('amoscore', 'Search'), ['class' => 'btn btn-navigation-primary', 'id' => $gridId . '-search-btn']) ?>
         </div>
     </div>

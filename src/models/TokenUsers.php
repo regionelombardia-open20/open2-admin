@@ -1,19 +1,11 @@
 <?php
 
-/**
- * Aria S.p.A.
- * OPEN 2.0
- *
- *
- * @package    Open20Package
- * @category   CategoryName
- */
-
 namespace open20\amos\admin\models;
 
 use open20\amos\core\forms\editors\DateTime;
 use Yii;
 use yii\helpers\ArrayHelper;
+use open20\amos\admin\AmosAdmin;
 
 /**
  * This is the model class for table "token_users".
@@ -37,7 +29,6 @@ class TokenUsers extends \open20\amos\admin\models\base\TokenUsers
      * Returns the text hint for the specified attribute.
      * @param string $attribute the attribute name
      * @return string the attribute hint
-     * @see attributeHints
      */
     public function getAttributeHint($attribute)
     {
@@ -138,6 +129,18 @@ class TokenUsers extends \open20\amos\admin\models\base\TokenUsers
         $backendUrl = \Yii::$app->params['platform']['backendUrl'];
         if(!empty($backendUrl)) {
             $url = $backendUrl . '/admin/security/login?token=' . $this->token;
+        }
+        return $url;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFrontendTokenLink(){
+        $url = '';
+        $backendUrl = \Yii::$app->params['platform']['frontendUrl'];
+        if(!empty($backendUrl)) {
+            $url = $backendUrl . '/amosadmin/security/login?token=' . $this->token;
         }
         return $url;
     }

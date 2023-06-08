@@ -29,12 +29,14 @@ use yii\redactor\widgets\Redactor;
  */
 class ConnectToUserWidget extends Widget
 {
-    const MODAL_CONFIRM_BTN_OPTIONS = ['class' => 'btn btn-navigation-primary btn-connect-to-user btn-connect-to-user-confirm'];
+    const MODAL_CONFIRM_BTN_OPTIONS = ['class' => 'btn btn-primary btn-connect-to-user btn-connect-to-user-confirm', 'tabindex' => 0];
     const MODAL_CANCEL_BTN_OPTIONS = [
         'class' => 'btn btn-secondary btn-connect-to-user btn-connect-to-user-cancel',
-        'data-dismiss' => 'modal'
+        'data-dismiss' => 'modal',
+        'tabindex' => 0,
+        'href' =>'#'
     ];
-    const BTN_CLASS_DFL = 'btn btn-navigation-primary btn-connect-to-user';
+    const BTN_CLASS_DFL = 'btn btn-primary btn-connect-to-user';
 
     /**
      * @var int $userId
@@ -99,7 +101,7 @@ class ConnectToUserWidget extends Widget
                     $this->btnClass = self::BTN_CLASS_DFL;
                 }
             }
-            $this->btnOptions = ['class' => $this->btnClass . ($this->isGridView ? ' font08' : '')];
+            $this->btnOptions = ['href'=> '#', 'class' =>  $this->btnClass . ($this->isGridView ? ' font08' : '')];
             if (!empty($this->btnStyle)) {
                 $this->btnOptions = ArrayHelper::merge($this->btnOptions, ['style' => $this->btnStyle]);
             }
@@ -112,6 +114,10 @@ class ConnectToUserWidget extends Widget
      */
     public function run()
     {
+        if (!Yii::$app->user->can('ASSOCIATE_CONTACTS')) {
+            return '';
+        }
+        
         //Register javascript to send private message to connected users
         $js = <<<JS
   
@@ -181,7 +187,7 @@ JS;
                 echo Html::tag('div',
                     Html::a(AmosAdmin::t('amosadmin', 'Not now'), null, $this->modalButtonCancelOptions)
                     . Html::a(AmosAdmin::t('amosadmin', 'Complete the profile'),
-                        ['/admin/first-access-wizard/introduction', 'id' => $userProfile->id],
+                        ['/'.AmosAdmin::getModuleName().'/first-access-wizard/introduction', 'id' => $userProfile->id],
                         $this->modalButtonConfirmationOptions),
                     ['class' => 'pull-right m-15-0']
                 );
@@ -197,7 +203,8 @@ JS;
                 if (!$this->onlyButton) {
                     Modal::begin([
                         'id' => 'invitationPopup-' . $model->id,
-                        'header' => AmosAdmin::t('amosadmin', "Contact request")
+                        'header' => AmosAdmin::t('amosadmin', "Contact request"),
+                       
                     ]);
                     echo Html::tag('div', AmosAdmin::t('amosadmin', "Do you wish to invite") . " <strong>"
                         . $model->getNomeCognome() . "</strong> " . AmosAdmin::t('amosadmin',
@@ -205,7 +212,7 @@ JS;
                     echo Html::tag('div',
                         Html::a(AmosAdmin::t('amosadmin', 'Cancel'), null, $this->modalButtonCancelOptions)
                         . Html::a(AmosAdmin::t('amosadmin', 'Invite contact'),
-                            ['/admin/user-contact/connect', 'contactId' => $model->user_id],
+                            ['/'.AmosAdmin::getModuleName().'/user-contact/connect', 'contactId' => $model->user_id],
                             $this->modalButtonConfirmationOptions),
                         ['class' => 'pull-right m-15-0']
                     );
@@ -221,7 +228,7 @@ JS;
                 if ($userContact->status == UserContact::STATUS_INVITED) {
                     if (!$invited) {
                         //logged user invited another user to join is contact list, but the request is still pending. It is possible to send a reminder
-                        $title = AmosAdmin::t('amosadmin', 'Pending invitation') . AmosIcons::show('account-box-mail');
+                        $title = AmosAdmin::t('amosadmin', 'Pending invitation');
                         $titleLink = AmosAdmin::t('amosadmin', 'Pending invitation');
                         $dataToggle = 'modal';
                         $idModal = ($isUserContactModel ? $userContact->contact_id : $model->id);
@@ -251,7 +258,7 @@ JS;
                             echo Html::tag('div',
                                 Html::a(AmosAdmin::t('amosadmin', 'Cancel'), null, $this->modalButtonCancelOptions)
                                 . Html::a(AmosAdmin::t('amosadmin', 'Send reminder'),
-                                    ['/admin/user-contact/send-reminder', 'id' => $userContact->id],
+                                    ['/'.AmosAdmin::getModuleName().'/user-contact/send-reminder', 'id' => $userContact->id],
                                     $this->modalButtonConfirmationOptions),
                                 ['class' => 'pull-right m-15-0']
                             );
@@ -274,23 +281,31 @@ JS;
                             $invitedBy = User::findOne($userContact->created_by)->getProfile()->getNomeCognome();
                             echo Html::tag('div', AmosAdmin::t('amosadmin',
                                     "Do you wish to join the contact network of") . " <strong>" . $invitedBy . " </strong>?");
+                            
+                            $urlReject = [
+                                '/'.AmosAdmin::getModuleName().'/user-contact/connect',
+                                'contactId' => $loggedUserId,
+                                'userId' => $userContact->user_id,
+                                'accept' => false
+                            ];
+                            $urlAccept = [
+                                '/'.AmosAdmin::getModuleName().'/user-contact/connect',
+                                'contactId' => $loggedUserId,
+                                'userId' => $userContact->user_id,
+                                'accept' => true
+                            ];
+                            if ($this->isProfileView) {
+                                $urlReject['fromView'] = true;
+                                $urlAccept['fromView'] = true;
+                            }
+                            
                             echo Html::tag('div',
                                 Html::a(AmosAdmin::t('amosadmin', 'Reject invitation'),
-                                    [
-                                        '/admin/user-contact/connect',
-                                        'contactId' => $loggedUserId,
-                                        'userId' => $userContact->user_id,
-                                        'accept' => false
-                                    ],
+                                    $urlReject,
                                     $btnRejectOpts
                                 )
                                 . Html::a(AmosAdmin::t('amosadmin', 'Accept invitation'),
-                                    [
-                                        '/admin/user-contact/connect',
-                                        'contactId' => $loggedUserId,
-                                        'userId' => $userContact->user_id,
-                                        'accept' => true
-                                    ],
+                                    $urlAccept,
                                     $this->modalButtonConfirmationOptions),
                                 ['class' => 'pull-right m-15-0']
                             );
@@ -356,7 +371,8 @@ JS;
         if (!empty($dataTarget) && !empty($dataToggle)) {
             $this->btnOptions = ArrayHelper::merge($this->btnOptions, [
                 'data-target' => $dataTarget,
-                'data-toggle' => $dataToggle
+                'data-toggle' => $dataToggle,
+                'href' =>'#'
             ]);
         }
         $btn = Html::a($title, $buttonUrl, $this->btnOptions);

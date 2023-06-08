@@ -25,7 +25,7 @@ use open20\amos\admin\AmosAdmin;
         </div>
 
         <div class="bk-elementActions">
-            <a href="/admin/user-profile/view?id=<?= $model->id ?>"><button class="btn btn-success"><?= AmosAdmin::t('amosadmin', 'Visualizza') ?></button></a>
+            <a href="/'.AmosAdmin::getModuleName().'/user-profile/view?id=<?= $model->id ?>"><button class="btn btn-success"><?= AmosAdmin::t('amosadmin', 'Visualizza') ?></button></a>
         </div>
         <div class="clear"></div>
     </div>

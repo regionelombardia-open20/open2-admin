@@ -25,10 +25,12 @@ use kartik\alert\Alert;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\web\View;
+use open20\amos\layout\assets\SpinnerWaitAsset;
 
 
 AmosAsset::register($this);
 ModuleUserProfileAsset::register($this);
+SpinnerWaitAsset::register($this);
 
 /**
  * @var yii\web\View $this
@@ -58,9 +60,50 @@ $defaultFacilitatorId = Html::getInputId($model, 'default_facilitatore');
 $loggedUser = Yii::$app->user->identity;
 /** @var UserProfile $loggedUserProfile */
 $loggedUserProfile = $loggedUser->getProfile();
-//$ajaxUrl = Url::to(['/admin/user-profile/is-default-facilitator', 'id' => $loggedUserProfile->id]);
-$ajaxUrl = Url::to(['/admin/user-profile/def-facilitator-present', 'id' => $model->id]);
+//$ajaxUrl = Url::to(['/'.AmosAdmin::getModuleName().'/user-profile/is-default-facilitator', 'id' => $loggedUserProfile->id]);
+$ajaxUrl = Url::to(['/' . AmosAdmin::getModuleName() . '/user-profile/def-facilitator-present', 'id' => $model->id]);
+
 $js = "
+
+$('.has-error').each(function() {
+	$(this).removeClass('has-error');
+});
+$('.help-block-error').each(function() {
+	$(this).html('');
+});
+    
+$('.btn-workflow').on('click', function(e) {
+	checkErrors(e);
+});
+$('.saveBtn').on('click', function(e) {
+	checkErrors(e);
+});
+
+
+function checkErrors(e){
+	e.preventDefault();
+
+	var haserror = $('.has-error');
+	var checkerror = $('.help-block-error');
+	if (haserror.length > 0) {
+		$('html, body').animate({
+			scrollTop: $('#record_form').first().offset().top+200
+		}, 1000);
+		
+		setTimeout(function(){ 
+			$('.has-error').each(function() {
+				$(this).removeClass('has-error');
+			});
+			$('.help-block-error').each(function() {
+				$(this).html('');
+			});
+		}, 3000);  
+		
+	}else{
+		 $('#user-profile-form').yiiActiveForm('submitForm');
+	}
+}
+
 var isPreviousChecked = $('#$defaultFacilitatorId').is(':checked');
 var isProfileModified = 0;
 
@@ -124,6 +167,7 @@ $jsIsProfileModified = "
         });
         var required = $('.required input, .required textarea');
         var haserror = $('.has-error');
+        var checkerror = $('.help-block-error');
         var haserrorRequired = false;
         $(required).each(function() {      
             if ($(this).val().length <= 0) {
@@ -133,19 +177,13 @@ $jsIsProfileModified = "
         if (haserror.length <= 0 && haserrorRequired) {
             $('#user-profile-form').yiiActiveForm('submitForm');
         }
-        if (haserror.length <= 0 && !haserrorRequired) {
+        if (checkerror.length <= 0 && !haserrorRequired) {
             if (isProfileModified == 1) {
                 $(modalId).modal('show'); 
             } else {
                 $('#user-profile-form').yiiActiveForm('submitForm');
             }
-        } else {
-            if (haserror.length) {
-                $('html, body').animate({
-                    scrollTop: $('.has-error').first().offset().top
-                }, 1000);
-            }
-        }
+        } 
         return false;
     });
 ";
@@ -155,7 +193,7 @@ if ($model->id) {
     $workflowInitialStatusId = $model->getWorkflowSource()->getWorkflow(UserProfile::USERPROFILE_WORKFLOW)->getInitialStatusId();
     $validatorUserIds = $model->getValidatorUsersId();
     if (
-        !$adminModule->disableUpdateChangeStatus &&
+        (!$adminModule->completeBypassWorkflow && !$adminModule->disableUpdateChangeStatus) &&
         (!Yii::$app->user->can('ADMIN') && !Yii::$app->user->can('AMMINISTRATORE_UTENTI')) &&
         !in_array(Yii::$app->user->id, $validatorUserIds) &&
         ($model->status == UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) &&
@@ -166,7 +204,7 @@ if ($model->id) {
 }
 $enableUserContacts = $adminModule->enableUserContacts;
 $enableExternalFacilitator = $adminModule->enableExternalFacilitator;
-$userCanChangeWorkflow = Yii::$app->user->can('CHANGE_USERPROFILE_WORKFLOW_STATUS');
+$userCanChangeWorkflow = (!$adminModule->completeBypassWorkflow && Yii::$app->user->can('CHANGE_USERPROFILE_WORKFLOW_STATUS'));
 
 ?>
 
@@ -177,7 +215,7 @@ $form = ActiveForm::begin([
         'data-fid' => (isset($fid)) ? $fid : 0,
         'data-field' => ((isset($dataField)) ? $dataField : ''),
         'data-entity' => ((isset($dataEntity)) ? $dataEntity : ''),
-//        'class' => 'default-form col-xs-12 nop',
+        //        'class' => 'default-form col-xs-12 nop',
         'enctype' => 'multipart/form-data' // important
     ]
 ]);
@@ -194,30 +232,30 @@ $form = ActiveForm::begin([
 <?php } ?>
 
 <div class="loading" id="loader" hidden></div>
-<div class="user-form col-xs-12">
+<div class="user-form">
     <div id="card-section" class="row">
         <div class="col-xs-12">
             <?= Html::tag('h2', AmosAdmin::t('amosadmin', '#settings_general_title'), ['class' => 'subtitle-form']) ?>
         </div>
         <div class="col-md-8 col-xs-12">
-            <?php if ($adminModule->confManager->isVisibleBox('box_custom_general_information_begin', ConfigurationManager::VIEW_TYPE_FORM)): ?>
+            <?php if ($adminModule->confManager->isVisibleBox('box_custom_general_information_begin', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                 <?= $this->render('boxes/box_custom_general_information_begin', ['form' => $form, 'model' => $model, 'user' => $user, 'idTabInsights' => $idTabInsights]); ?>
             <?php endif; ?>
 
-            <?php if ($adminModule->confManager->isVisibleBox('box_informazioni_base', ConfigurationManager::VIEW_TYPE_FORM)): ?>
+            <?php if ($adminModule->confManager->isVisibleBox('box_informazioni_base', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                 <?= $this->render('boxes/box_informazioni_base', ['form' => $form, 'model' => $model, 'user' => $user, 'idTabInsights' => $idTabInsights]); ?>
             <?php endif; ?>
 
-            <?php if ($adminModule->confManager->isVisibleBox('box_dati_contatto', ConfigurationManager::VIEW_TYPE_FORM)): ?>
+            <?php if ($adminModule->confManager->isVisibleBox('box_dati_contatto', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                 <?= $this->render('boxes/box_dati_contatto', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
             <?php endif; ?>
 
-            <?php if ($adminModule->confManager->isVisibleBox('box_custom_general_information_end', ConfigurationManager::VIEW_TYPE_FORM)): ?>
+            <?php if ($adminModule->confManager->isVisibleBox('box_custom_general_information_end', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                 <?= $this->render('boxes/box_custom_general_information_end', ['form' => $form, 'model' => $model, 'user' => $user, 'idTabInsights' => $idTabInsights]); ?>
             <?php endif; ?>
         </div>
         <div class="col-md-4 col-xs-12">
-            <?php if ($adminModule->confManager->isVisibleBox('box_foto', ConfigurationManager::VIEW_TYPE_FORM)): ?>
+            <?php if ($adminModule->confManager->isVisibleBox('box_foto', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                 <?= $this->render('boxes/box_foto', [
                     'form' => $form,
                     'model' => $model,
@@ -241,7 +279,7 @@ $form = ActiveForm::begin([
     <!-- FACILITATORE -->
     <div class="row">
         <div class="col-xs-12">
-            <?php if ($adminModule->confManager->isVisibleBox('box_facilitatori', ConfigurationManager::VIEW_TYPE_FORM)): ?>
+            <?php if ($adminModule->confManager->isVisibleBox('box_facilitatori', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                 <?= $this->render('boxes/box_facilitatori', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
                 <?php if ($enableExternalFacilitator) { ?>
                     <?= $this->render('boxes/box_external_facilitator', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
@@ -258,40 +296,44 @@ $form = ActiveForm::begin([
             <!-- APPROFONDIMENTI -->
             <?php $this->beginBlock($idTabInsights); ?>
             <div class="col-md-8 col-xs-12">
-                <?php if ($adminModule->confManager->isVisibleBox('box_custom_insights_begin', ConfigurationManager::VIEW_TYPE_FORM)): ?>
+                <?php if ($adminModule->confManager->isVisibleBox('box_custom_insights_begin', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                     <?= $this->render('boxes/box_custom_insights_begin', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
                 <?php endif; ?>
 
-                <?php if ($adminModule->confManager->isVisibleBox('box_presentazione_personale', ConfigurationManager::VIEW_TYPE_FORM)): ?>
+                <?php if ($adminModule->confManager->isVisibleBox('box_presentazione_personale', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                     <?= $this->render('boxes/box_presentazione_personale', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
                 <?php endif; ?>
 
-                <?php if ($adminModule->confManager->isVisibleBox('box_role_and_area', ConfigurationManager::VIEW_TYPE_FORM)): ?>
+                <?php if ($adminModule->confManager->isVisibleBox('box_role_and_area', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                     <?= $this->render('boxes/box_role_and_area', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
                 <?php endif; ?>
 
-                <?php if ($adminModule->confManager->isVisibleBox('box_ulteriori_informazioni', ConfigurationManager::VIEW_TYPE_FORM)): ?>
+                <?php if ($adminModule->confManager->isVisibleBoxInForm('box_agid_rtd')) : ?>
+                    <?= $this->render('boxes/box_agid_rtd', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
+                <?php endif; ?>
+
+                <?php if ($adminModule->confManager->isVisibleBox('box_ulteriori_informazioni', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                     <?= $this->render('boxes/box_ulteriori_informazioni', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
                 <?php endif; ?>
 
-                <?php if ($adminModule->confManager->isVisibleBox('box_dati_residenza', ConfigurationManager::VIEW_TYPE_FORM)): ?>
+                <?php if ($adminModule->confManager->isVisibleBox('box_dati_residenza', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                     <?= $this->render('boxes/box_dati_residenza', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
                 <?php endif; ?>
 
-                <?php if ($adminModule->confManager->isVisibleBox('box_dati_nascita', ConfigurationManager::VIEW_TYPE_FORM)): ?>
+                <?php if ($adminModule->confManager->isVisibleBox('box_dati_nascita', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                     <?= $this->render('boxes/box_dati_nascita', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
                 <?php endif; ?>
 
-                <?php if ($adminModule->confManager->isVisibleBox('box_dati_fiscali_amministrativi', ConfigurationManager::VIEW_TYPE_FORM)): ?>
+                <?php if ($adminModule->confManager->isVisibleBox('box_dati_fiscali_amministrativi', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                     <?= $this->render('boxes/box_dati_fiscali_amministrativi', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
                 <?php endif; ?>
 
-                <?php if ($adminModule->confManager->isVisibleBox('box_custom_insights_end', ConfigurationManager::VIEW_TYPE_FORM)): ?>
+                <?php if ($adminModule->confManager->isVisibleBox('box_custom_insights_end', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                     <?= $this->render('boxes/box_custom_insights_end', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
                 <?php endif; ?>
             </div>
             <div class="col-md-4 col-xs-12">
-                <?php if ($adminModule->confManager->isVisibleBox('box_prevalent_partnership', ConfigurationManager::VIEW_TYPE_FORM)): ?>
+                <?php if ($adminModule->confManager->isVisibleBox('box_prevalent_partnership', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                     <?= $this->render('boxes/box_prevalent_partnership', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
                 <?php endif; ?>
             </div>
@@ -306,16 +348,16 @@ $form = ActiveForm::begin([
             ?>
 
             <!-- NETWORK -->
-            <?php if ($model->isNewRecord || ($enableUserContacts && $model->validato_almeno_una_volta) || isset($moduleCwh)): ?>
+            <?php if ($model->isNewRecord || ($enableUserContacts && $model->validato_almeno_una_volta) || isset($moduleCwh)) : ?>
                 <?php $this->beginBlock($idTabNetwork); ?>
                 <div>
-                    <?php if ($model->isNewRecord): ?>
+                    <?php if ($model->isNewRecord) : ?>
                         <?= Alert::widget([
                             'type' => Alert::TYPE_WARNING,
                             'body' => AmosAdmin::t('amosadmin', "Prima di poter gestire la rete &egrave; necessario salvare l'utente."),
                             'closeButton' => false
                         ]); ?>
-                    <?php else: ?>
+                    <?php else : ?>
                         <?php
                         if ($enableUserContacts && $model->validato_almeno_una_volta) {
                             echo \open20\amos\admin\widgets\UserContacsWidget::widget([
@@ -343,9 +385,9 @@ $form = ActiveForm::begin([
             <?php endif; ?>
 
             <!-- SETTINGS -->
-            <?php if (Yii::$app->user->can('ADMIN') || Yii::$app->user->can('AMMINISTRATORE_UTENTI') || Yii::$app->user->can('UpdateOwnUserProfile', ['model' => $loggedUserProfile])): ?>
+            <?php if (Yii::$app->user->can('ADMIN') || Yii::$app->user->can('AMMINISTRATORE_UTENTI') || Yii::$app->user->can('UpdateOwnUserProfile', ['model' => $loggedUserProfile])) : ?>
                 <?php $this->beginBlock($idTabSettings); ?>
-                <?php if ($model->isNewRecord): ?>
+                <?php if ($model->isNewRecord) : ?>
                     <div class="col-xs-12">
                         <?= Alert::widget([
                             'type' => Alert::TYPE_WARNING,
@@ -353,33 +395,37 @@ $form = ActiveForm::begin([
                             'closeButton' => false
                         ]); ?>
                     </div>
-                <?php else: ?>
-                    <div class="col-md-8 col-xs-12">
-                        <?php if ($adminModule->confManager->isVisibleBox('box_dati_accesso', ConfigurationManager::VIEW_TYPE_FORM)): ?>
+                <?php else : ?>
+
+                    <div>
+                        <?php if ($adminModule->confManager->isVisibleBox('box_dati_accesso', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                             <?= $this->render('boxes/box_access_data', ['form' => $form, 'model' => $model, 'user' => $user, 'spediscicredenzialienable' => isset($spediscicredenzialienable) ? $spediscicredenzialienable : true]); ?>
                         <?php endif; ?>
 
-                        <?php /*if ($adminModule->confManager->isVisibleBox('box_dati_accesso', ConfigurationManager::VIEW_TYPE_FORM)): */ ?><!--
+                        <?php /*if ($adminModule->confManager->isVisibleBox('box_dati_accesso', ConfigurationManager::VIEW_TYPE_FORM)): */ ?>
+                        <!--
                             < ?= $this->render('boxes/box_dati_accesso', ['form' => $form, 'model' => $model, 'user' => $user, 'spediscicredenzialienable' => isset($spediscicredenzialienable) ? $spediscicredenzialienable : true]); ?>
                         --><?php /*endif; */ ?>
 
-                        <?php /*if ($adminModule->confManager->isVisibleBox('box_account_data', ConfigurationManager::VIEW_TYPE_FORM)): */ ?><!--
+                        <?php /*if ($adminModule->confManager->isVisibleBox('box_account_data', ConfigurationManager::VIEW_TYPE_FORM)): */ ?>
+                        <!--
                             < ?= $this->render('boxes/box_account_data', ['form' => $form, 'model' => $model, 'user' => $user, 'spediscicredenzialienable' => isset($spediscicredenzialienable) ? $spediscicredenzialienable : true]); ?>
                         --><?php /*endif; */ ?>
 
-                        <?php if ($adminModule->confManager->isVisibleBox('box_questio', ConfigurationManager::VIEW_TYPE_FORM)): ?>
+                        <?php if ($adminModule->confManager->isVisibleBox('box_questio', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                             <?= $this->render('boxes/box_questio', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
                         <?php endif; ?>
 
-                        <?php if (Yii::$app->user->can('ADMIN') && $model->isFacilitator() && $adminModule->confManager->isVisibleField('default_facilitatore', ConfigurationManager::VIEW_TYPE_FORM)): ?>
-                            <div class="col-xs-12 nop">
-                                <?= $form->field($model, 'default_facilitatore')->checkbox()->label(AmosAdmin::t('amosadmin', 'Is default facilitator') . '?') ?>
-                            </div>
-                        <?php endif; ?>
+
                         <?php if (Yii::$app->user->can('ADMIN') && $adminModule->showFacilitatorForModuleSelect) : ?>
                             <?= $this->render('boxes/box_facilitator_roles', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
                         <?php endif; ?>
-                        <?php if ($adminModule->confManager->isVisibleBox('box_social_account', ConfigurationManager::VIEW_TYPE_FORM)): ?>
+                        <?php if (Yii::$app->user->can('ADMIN') && $model->isFacilitator() && $adminModule->confManager->isVisibleField('default_facilitatore', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
+                            <div class="default_facilitatore">
+                                <?= $form->field($model, 'default_facilitatore')->checkbox()->label(AmosAdmin::t('amosadmin', 'Is default facilitator') . '?') ?>
+                            </div>
+                        <?php endif; ?>
+                        <?php if ($adminModule->confManager->isVisibleBox('box_social_account', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                             <?= $this->render('boxes/box_social_account', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
                         <?php endif; ?>
                     </div>
@@ -396,7 +442,7 @@ $form = ActiveForm::begin([
             <?php endif; ?>
 
             <!-- NOTIFICATION -->
-            <?php if ($adminModule->confManager->isVisibleBox('box_email_frequency', ConfigurationManager::VIEW_TYPE_FORM)): ?>
+            <?php if ($adminModule->confManager->isVisibleBox('box_email_frequency', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                 <?php if (isset($moduleCwh) && isset($moduleNotify)) { ?>
                     <?php $this->beginBlock($idTabNotifications); ?>
                     <div>
@@ -423,29 +469,75 @@ $form = ActiveForm::begin([
 
 
             <!-- ADMIN -->
-            <?php if (Yii::$app->user->can('PRIVILEGES_MANAGER')): ?>
-                <?php $privilegesModule = Yii::$app->getModule('privileges'); ?>
-                <?php if (!empty($privilegesModule)): ?>
-                    <?php $this->beginBlock($idTabAdministration); ?>
-                    <?php if ($model->isNewRecord): ?>
-                        <?= Alert::widget([
-                            'type' => Alert::TYPE_WARNING,
-                            'body' => AmosAdmin::t('amosadmin', 'Prima di poter gestire le classi di utenza &egrave; necessario salvare l\'utente.'),
-                            'closeButton' => false
-                        ]) ?>
-                    <?php else: ?>
-                        <?= UserPrivilegesWidget::widget(['userId' => $model->user_id]) ?>
-                    <?php endif; ?>
-                    <?php $this->endBlock(); ?>
-                    <?php
-                    $itemsTab[] = [
-                        'label' => AmosAdmin::t('amosadmin', 'Administration'),
-                        'content' => $this->blocks[$idTabAdministration],
-                        'options' => ['id' => $idTabAdministration],
-                    ];
+            <!-- ADMIN -->
+            <?php
+            if ($adminModule->disablePrivilegesEnableProfiles == true) {
+
+                $this->beginBlock($idTabAdministration);
+                $canPrivileges = Yii::$app->user->can($adminModule->roleOfEditingProfiles);
+                ?>
+                <?=
+                $this->render('boxes/box_profiles',
+                    ['form' => $form, 'model' => $model, 'user' => $user, 'profiles' => $profiles, 'permission' => ($canPrivileges
+                    && \Yii::$app->user->id != $model->user_id), 'manage_profile' => $canPrivileges]);
+                ?>
+                <?php
+                $this->endBlock();
+                $itemsTab[]    = [
+                    'label' => AmosAdmin::t('amosadmin', 'Administration'),
+                    'content' => $this->blocks[$idTabAdministration],
+                    'options' => ['id' => $idTabAdministration],
+                ];
+            } else {
+                if (Yii::$app->user->can('PRIVILEGES_MANAGER') || Yii::$app->user->can('SUPERUSER')) :
                     ?>
-                <?php endif; ?>
-            <?php endif; ?>
+                    <?php $privilegesModule = Yii::$app->getModule('privileges'); ?>
+                    <?php if (!empty($privilegesModule)) : ?>
+                        <?php $this->beginBlock($idTabAdministration); ?>
+                        <?php if ($model->isNewRecord) : ?>
+                            <?=
+                            Alert::widget([
+                                'type' => Alert::TYPE_WARNING,
+                                'body' => AmosAdmin::t('amosadmin',
+                                    'Prima di poter gestire le classi di utenza &egrave; necessario salvare l\'utente.'),
+                                'closeButton' => false
+                            ])
+                            ?>
+                        <?php else : ?>
+                            <?php
+                            $this->registerJs("
+                            $(\"ajax-privileges-loading\").hide();
+                            $.ajax({
+                                    url: \"/amosadmin/user-profile/privileges-ajax?userId={$model->user_id}\",
+                                    timeout: 15000,
+                                    type: \"GET\",
+                                    dataType: \"html\",
+                                    error: function(){
+                                    },
+                                    success: function (data) {
+                                        $(\"#ajax-privileges\").append(data).html();
+                                        $(\"ajax-privileges-loading\").hide();
+                                        $(\"ajax-privileges\").show();
+                                    }
+                            });
+                            ", \yii\web\View::POS_READY);
+                            ?>
+                            <div id="ajax-privileges-loading" class="loading"></div>
+                            <div id="ajax-privileges"></div>
+                        <?php endif; ?>
+                        <?php $this->endBlock(); ?>
+                        <?php
+                        $itemsTab[] = [
+                            'label' => AmosAdmin::t('amosadmin', 'Administration'),
+                            'content' => $this->blocks[$idTabAdministration],
+                            'options' => ['id' => $idTabAdministration],
+                        ];
+                        ?>
+                    <?php endif; ?>
+                    <?php
+                endif;
+            }
+            ?>
 
             <?php
             if (isset($tabActive)) {
@@ -459,7 +551,8 @@ $form = ActiveForm::begin([
             <?= Tabs::widget([
                 'encodeLabels' => false,
                 'items' => $itemsTab,
-                'hideTagsTab' => !Yii::$app->user->can('FORM_TAG_TABS_PERMISSION')
+                'hideTagsTab' => !Yii::$app->user->can('FORM_TAG_TABS_PERMISSION'),
+                'cardTagsView' => $adminModule->cardTagsView,
                 /* 'clientEvents' => [
                   'shown.bs.tab' => new JsExpression('reloadGoogleMaps')
                   ] */
@@ -467,13 +560,13 @@ $form = ActiveForm::begin([
         </div>
     </div>
 
-    <div class="row">
-        <?php if ($adminModule->confManager->isVisibleBox('box_privacy', ConfigurationManager::VIEW_TYPE_FORM)): ?>
+    <div class="section-data">
+        <?php if ($adminModule->confManager->isVisibleBox('box_privacy', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
             <!-- ADMIN cannot check the privacy checkbox of other users -->
-            <?php if ((\Yii::$app->user->can('ADMIN') || \Yii::$app->user->can('AMMINISTRATORE_UTENTI')) && ($user->id !== \Yii::$app->user->id)): ?>
-                <div class='col-xs-12 form-group'><strong><?= $model->getAttributeLabel('privacy'); ?>
+            <?php if ((\Yii::$app->user->can('ADMIN') || \Yii::$app->user->can('AMMINISTRATORE_UTENTI')) && ($user->id !== \Yii::$app->user->id)) : ?>
+                <div class='form-group'><strong><?= $model->getAttributeLabel('privacy'); ?>
                         : </strong><?= \Yii::$app->formatter->asBoolean($model->privacy); ?></div>
-            <?php else: ?>
+            <?php else : ?>
                 <?= $this->render('boxes/box_privacy', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
             <?php endif; ?>
         <?php endif; ?>
@@ -534,7 +627,8 @@ $form = ActiveForm::begin([
         <div class="row">
             <?php
 
-            if (Yii::$app->user->can('ADMIN')
+            if (
+                Yii::$app->user->can('ADMIN')
                 || Yii::$app->user->can('AMMINISTRATORE_UTENTI')
                 || Yii::$app->user->can(ValidateUserProfileWorkflowRule::className(), ['model' => $model])
                 || $adminModule->disableSendValidationRequestAuto
@@ -580,7 +674,7 @@ $form = ActiveForm::begin([
             'model' => $model,
             'buttonClassSave' => 'btn btn-navigation-primary saveBtn',
         ];
-        ?>
+    ?>
         <?= CloseSaveButtonWidget::widget($closeSaveOptions); ?>
 
     <?php } ?>
@@ -589,10 +683,13 @@ $form = ActiveForm::begin([
     if (!$model->isNewRecord) {
         \yii\bootstrap\Modal::begin(['id' => 'modalId']);
         echo Html::tag('div', AmosAdmin::t('amosadmin', 'Salva le modifiche e rimani in attesa di essere validato'));
-        echo Html::tag('div',
-            Html::submitButton(AmosAdmin::t('amosadmin', 'Ok'),
-                ['class' => 'btn btn-navigation-primary', 'id' => $model->getWorkflowStatus()->getId()])
-            . Html::a(AmosAdmin::t('amosadmin', 'Annulla'), null, ['data-dismiss' => 'modal', 'class' => 'btn btn-secondary']),
+        echo Html::tag(
+            'div',
+            Html::submitButton(
+                AmosAdmin::t('amosadmin', 'Ok'),
+                ['class' => 'btn btn-navigation-primary', 'id' => $model->getWorkflowStatus()->getId()]
+            )
+                . Html::a(AmosAdmin::t('amosadmin', 'Annulla'), null, ['data-dismiss' => 'modal', 'class' => 'btn btn-secondary']),
             ['class' => 'pull-right m-15-0']
         );
         \yii\bootstrap\Modal::end();
@@ -601,4 +698,5 @@ $form = ActiveForm::begin([
 
 </div>
 
-<?php ActiveForm::end(); ?>
+<?php ActiveForm::end();
+echo $this->render('/layouts/fullsize/parts/_modalConfirmNetworkTab');?>

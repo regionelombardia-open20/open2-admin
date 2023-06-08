@@ -13,6 +13,7 @@ namespace open20\amos\admin\models\search;
 use open20\amos\admin\AmosAdmin;
 use open20\amos\admin\base\ConfigurationManager;
 use open20\amos\admin\models\UserProfile;
+use open20\amos\admin\models\UserProfileClassesUserMm;
 use open20\amos\core\user\User;
 use open20\amos\core\interfaces\SearchModelInterface;
 use open20\amos\core\record\SearchResult;
@@ -23,6 +24,9 @@ use yii\db\ActiveQuery;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\data\Pagination;
+use open20\amos\admin\models\UserContact;
+use open20\amos\core\interfaces\CmsModelInterface;
+use open20\amos\core\record\CmsField;
 
 /**
  * Class UserProfileSearch
@@ -33,7 +37,7 @@ use yii\data\Pagination;
  *
  * @package open20\amos\admin\models\search
  */
-class UserProfileSearch extends UserProfile implements SearchModelInterface
+class UserProfileSearch extends UserProfile implements SearchModelInterface, CmsModelInterface
 {
     /**
      * @var string $username
@@ -59,6 +63,7 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
      * @var string $userProfileStatus
      */
     public $userProfileStatus = '';
+    public $tags;
 
     /**
      * @inheritdoc
@@ -75,12 +80,16 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
                 'sesso',
                 'codice_fiscale',
                 'prevalent_partnership_id',
+                'user_profile_role_id',
+                'user_profile_area_id',
+                'user_profile_area_other',
                 'facilitatore_id',
                 'status',
                 'isFacilitator',
                 'isOperatingReferent',
                 'userProfileStatus',
                 'validato_almeno_una_volta',
+                'tags',
                 ], 'safe'],
         ];
     }
@@ -91,9 +100,9 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
     public function attributeLabels()
     {
         return ArrayHelper::merge(parent::attributeLabels(),
-                [
+            [
                 'userProfileStatus' => AmosAdmin::t('amosadmin', 'Stato profilo utente'),
-        ]);
+            ]);
     }
 
     /**
@@ -116,7 +125,8 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
         $query = AmosAdmin::instance()->createModel('UserProfile')->find()->innerJoinWith(['user']);
 
         /** @var AmosAdmin $adminModule */
-        $adminModule = \Yii::$app->getModule('admin');
+        $adminModule = \Yii::$app->getModule(AmosAdmin::getModuleName());
+
 
         if (
             !is_null(Yii::$app->getModule($adminModule->getOrganizationModuleName())) &&
@@ -142,7 +152,7 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
                     ->innerJoin($mmTable.' '.$mmTableAlis, $mmTableAlis.'.user_id = user_profile.user_id ')
                     ->andWhere([
                         $mmTableAlis.'.'.$entityField => $entityId
-                ]);
+                    ]);
             }
         }
 
@@ -151,6 +161,7 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
 
         // Check params to get orders value
         $this->setOrderVars($params);
+
 
         //INIZIO ACCOPPIAMENTO STRETTO CON ALTRA ENTITA'
         if ($adminModule->tightCoupling == true && !\Yii::$app->user->can($adminModule->tightCouplingRoleAdmin)) {
@@ -170,11 +181,12 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
                     ->andWhere(["{$tightCouplingModel::tableName()}.user_id" => $myUserId])
                     ->select("{$tightCouplingModel::tableName()}.{$tightCouplingField}");
                 $query->innerJoin($tightCouplingModel::tableName(),
-                        "{$tightCouplingModel::tableName()}.user_id = user_profile.user_id")
+                    "{$tightCouplingModel::tableName()}.user_id = user_profile.user_id")
                     ->andWhere(['in', "{$tightCouplingModel::tableName()}.{$tightCouplingField}", $myGroups]);
             }
         }
 
+        $query->groupBy('user_profile.id');
         //FINE ACCOPPIAMENTO STRETTO CON ALTRA ENTITA'
 
         return $query;
@@ -190,6 +202,12 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
             UserProfile::tableName().'.status' => $this->userProfileStatus,
             UserProfile::tableName().'.validato_almeno_una_volta' => $this->validato_almeno_una_volta,
         ]);
+
+        if (!empty($this->tags)) {
+            $query->innerJoin('cwh_tag_owner_interest_mm',
+                'cwh_tag_owner_interest_mm.record_id = '.UserProfile::tableName().'.id and cwh_tag_owner_interest_mm.deleted_at is null')
+                ->andFilterWhere(['cwh_tag_owner_interest_mm.tag_id' => $this->tags]);
+        }
 
         $query->andFilterWhere(['like', UserProfile::tableName().'.nome', $this->nome])
             ->andFilterWhere(['like', UserProfile::tableName().'.cognome', $this->cognome])
@@ -264,12 +282,12 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
         if ($this->canUseModuleOrder()) {
             $dataProvider->setSort([
                 'attributes' => [
-                    'nome' => [
+                    'user_profile.nome' => [
                         'asc' => ['nome' => SORT_ASC, 'cognome' => SORT_ASC],
                         'desc' => ['nome' => SORT_DESC, 'cognome' => SORT_DESC],
                         'default' => SORT_ASC
                     ],
-                    'cognome' => [
+                    'user_profile.cognome' => [
                         'asc' => ['cognome' => SORT_ASC, 'nome' => SORT_ASC],
                         'desc' => ['cognome' => SORT_DESC, 'nome' => SORT_DESC],
                         'default' => SORT_ASC
@@ -284,7 +302,7 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
                         'desc' => ['organizations.name' => SORT_DESC, 'cognome' => SORT_DESC, 'nome' => SORT_DESC],
                         'default' => SORT_ASC
                     ],
-                    'created_at'
+                    'user_profile.created_at'
                 ],
                 'defaultOrder' => [
                     $this->orderAttribute => (int) $this->orderType
@@ -302,6 +320,11 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
     {
         $query = $this->baseSearch($params);
         $query->andWhere([UserProfile::tableName().'.attivo' => 1]);
+
+        if(isset($params['profileClasses'])) {
+            $query->leftJoin(UserProfileClassesUserMm::tableName(), UserProfileClassesUserMm::tableName() . '.user_id = ' . User::tableName() . '.id');
+            $query->andWhere(['IN', UserProfileClassesUserMm::tableName() . '.user_profile_classes_id', $params['profileClasses']]);
+        }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query
@@ -447,6 +470,23 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
         return $dataProvider;
     }
 
+    public static function isCommunityManagerOfAtLeastOne($userId = null)
+    {
+        if (\Yii::$app->user->isGuest || class_exists(\Yii::getAlias('@vendor/open20/amos-community/src/AmosCommunity'))
+            && !empty(\Yii::$app->getModule(\open20\amos\community\AmosCommunity::getModuleName()))) {
+            return 0;
+        }
+        if (empty($userId)) {
+            $userId = \Yii::$app->user->id;
+        }
+        $count = \open20\amos\community\models\CommunityUserMm::find()
+            ->andWhere(['user_id' => $userId])
+            ->andWhere(['role' => \open20\amos\community\models\CommunityUserMm::ROLE_COMMUNITY_MANAGER])
+            ->limit(1)
+            ->count();
+        return $count;
+    }
+
     /**
      * Search all active users with "FACILITATOR" role.
      * @param array $params
@@ -471,6 +511,38 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
             return $dataProvider;
         }
 
+        $this->baseFilter($query);
+
+        return $dataProvider;
+    }
+
+    /**
+     * Search all active users with "FACILITATOR" role.
+     * @param array $params
+     * @return ActiveDataProvider
+     */
+    public function searchMyNetwork($params)
+    {
+        $userId = \Yii::$app->user->id;
+        $query  = $this->baseSearch($params);
+        $query->andWhere([UserProfile::tableName().'.attivo' => 1]);
+
+        $contacts = UserContact::find()->andWhere(['or',
+                ['user_id' => $userId],
+                ['contact_id' => $userId],
+            ])
+            ->andWhere(['status' => [UserContact::STATUS_ACCEPTED, UserContact::STATUS_INVITED]])
+            ->select(new \yii\db\Expression("IF(user_id = $userId, contact_id, user_id) as id"));
+        $query->andWhere(['in', UserProfile::tableName().'.user_id', $contacts]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query
+        ]);
+        $this->setUserProfileSort($dataProvider);
+
+        if (!($this->load($params) && $this->validate())) {
+            return $dataProvider;
+        }
         $this->baseFilter($query);
 
         return $dataProvider;
@@ -593,5 +665,107 @@ class UserProfileSearch extends UserProfile implements SearchModelInterface
         }
 
         return $searchResult;
+    }
+
+    public function baseUsersQuery($params)
+    {
+
+//        $tableName = $this->tableName();
+        $query = $this->baseSearch($params)
+            ->andWhere(['user_profile.validato_almeno_una_volta' => 1]);
+
+        return $query;
+    }
+
+    /**
+     * Search method useful to retrieve news to show in frontend (with cms)
+     *
+     * @param $params
+     * @param int|null $limit
+     * @return ActiveDataProvider
+     */
+    public function cmsSearch($params, $limit = null)
+    {
+        $params = array_merge($params, Yii::$app->request->get());
+        $this->load($params);
+        $query  = $this->baseUsersQuery($params);
+
+        $dataProvider = new \yii\data\ActiveDataProvider([
+            'query' => $query,
+            'sort' => [
+                'defaultOrder' => [
+                    'cognome' => SORT_ASC,
+                    'nome' => SORT_ASC,
+                ],
+            ],
+        ]);
+
+        if (!empty($params["withPagination"])) {
+            $dataProvider->setPagination(['pageSize' => $limit]);
+            $query->limit(null);
+        } else {
+            $query->limit($limit);
+        }
+
+        if (!empty($params["conditionSearch"])) {
+            $commands = explode(";", $params["conditionSearch"]);
+            foreach ($commands as $command) {
+                $query->andWhere(eval("return ".$command.";"));
+            }
+        }
+
+        return $dataProvider;
+    }
+
+    /**
+     * @return array
+     */
+    public function cmsViewFields()
+    {
+        $viewFields = [];
+
+//    array_push($viewFields, new CmsField("titolo", "TEXT", 'amosnews', $this->attributeLabels()["titolo"]));
+//    array_push($viewFields, new CmsField("descrizione_breve", "TEXT", 'amosnews', $this->attributeLabels()['descrizione_breve']));
+//    array_push($viewFields, new CmsField("newsImage", "IMAGE", 'amosnews', $this->attributeLabels()['newsImage']));
+//    array_push($viewFields, new CmsField("data_pubblicazione", "DATE", 'amosnews', $this->attributeLabels()['data_pubblicazione']));
+
+        $viewFields[] = new CmsField("nome", "TEXT", 'amosadmin', $this->attributeLabels()["nome"]);
+        $viewFields[] = new CmsField("cognome", "TEXT", 'amosadmin', $this->attributeLabels()['descrizione_breve']);
+        $viewFields[] = new CmsField("userProfileImage", "IMAGE", 'amosadmin',
+            $this->attributeLabels()['userProfileImage']);
+        $viewFields[] = new CmsField("created_at", "DATE", 'amosadmin', $this->attributeLabels()['created_at']);
+
+        return $viewFields;
+    }
+
+    /**
+     * @return array
+     */
+    public function cmsSearchFields()
+    {
+        $searchFields = [];
+
+        $searchFields[] = new CmsField("nome", "TEXT");
+        $searchFields[] = new CmsField("cognome", "TEXT");
+
+        return $searchFields;
+    }
+
+    /**
+     * @param int $id
+     * @return boolean
+     */
+    public function cmsIsVisible($id)
+    {
+        $retValue = false;
+
+        if (isset($id)) {
+            $md = $this->findOne($id);
+            if (!is_null($md)) {
+                $retValue = $md->validato_almeno_una_volta;
+            }
+        }
+
+        return $retValue;
     }
 }

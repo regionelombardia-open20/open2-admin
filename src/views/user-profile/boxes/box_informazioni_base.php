@@ -11,6 +11,7 @@
 use open20\amos\admin\AmosAdmin;
 use open20\amos\admin\base\ConfigurationManager;
 use open20\amos\admin\models\UserProfileAgeGroup;
+use open20\amos\admin\utility\UserProfileUtility;
 use open20\amos\core\forms\editors\Select;
 use open20\amos\core\helpers\Html;
 use open20\amos\core\icons\AmosIcons;
@@ -66,11 +67,7 @@ $this->registerJs($js, View::POS_READY);
                 ])->widget(Select::classname(),
                     [
                     'options' => ['placeholder' => AmosAdmin::t('amosadmin', 'Select/Choose').'...', 'disabled' => false],
-                    'data' => [
-                        'None' => AmosAdmin::t('amosadmin', '#undefinded'),
-                        'Maschio' => AmosAdmin::t('amosadmin', '#man'),
-                        'Femmina' => AmosAdmin::t('amosadmin', '#women')
-                    ]
+                    'data' => UserProfileUtility::getGenderValues()
                 ])->label($model->getAttributeLabel(AmosAdmin::t('amosadmin', '#sex')).' '.AmosIcons::show('lock',
                         ['title' => AmosAdmin::t('amosadmin', '#confidential')]));
                 ?>
@@ -137,29 +134,19 @@ $this->registerJs($js, View::POS_READY);
                 //$presentazione_breve = strip_tags($model->presentazione_breve);
                 ?>
 
-                <?= AmosAdmin::t('amosadmin', 'Presentazione Breve') ?>
-
-                <?=
-                Html::input('text', 'UserProfile[presentazione_breve]', $model->presentazione_breve,
-                    [
-                    'id' => 'search-users-share',
-                    'class' => 'form-control pull-left',
-                    'placeholder' => AmosAdmin::t('amosadmin', '#short_presentation_placeholder'),
-                    'maxlength' => 140,
-                ]);
-
-
-                /*
-                  $form->field($model, 'presentazione_breve')->limitedCharsTextArea([
-                  'rows' => 6,
-                  'readonly' => false,
-                  'placeholder' => AmosAdmin::t('amosadmin', '#short_presentation_placeholder'),
-                  'maxlength' => 140
-                  ]);
-                 */
-                ?>
-
-
+<!--                TODO perché è stata messa sta roba, che ho tolto, che si perde tutte le cose che fa Yii2 sulla validazione????????????????????????????????? -->
+<!--                < ?= AmosAdmin::t('amosadmin', 'Presentazione Breve') ?>-->
+<!--                < ?=-->
+<!--                Html::input('text', 'UserProfile[presentazione_breve]', $model->presentazione_breve,-->
+<!--                    [-->
+<!--                    'id' => 'search-users-share',-->
+<!--                    'class' => 'form-control pull-left',-->
+<!--                    'placeholder' => AmosAdmin::t('amosadmin', '#short_presentation_placeholder'),-->
+<!--                    'maxlength' => 140,-->
+<!--                ]);-->
+<!--                ?>-->
+                
+                <?= $form->field($model, 'presentazione_breve')->textInput(['maxlength' => true, 'placeholder' => AmosAdmin::t('amosadmin', '#short_presentation_placeholder')]); ?>
 
                 <!--                < ?= Html::a(AmosAdmin::t('amosadmin', 'Do you want to include a more complete professional presentation') . '?', '#' . $idTabInsights, [-->
                 <!--                    'data-toggle' => 'tab',-->

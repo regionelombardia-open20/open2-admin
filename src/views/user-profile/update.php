@@ -20,10 +20,12 @@ use open20\amos\admin\AmosAdmin;
  */
 
 $this->title = $model;
-$this->params['breadcrumbs'][] = ['label' => AmosAdmin::t('amosadmin', 'Utenti'), 'url' => ['/admin']];
-$this->params['breadcrumbs'][] = ['label' => AmosAdmin::t('amosadmin', 'Elenco'), 'url' => ['index']];
-//$this->params['breadcrumbs'][] = ['label' => $model, 'url' => ['view', 'id' => $model->id]];
+$this->params['titleSection'] = AmosAdmin::t('amosadmin', 'Il mio profilo');
+$this->params['breadcrumbs'][] = ['label' => AmosAdmin::t('amosadmin', 'Partecipanti'), 'url' => ['/'.AmosAdmin::getModuleName().'/user-profile/validated-users']];
+$this->params['breadcrumbs'][] = ['label' => AmosAdmin::t('amosadmin', 'Il mio profilo'), 'url' => ['/'.AmosAdmin::getModuleName().'/user-profile/view','id' => $model->id]];
 $this->params['breadcrumbs'][] = AmosAdmin::t('amosadmin', 'Aggiorna');
+
+//$this->params['breadcrumbs'][] = ['label' => $model, 'url' => ['view', 'id' => $model->id]];
 
 ?>
 
@@ -33,6 +35,7 @@ $this->params['breadcrumbs'][] = AmosAdmin::t('amosadmin', 'Aggiorna');
         'model' => $model,
         'tipologiautente' => $tipologiautente,
         'permissionSave' => $permissionSave,
+        'profiles' => $profiles,
         'tabActive' => $tabActive
     ]) ?>
 </div>

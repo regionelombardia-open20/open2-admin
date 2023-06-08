@@ -61,13 +61,19 @@ class UserContactController extends CrudController
                         'allow' => true,
                         'actions' => [
                             'connect',
-                            'associate-contacts',
                             'associa-m2m',
                             'annulla-m2m',
-                            'delete-contact',
                             'send-reminder'
                         ],
                         'roles' => ['@']
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => [
+                            'associate-contacts',
+                            'delete-contact',
+                        ],
+                        'roles' => ['ASSOCIATE_CONTACTS']
                     ],
                 ],
             ],
@@ -85,8 +91,6 @@ class UserContactController extends CrudController
      */
     public function init()
     {
-        
-        
         $this->setModelObj(AmosAdmin::instance()->createModel('UserContact'));
         $this->setModelSearch(AmosAdmin::instance()->createModel('UserContactSearch'));
         
@@ -98,17 +102,8 @@ class UserContactController extends CrudController
             'url' => '?currentView=grid'
         ];
         
-        $iconView = [
-            'name' => 'icon',
-            'label' => AmosAdmin::t('amosadmin', '{iconaElenco}' . Html::tag('p', AmosAdmin::t('amosadmin', 'Icone')), [
-                'iconaElenco' => AmosIcons::show('grid')
-            ]),
-            'url' => '?currentView=icon'
-        ];
-        
         $this->setAvailableViews([
             'grid' => $gridView,
-            'icon' => $iconView,
         ]);
         
         parent::init();
@@ -182,8 +177,20 @@ class UserContactController extends CrudController
                 }
             }
         }
+    
+        $urlRedirect = Url::previous();
+        if (is_null($urlRedirect)) {
+            if (Yii::$app->request->get('fromView')) {
+                /** @var UserProfile $userProfileModel */
+                $userProfileModel = AmosAdmin::instance()->createModel('UserProfile');
+                $userProfile = $userProfileModel::findOne(['user_id' => $userId]);
+                $urlRedirect = ['/' - AmosAdmin::getModuleName() . '/user-profile/view', 'id' => $userProfile->id];
+            } else {
+                $urlRedirect = Yii::$app->request->getReferrer();
+            }
+        }
         
-        return $this->redirect(Url::previous());
+        return $this->redirect($urlRedirect);
     }
     
     /**
@@ -191,6 +198,13 @@ class UserContactController extends CrudController
      */
     public function actionAssociateContacts($id)
     {
+
+        //cta
+        $this->view->params =[
+            //GESTIONE TITOLO
+            'titleSection' => 'Associa contatti',
+        ]; 
+
         Url::remember();
         return $this->actionAssociaM2m($id);
     }
@@ -221,7 +235,7 @@ class UserContactController extends CrudController
      */
     public function beforeCancelAssociateM2m($event)
     {
-        $this->setRedirectArray(['/admin/user-profile/update', 'id' => \Yii::$app->request->get('id')]);
+        $this->setRedirectArray(['/'.AmosAdmin::getModuleName().'/user-profile/update', 'id' => \Yii::$app->request->get('id')]);
     }
     
     /**
@@ -245,7 +259,7 @@ class UserContactController extends CrudController
             } else {
                 /** @var AmosNotify $notifyModule */
                 $notifyModule = Yii::$app->getModule('notify');
-                if ($notifyModule && $notifyModule->hasMethod('contactAccepted')) {
+                if ($notifyModule && $notifyModule->hasMethod('contactAccepted') &&  $notifyModule->hasProperty('enableSuggestions') &&   !empty($notifyModule->enableSuggestions) ) {
                     $notifyModule->contactAccepted($user, $invitedUser);
                     return;                    
                 } else {
@@ -253,10 +267,11 @@ class UserContactController extends CrudController
                     $contactProfile = $invitedUser->getProfile();
                     $message = AmosAdmin::t('amosadmin',"accepted your connection invitation and is now active in your contact list");
                     $messageLink = AmosAdmin::t('amosadmin', "and open the network section in your profile to check the status of your contacts");
+                    $url = Yii::$app->urlManager->createAbsoluteUrl([AmosAdmin::getModuleName() . '/user-profile/update', 'id' => $user->getProfile()->id, '#' => 'tab-network']);
                 }
             }
             if (!isset($url)){
-                $url = Yii::$app->urlManager->createAbsoluteUrl('dashboard');
+                $url = Yii::$app->urlManager->createAbsoluteUrl([AmosAdmin::getModuleName() . '/user-profile/update', 'id' => $invitedUser->getProfile()->id, '#' => 'tab-network']);
             }
             $subject = $contactProfile->getNomeCognome() . " " . $message;
             $text = $this->renderMailPartial('email', [

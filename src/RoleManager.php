@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Aria S.p.A.
  * OPEN 2.0
@@ -23,13 +22,15 @@ use yii\web\ForbiddenHttpException;
 class RoleManager extends Module
 {
     public $controllerNamespace = "mdm\admin\controllers";
+
     public function init()
     {
         //Views on the original plugin
         $this->viewPath = '@vendor/mdmsoft/yii2-admin/views';
 
-        if(!Yii::$app->user->can('ADMIN')) {
-            throw new ForbiddenHttpException(Yii::t('amosadmin', 'Access Denied'));
+        if (!(\Yii::$app instanceof \yii\console\Application) && strpos(\Yii::$app->request->url, 'amministra-utenti') !== false
+            && !Yii::$app->user->can('ADMIN')) {
+            Yii::$app->response->redirect('/403')->send();
         }
 
         return parent::init();

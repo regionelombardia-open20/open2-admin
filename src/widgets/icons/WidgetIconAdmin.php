@@ -50,7 +50,7 @@ class WidgetIconAdmin extends WidgetIcon
             $this->setIcon('users');
         }
 
-        $this->setUrl(['/admin']);
+        $this->setUrl(['/'. AmosAdmin::getModuleName()]);
         $this->setCode('ADMIN_MODULE');
         $this->setModuleName(AmosAdmin::getModuleName());
         $this->setNamespace(__CLASS__);

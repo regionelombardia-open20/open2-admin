@@ -15,32 +15,33 @@ use open20\amos\core\forms\AccordionWidget;
 use open20\amos\core\forms\ContextMenuWidget;
 use open20\amos\core\helpers\Html;
 use open20\amos\core\icons\AmosIcons;
-
+use open20\amos\core\utilities\StringUtils;
+use open20\amos\layout\assets\BaseAsset;
+use open20\amos\layout\Module;
+use open20\amos\admin\models\base\UserProfile;
 
 /**
  * @var yii\web\View $this
  * @var open20\amos\admin\models\UserProfile $model
  */
 
-
-
-
-$this->title = $model;
-$this->params['breadcrumbs'][] = ['label' => AmosAdmin::t('amosadmin', 'Utenti'), 'url' => ['/admin']];
-$this->params['breadcrumbs'][] = ['label' => AmosAdmin::t('amosadmin', 'Elenco'), 'url' => ['index']];
-$this->params['breadcrumbs'][] = '';
+$this->title = $model; 
+$this->params['titleSection'] = AmosAdmin::t('amosadmin', 'Il mio profilo');
+$this->params['breadcrumbs'][] = ['label' => AmosAdmin::t('amosadmin', 'Partecipanti'), 'url' => ['/'.AmosAdmin::getModuleName().'/user-profile/validated-users']];
+$this->params['breadcrumbs'][] = ['label' => $model->nomeCognome];
 
 \open20\amos\admin\assets\AmosAsset::register($this);
 
 /** @var AmosAdmin $adminModule */
-$adminModule = Yii::$app->controller->module;
+$adminModule = AmosAdmin::instance();
 $idTabAdministration = 'tab-administration';
 
-$enableUserContacts = AmosAdmin::getInstance()->enableUserContacts;
-$hideContactsInView = AmosAdmin::getInstance()->hideContactsInView;
-$accordionNetworkOpenOnDefault = AmosAdmin::getInstance()->accordionNetworkOpenOnDefault;
+$enableUserContacts = $adminModule->enableUserContacts;
+$hideContactsInView = $adminModule->hideContactsInView;
+$accordionNetworkOpenOnDefault = $adminModule->accordionNetworkOpenOnDefault;
 
-$userCanChangeWorkflow = Yii::$app->user->can('CHANGE_USERPROFILE_WORKFLOW_STATUS');
+$userCanChangeWorkflow = (!$adminModule->completeBypassWorkflow && Yii::$app->user->can('CHANGE_USERPROFILE_WORKFLOW_STATUS'));
+$asset = BaseAsset::register($this);
 
 if($accordionNetworkOpenOnDefault) {
     $js = <<<JS
@@ -49,7 +50,20 @@ $(document).ready(function(){
 });
 JS;
     $this->registerJs($js);
+
+
+    
 }
+
+
+$jsReadMore = <<< JS
+
+$("#moreTextJs .changeContentJs > .actionChangeContentJs").click(function(){
+    $("#moreTextJs .changeContentJs").toggle();
+    $('html, body').animate({scrollTop: $('#moreTextJs').offset().top - 120},1000);
+});
+JS;
+$this->registerJs($jsReadMore);
 
 
 //if($userCanChangeWorkflow) {
@@ -67,9 +81,10 @@ JS;
 
 <div class="profile">
     <!-- HEADER -->
-    <div class="col-xs-12 info-view-header nop">
-        <div class="col-md-3 col-sm-4 col-xs-12 nop">
+    <div class="info-view-header row">
+        <div class="col-md-3 col-sm-4 col-xs-12">
             <div class="img-profile">
+                <div class="img-profile-circle">
                 <?php if (($adminModule->confManager->isVisibleBox('box_foto', ConfigurationManager::VIEW_TYPE_VIEW)) &&
                     ($adminModule->confManager->isVisibleField('userProfileImage',
                         ConfigurationManager::VIEW_TYPE_VIEW))
@@ -88,38 +103,34 @@ JS;
                         'alt' => AmosAdmin::t('amosadmin', 'Immagine del profilo')
                     ]); ?>
                 <?php endif; ?>
+                </div>
                 <div class="under-img">
                     <!-- IMPERSONATE -->
                     <?php
                     if ($model->user_id != Yii::$app->user->id && Yii::$app->user->can('IMPERSONATE_USERS')) {
-                        echo Html::a(
-                            AmosIcons::show('assignment-account', ['class' => 'btn-cancel-search']) . AmosAdmin::t('amosadmin', 'Impersonate'),
-                            \Yii::$app->urlManager->createUrl(['/admin/security/impersonate',
-                                'user_id' => $model->user_id
-                            ]),
-                            ['class' => 'btn btn-action-primary']
+                        $user = new \open20\amos\core\user\AmosUser();
+                        $user->setIdentity(
+                            \open20\amos\core\user\User::findOne(['id' => $model->user_id])
                         );
+                        if(Yii::$app->user->can('ADMIN') || !$user->can("ADMIN")){
+                            echo Html::a(
+                                AmosIcons::show('assignment-account', ['class' => 'btn-cancel-search']) . AmosAdmin::t('amosadmin', 'Impersonate'),
+                                \Yii::$app->urlManager->createUrl(['/'.AmosAdmin::getModuleName().'/security/impersonate',
+                                    'user_id' => $model->user_id
+                                ]),
+                                ['class' => 'btn btn-action-primary']
+                            );
+                        }
                     }
                     ?>
                     <!-- end IMPERSONATE -->
 
-                    <?php if ($adminModule->confManager->isVisibleField('nome', ConfigurationManager::VIEW_TYPE_VIEW)): ?>
-                        <?php if ($model->nome): ?>
-                            <h2><?= $model->nome ?>
-                                <?php if ($adminModule->confManager->isVisibleField('cognome', ConfigurationManager::VIEW_TYPE_VIEW)): ?>
-                                    <?= ($model->cognome ? $model->cognome : '') ?>
-                                <?php endif; ?>
-                            </h2>
-                        <?php endif; ?>
-                    <?php endif; ?>
-
 
                     <?php if ($model->validato_almeno_una_volta): ?>
-                        <div class="container-info-icons">
+                        <div class="container-info-icons text-info m-t-20">
                             <?php
                             if ($model->isFacilitator()) {
-                                //TODO replace account with man dressing tie and jacket
-                                $facilitatorIcon = AmosIcons::show('account', ['class' => 'am-2', 'title' => AmosAdmin::t('amosadmin', 'Facilitator')]);
+                                $facilitatorIcon = AmosIcons::show('pin-assistant', ['class' => 'am-1', 'title' => AmosAdmin::t('amosadmin', 'Facilitator')]);
                                 echo Html::tag('div', $facilitatorIcon . AmosAdmin::t('amosadmin', 'Facilitator'), ['class' => 'facilitator']);
                             }
                             $googleContactIcon = \open20\amos\admin\widgets\GoogleContactWidget::widget(['model' => $model]);
@@ -127,12 +138,13 @@ JS;
                                 echo Html::tag('div', $googleContactIcon . AmosAdmin::t('amosadmin', 'Google Contact'), ['class' => 'google-contact']);
                             }
 
-                            $title = AmosAdmin::t('amosadmin', 'Profile Active');
-                            if ($model->status == \open20\amos\admin\models\UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) {
-                                $title = AmosAdmin::t('amosadmin', 'Profile Validated');
+                            if (!$adminModule->completeBypassWorkflow) {
+                                $title = AmosAdmin::t('amosadmin', 'Profile Active');
+                                if ($model->status == \open20\amos\admin\models\UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) {
+                                    $title = AmosAdmin::t('amosadmin', 'Profile Validated');
+                                }
+                                echo Html::tag('div', AmosIcons::show('check-circle', ['class' => 'am-1', 'title' => $title]) . $title, ['class' => 'col-xs-12 nop']);
                             }
-                            //TODO replace check-all with cockade
-                            echo Html::tag('div', AmosIcons::show('check-all', ['class' => 'am-2', 'title' => $title]) . $title, ['class' => 'col-xs-12 nop']);
                             ?>
                         </div>
                     <?php endif; ?>
@@ -143,7 +155,7 @@ JS;
         <div class="col-md-9 col-sm-8 col-xs-12">
             <?= ContextMenuWidget::widget([
                 'model' => $model,
-                'actionModify' => "/admin/user-profile/update?id=" . $model->id,
+                'actionModify' => "/" . AmosAdmin::getModuleName() . "/user-profile/update?id=" . $model->id,
                 'disableDelete' => true
             ]) ?>
             <!-- SCHEDA -->
@@ -158,16 +170,46 @@ JS;
                         <div class="col-md-9 col-sm-8 col-xs-12"><?= strip_tags($model->presentazione_breve) ?></div>
                     </div>
                 <?php endif; ?>
+                
                 <?php if (
                     ($adminModule->confManager->isVisibleBox('box_presentazione_personale', ConfigurationManager::VIEW_TYPE_VIEW)) &&
                     ($adminModule->confManager->isVisibleField('presentazione_personale', ConfigurationManager::VIEW_TYPE_VIEW))
                     && $model->presentazione_personale
                 ): ?>
-                    <div class="row">
+                    <div class="row m-b-35">
                         <div class="col-md-3 col-sm-4 col-xs-12 bold"><?= $model->getAttributeLabel('presentazione_personale') ?></div>
-                        <div class="col-md-9 col-sm-8 col-xs-12"><?= $model->presentazione_personale ?></div>
+                        <div class="col-md-9 col-sm-8 col-xs-12">
+                        <?php
+                        $desclen = 350;
+                        ?>
+                        <?php if (strlen($model->presentazione_personale) <= $desclen) : ?>
+                            <?= $model->presentazione_personale ?>
+                        <?php else : ?>
+                            <div id="moreTextJs">
+                                <?php
+                                $moreContentTextLink  = Module::t('amoslayout', 'espandi descrizione') . ' ' . AmosIcons::show("chevron-down");
+                                $moreContentTitleLink = Module::t('amoslayout', 'Leggi la descrizione completa');
+
+                                $lessContentTextLink  = Module::t('amoslayout', 'riduci descrizione') . ' ' . AmosIcons::show("chevron-up");
+                                $lessContentTitleLink = Module::t('amoslayout', 'Riduci testo');
+                                ?>
+                                <div class="changeContentJs partialContent">
+                                    <?=
+                                        StringUtils::truncateHTML($model->presentazione_personale, $desclen)
+                                    ?>
+                                    <a class="actionChangeContentJs" href="javascript:void(0)" title="<?= $moreContentTitleLink ?>"><?= $moreContentTextLink ?></a>
+                                </div>
+                                <div class="changeContentJs totalContent" style="display:none">
+                                <?= $model->presentazione_personale ?>
+                                    <a class="actionChangeContentJs" href="javascript:void(0)" title="<?= $lessContentTitleLink ?>"><?= $lessContentTextLink ?></a>
+                                </div>
+                            </div>
+                        <?php endif ?>
+                        
+                        </div>
                     </div>
                 <?php endif; ?>
+                
                 <!--                --><?php //if ( $adminModule->confManager->isVisibleBox('box_dati_contatto', ConfigurationManager::VIEW_TYPE_VIEW)): ?>
                 <?php if ($adminModule->confManager->isVisibleField('email', ConfigurationManager::VIEW_TYPE_VIEW)): ?>
                     <div class="row">
@@ -316,13 +358,29 @@ JS;
             <!-- end NETWORK -->
 
             <!-- ADMIN - PRIVILEGES -->
-            <?php if (Yii::$app->user->can('PRIVILEGES_MANAGER')) {
-                $accordionAdmin = '';
+            <?php
+            $privilegesView = false;
+            $accordionAdmin = '';
+            if ($adminModule->disablePrivilegesEnableProfiles == true) {
+                $profileClasses = $model->profileClasses;
+                $privilegesView = true;
+                if (!empty($profileClasses)) {
+                    $accordionAdmin .= '<ul>';
+                    foreach ($model->profileClasses as $item) {
+                        $accordionAdmin .= '<li><strong>'.$item->name.'</strong> '.$item->description.'</li>';
+                    }
+                    $accordionAdmin .= '</ul>';
+                } else {
+                    $accordionAdmin .= AmosAdmin::t('amosadmin', 'Nessun profilo associato');
+                }
+            } else if (Yii::$app->user->can('PRIVILEGES_MANAGER')) {
+
                 $privilegesModule = Yii::$app->getModule('privileges');
                 if (!empty($privilegesModule)) {
                     $accordionAdmin = \open20\amos\privileges\widgets\UserPrivilegesWidget::widget(['userId' => $model->user_id]);
                 }
-                
+            }
+            if ($privilegesView) {
                 echo AccordionWidget::widget([
                     'items' => [
                         [
@@ -343,7 +401,8 @@ JS;
                         'class' => 'sede-accordion'
                     ]
                 ]);
-            } ?>
+            }
+            ?>
             <!-- end ADMIN - PRIVILEGES -->
         </div>
 
@@ -352,8 +411,8 @@ JS;
                 <!-- AREE INTERESSE -->
                 <?php if (\Yii::$app->getModule('tag')): ?>
                     <div class="col-xs-12 tags-section-sidebar nop" id="section-tags">
-                        <?= Html::tag('h2', AmosIcons::show('tag', [], 'dash') . AmosAdmin::t('amosadmin', '#tags_title')) ?>
-                        <div class="col-xs-12">
+                        <?= Html::tag('h2', AmosIcons::show('tag', [], 'dash') . AmosAdmin::t('amosadmin', '#tags_title'),  ['class' => 'm-0']) ?>
+                        <div class="col-xs-12 m-b-25">
                             <?= \open20\amos\core\forms\ListTagsWidget::widget([
                                 'userProfile' => $model->id,
                                 'className' => $model->className(),
@@ -367,7 +426,48 @@ JS;
             </div>
         <?php endif; ?>
     </div>
-    <?= Html::a(AmosAdmin::t('amosadmin', '#go_back'), (Yii::$app->session->get('previousUrl') ?: \Yii::$app->request->referrer), [
-        'class' => 'btn btn-secondary pull-left'
-    ]) ?>
+
+
+    <?php
+    if($adminModule->enableValidationInView && \Yii::$app->user->can(\open20\amos\admin\models\UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED)) {
+        $form = \open20\amos\core\forms\ActiveForm::begin([
+            'options' => [
+                'id' => 'user-profile-form',
+                'data-fid' => (isset($fid)) ? $fid : 0,
+                'data-field' => ((isset($dataField)) ? $dataField : ''),
+                'data-entity' => ((isset($dataEntity)) ? $dataEntity : ''),
+//        'class' => 'default-form col-xs-12 nop',
+                'enctype' => 'multipart/form-data' // important
+            ]
+        ]);
+        ?>
+        <?php
+        echo \open20\amos\workflow\widgets\WorkflowTransitionButtonsWidget::widget([
+            // parametri ereditati da verioni precedenti del widget WorkflowTransition
+            'form' => $form,
+            'model' => $model,
+            'workflowId' => UserProfile::USERPROFILE_WORKFLOW,
+            'viewWidgetOnNewRecord' => true,
+
+            'closeButton' => Html::a(AmosAdmin::t('amosadmin', 'Annulla'), !empty(Yii::$app->session->get('previousUrl')) ? Yii::$app->session->get('previousUrl') : \Yii::$app->request->referrer, ['class' => 'btn btn-secondary']),
+
+            // fisso lo stato iniziale per generazione pulsanti e comportamenti
+            // "fake" in fase di creazione (il record non e' ancora inserito nel db)
+            'initialStatusName' => explode('/', $model->getWorkflowSource()->getWorkflow(UserProfile::USERPROFILE_WORKFLOW)->getInitialStatusId())[1],
+            'initialStatus' => $model->getWorkflowSource()->getWorkflow(UserProfile::USERPROFILE_WORKFLOW)->getInitialStatusId(),
+            // Stati da renderizzare obbligatoriamente in fase di creazione (quando il record non e' ancora inserito nel db)
+            'statusToRender' => $statusToRender,
+
+            'hideSaveDraftStatus' => $hideDraftStatus,
+
+            'draftButtons' => $draftButtons
+        ]);
+        ?>
+        <?php
+        \open20\amos\core\forms\ActiveForm::end();
+    }else { ?>
+        <?= Html::a(AmosAdmin::t('amosadmin', '#go_back'), (Yii::$app->session->get('previousUrl') ?: \Yii::$app->request->referrer), [
+            'class' => 'btn btn-secondary pull-left'
+        ]) ?>
+    <?php } ?>
 </div>

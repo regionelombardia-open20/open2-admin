@@ -25,7 +25,7 @@ use open20\amos\core\utilities\ModalUtility;
 $modalId = 'send-recovery-password-modal-id';
 
 $spedisciCredenzialiLink = [
-    '/admin/security/spedisci-credenziali',
+    '/'.AmosAdmin::getModuleName().'/security/spedisci-credenziali',
     'id' => $model->id
 ];
 
@@ -70,10 +70,12 @@ ModalUtility::amosModal([
 ?>
 
 <?= Html::a(
-    AmosIcons::show('email') . AmosAdmin::t('amosadmin', 'Spedisci credenziali'),
+
+    AmosIcons::show('email') . '<span>' . AmosAdmin::t('amosadmin', 'Spedisci credenziali') . '</span>',
+
     $spedisciCredenzialiLink,
     [
-        'class' => 'btn btn-navigation-primary btn-spedisci-credenziali ',
+        'class' => 'btn btn-default btn-spedisci-credenziali btn-block',
         'data-toggle' => 'modal',
         'data-target' => '#' . $modalId
     ]

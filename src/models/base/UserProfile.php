@@ -13,7 +13,9 @@ namespace open20\amos\admin\models\base;
 
 use open20\amos\admin\AmosAdmin;
 use open20\amos\admin\interfaces\OrganizationsModuleInterface;
+use open20\amos\admin\utility\UserProfileUtility;
 use open20\amos\core\helpers\Html;
+use open20\amos\core\validators\StringHtmlValidator;
 use open20\amos\notificationmanager\record\NotifyAuditRecord;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -26,6 +28,9 @@ use yii\helpers\ArrayHelper;
  * @property string $cognome
  * @property string $codice_fiscale
  * @property string $sesso
+ * @property integer $correttezza_info
+ * @property string $email_istituzionale
+ * @property string $codice_ipa
  * @property string $presentazione_breve
  * @property string $presentazione_personale
  * @property string $nascita_data
@@ -51,6 +56,8 @@ use yii\helpers\ArrayHelper;
  * @property string $cellulare
  * @property string $fax
  * @property integer $attivo
+ * @property integer $main_user_profile_id
+ * @property string $deactivated_at
  * @property string $status
  * @property string $note
  * @property string $partita_iva
@@ -87,13 +94,18 @@ use yii\helpers\ArrayHelper;
  * @property integer $user_profile_age_group_id
  * @property integer $prevalent_partnership_id
  * @property integer $user_id
+ * @property integer $delete_token
  * @property integer $notify_from_editorial_staff
+ * @property integer $notify_tagging_user_in_content
  * @property string $created_at
  * @property string $updated_at
  * @property string $deleted_at
  * @property integer $created_by
  * @property integer $updated_by
  * @property integer $deleted_by
+ *
+ * @method \cornernote\workflow\manager\components\WorkflowDbSource getWorkflowSource()
+ * @method null|\raoul2000\workflow\base\Status getWorkflowStatus()
  *
  * @property \open20\amos\comuni\models\IstatComuni $comuneResidenza
  * @property \open20\amos\comuni\models\IstatProvince $provinciaResidenza
@@ -108,6 +120,7 @@ use yii\helpers\ArrayHelper;
  * @property \open20\amos\admin\models\UserProfileAgeGroup $userProfileAgeGroup
  * @property \open20\amos\organizzazioni\models\Profilo|\openinnovation\organizations\models\Organizations|\open20\amos\admin\interfaces\OrganizationsModuleInterface $prevalentPartnership
  * @property \open20\amos\core\user\User $user
+ * @property \open20\amos\admin\models\UserProfile $mainUserProfile
  *
  * @property \open20\amos\socialauth\models\SocialAuthUsers[] $socialAuthUsers
  */
@@ -167,12 +180,15 @@ class UserProfile extends NotifyAuditRecord
     {
         return 'user_profile';
     }
-
+    
+    /**
+     * @inheritdoc
+     */
     public function init()
     {
-        parent::init();
-
         $this->adminModule = AmosAdmin::instance();
+        
+        parent::init();
     }
 
     /**
@@ -184,9 +200,9 @@ class UserProfile extends NotifyAuditRecord
          * @var array $requiredArray
          * default required fields are :
          * [ 'nome', 'cognome', 'status', 'presentazione_breve' ]
-         * 
+         *
          * $module = Yii::$app->getModule(AmosAdmin::getModuleName());
-         * 
+         *
          * In this way everything extends AmosAdmin continue to work fine
          */
         $requiredArray = $this->adminModule->profileRequiredFields;
@@ -214,12 +230,14 @@ class UserProfile extends NotifyAuditRecord
             ], 'string'],
             [[
                 'attivo',
+                'main_user_profile_id',
                 'avatar_id',
                 'nascita_nazioni_id',
                 'user_profile_titoli_studio_id',
                 'nascita_province_id',
                 'nascita_comuni_id',
                 'privacy',
+                'correttezza_info',
                 'domicilio_cap',
                 'domicilio_provincia_id',
                 'domicilio_comune_id',
@@ -236,7 +254,8 @@ class UserProfile extends NotifyAuditRecord
                 'prevalent_partnership_id',
                 'enable_facilitator_box',
                 'external_facilitator_id',
-                'count_logins'
+                'count_logins',
+                'notify_tagging_user_in_content'
             ], 'integer'],
             [[
                 'nascita_data',
@@ -256,6 +275,8 @@ class UserProfile extends NotifyAuditRecord
                 'notify_from_editorial_staff',
                 'first_access_mail_url',
                 'enable_facilitator_box',
+                'delete_token',
+                'deactivated_at',
             ], 'safe'],
             [[
                 'nome',
@@ -270,7 +291,6 @@ class UserProfile extends NotifyAuditRecord
                 'googleplus',
                 'numero_civico_residenza',
                 'indirizzo_residenza',
-                'cap_residenza',
                 'status',
                 'user_profile_area_other',
                 'user_profile_role_other',
@@ -278,30 +298,33 @@ class UserProfile extends NotifyAuditRecord
             ], 'string', 'max' => 255],
             // phone numbers must accept any char - in USA also letters are allowed
             [['telefono', 'cellulare'], 'string', 'max' => 16],
+            [['cap_residenza'], 'string', 'min' => 5, 'max' => 5],
+            [['codice_ipa'], 'string'],
+            [['cap_residenza'], 'match', 'pattern' => '/^[0-9]{5,5}$/', 'message' => AmosAdmin::t('amosadmin', '#cap_validation_message')],
             [['partita_iva'], 'string', 'max' => 20],
             [['iban'], 'string', 'max' => 50],
             [['domicilio_civico'], 'string', 'max' => 10],
             [['domicilio_lat', 'domicilio_lon'], 'string', 'max' => 45],
             [['presentazione_breve'], 'string', 'max' => 140],
             [['codice_fiscale'], 'string', 'max' => 16],
-            [['user_profile_titoli_studio_id'], 'exist', 'skipOnError' => true, 'targetClass' => AmosAdmin::instance()->createModel('UserProfileTitoliStudio')->className(), 'targetAttribute' => ['user_profile_titoli_studio_id' => 'id']],
-            [['facilitatore_id'], 'exist', 'skipOnError' => true, 'targetClass' => AmosAdmin::instance()->createModel('UserProfile')->className(), 'targetAttribute' => ['facilitatore_id' => 'id']],
-            [['residenza_nazione_id'], 'exist', 'skipOnError' => true, 'targetClass' => AmosAdmin::instance()->createModel('IstatNazioni')->className(), 'targetAttribute' => ['residenza_nazione_id' => 'id']],
-            [['nascita_nazioni_id'], 'exist', 'skipOnError' => true, 'targetClass' => AmosAdmin::instance()->createModel('IstatNazioni')->className(), 'targetAttribute' => ['nascita_nazioni_id' => 'id']],
-            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => AmosAdmin::instance()->createModel('User')->className(), 'targetAttribute' => ['user_id' => 'id']],
-            [['user_profile_stati_civili_id'], 'exist', 'skipOnError' => true, 'targetClass' => AmosAdmin::instance()->createModel('UserProfileStatiCivili')->className(), 'targetAttribute' => ['user_profile_stati_civili_id' => 'id']],
+            [['user_profile_titoli_studio_id'], 'exist', 'skipOnError' => true, 'targetClass' => $this->adminModule->model('UserProfileTitoliStudio'), 'targetAttribute' => ['user_profile_titoli_studio_id' => 'id']],
+            [['facilitatore_id'], 'exist', 'skipOnError' => true, 'targetClass' => $this->adminModule->model('UserProfile'), 'targetAttribute' => ['facilitatore_id' => 'id']],
+            [['residenza_nazione_id'], 'exist', 'skipOnError' => true, 'targetClass' => $this->adminModule->model('IstatNazioni'), 'targetAttribute' => ['residenza_nazione_id' => 'id']],
+            [['nascita_nazioni_id'], 'exist', 'skipOnError' => true, 'targetClass' => $this->adminModule->model('IstatNazioni'), 'targetAttribute' => ['nascita_nazioni_id' => 'id']],
+            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => $this->adminModule->model('User'), 'targetAttribute' => ['user_id' => 'id']],
+            [['user_profile_stati_civili_id'], 'exist', 'skipOnError' => true, 'targetClass' => $this->adminModule->model('UserProfileStatiCivili'), 'targetAttribute' => ['user_profile_stati_civili_id' => 'id']],
             [['user_profile_role_other'], 'required', 'when' => function ($model) {
-                return ($this->user_profile_role_id == \open20\amos\admin\models\UserProfileRole::OTHER);
-            }, 'whenClient' => "function (attribute, value) {
-                return ($('#" . Html::getInputId($this, 'user_profile_role_id') . "').val() == " . \open20\amos\admin\models\UserProfileRole::OTHER . ");
-            }"],
+                return ($this->user_profile_role_id == $this->adminModule->roleFreeTextFieldId);
+            }/*, 'whenClient' => "function (attribute, value) {
+                return ($('#" . Html::getInputId($this, 'user_profile_role_id') . "').val() == " . $this->adminModule->roleFreeTextFieldId . ");
+            }"*/],
             [['user_profile_area_other'], 'required', 'when' => function ($model) {
                 return ($this->user_profile_area_id == \open20\amos\admin\models\UserProfileArea::OTHER);
             }, 'whenClient' => "function (attribute, value) {
                 return ($('#" . Html::getInputId($this, 'user_profile_area_id') . "').val() == " . \open20\amos\admin\models\UserProfileArea::OTHER . ");
             }"],
             [['facilitatore_id'], 'required', 'when' => function ($model) {
-                return ($this->status != self::USERPROFILE_WORKFLOW_STATUS_DRAFT && !AmosAdmin::instance()->bypassWorkflow);
+                return ($this->status != self::USERPROFILE_WORKFLOW_STATUS_DRAFT && !$this->adminModule->bypassWorkflow && !$this->adminModule->completeBypassWorkflow);
             }],
             [['privacy'], 'checkPrivacy']
         ];
@@ -310,7 +333,8 @@ class UserProfile extends NotifyAuditRecord
             $rules[] = ['codice_fiscale', 'unique', 'filter' => ['deleted_at' => null]];
         }
         if(!\Yii::$app->user->can('FACILITATOR')&& !Yii::$app->user->can('VALIDATOR') && !Yii::$app->user->can('ADMIN') ){
-            $rules[] =[['presentazione_personale'], 'string', 'max' => 600];
+            $rules[] =[['presentazione_personale'], StringHtmlValidator::className(), 'max' => 600];
+
         }
 
         return $rules;
@@ -321,7 +345,7 @@ class UserProfile extends NotifyAuditRecord
      */
     public function checkPrivacy()
     {
-        if (!$this->privacy && !\Yii::$app->user->can('ADMIN')) {
+        if (!$this->privacy && !\Yii::$app->user->can('ADMIN') && !\Yii::$app->user->can('AMMINISTRATORE_UTENTI')) {
             $this->addError('privacy', AmosAdmin::t('amosadmin', "It's mandatory to accept the privacy notice before save"));
         }
     }
@@ -409,6 +433,9 @@ class UserProfile extends NotifyAuditRecord
             'nascita_comuni_id' => AmosAdmin::t('amosadmin', 'Comune di nascita'),
             'privacy' => AmosAdmin::t('amosadmin', 'Accettazione privacy'),
             'domicilio_indirizzo' => AmosAdmin::t('amosadmin', 'Indirizzo'),
+            'codice_ipa' => AmosAdmin::t('amosadmin', 'Codice Ipa'),
+            'email_istituzionale' => AmosAdmin::t('amosadmin', 'Email Istituzionale'),
+            'correttezza_info' => AmosAdmin::t('amosadmin', 'Correttezza Info'),
             'domicilio_civico' => AmosAdmin::t('amosadmin', 'Civico'),
             'domicilio_cap' => AmosAdmin::t('amosadmin', 'Cap'),
             'user_profile_stati_civili_id' => AmosAdmin::t('amosadmin', 'Stato civile'),
@@ -457,6 +484,7 @@ class UserProfile extends NotifyAuditRecord
             'prevalent_partnership_id' => AmosAdmin::t('amosadmin', 'Prevalent Partnership Id'),
             'prevalentPartnership' => AmosAdmin::t('amosadmin', 'Prevalent Partnership'),
             'notify_from_editorial_staff' => AmosAdmin::t('amosadmin', '#notify_from_editorial_staff'),
+            'deactivated_at' => AmosAdmin::t('amosadmin', '#deactivated_at'),
             'created_at' => AmosAdmin::t('amosadmin', 'Creato il'),
             'updated_at' => AmosAdmin::t('amosadmin', 'Aggiornato il'),
             'deleted_at' => AmosAdmin::t('amosadmin', 'Cancellato il'),
@@ -467,6 +495,9 @@ class UserProfile extends NotifyAuditRecord
             'nomeCognome' => AmosAdmin::t('amosadmin', 'Name and surname'),
             'facilitatore' => AmosAdmin::t('amosadmin', 'Facilitator'),
             'surnameName' => AmosAdmin::t('amosadmin', 'Surname and name'),
+            'user_profile.nome' => AmosAdmin::t('amosadmin', 'Nome'),
+            'user_profile.cognome' => AmosAdmin::t('amosadmin', 'Cognome'),
+            'user_profile.created_at' => AmosAdmin::t('amosadmin', 'Creato il'),
         ]);
     }
 
@@ -491,7 +522,7 @@ class UserProfile extends NotifyAuditRecord
      */
     public function getDomicilioComune()
     {
-        return $this->hasOne(AmosAdmin::instance()->createModel('IstatComuni')->className(), ['id' => 'domicilio_comune_id']);
+        return $this->hasOne($this->adminModule->model('IstatComuni'), ['id' => 'domicilio_comune_id']);
     }
 
     /**
@@ -499,7 +530,7 @@ class UserProfile extends NotifyAuditRecord
      */
     public function getDomicilioProvincia()
     {
-        return $this->hasOne(AmosAdmin::instance()->createModel('IstatProvince')->className(), ['id' => 'domicilio_provincia_id']);
+        return $this->hasOne($this->adminModule->model('IstatProvince'), ['id' => 'domicilio_provincia_id']);
     }
 
     /**
@@ -507,7 +538,7 @@ class UserProfile extends NotifyAuditRecord
      */
     public function getUserProfileTagMms()
     {
-        return $this->hasMany(AmosAdmin::instance()->createModel('UserProfileTagMm')->className(), ['user_profile_id' => 'id']);
+        return $this->hasMany($this->adminModule->model('UserProfileTagMm'), ['user_profile_id' => 'id']);
     }
 
     /**
@@ -523,7 +554,7 @@ class UserProfile extends NotifyAuditRecord
      */
     public function getNascitaComuni()
     {
-        return $this->hasOne(AmosAdmin::instance()->createModel('IstatComuni')->className(), ['id' => 'nascita_comuni_id']);
+        return $this->hasOne($this->adminModule->model('IstatComuni'), ['id' => 'nascita_comuni_id']);
     }
 
     /**
@@ -531,7 +562,7 @@ class UserProfile extends NotifyAuditRecord
      */
     public function getNascitaProvince()
     {
-        return $this->hasOne(AmosAdmin::instance()->createModel('IstatProvince')->className(), ['id' => 'nascita_province_id']);
+        return $this->hasOne($this->adminModule->model('IstatProvince'), ['id' => 'nascita_province_id']);
     }
 
     /**
@@ -539,7 +570,7 @@ class UserProfile extends NotifyAuditRecord
      */
     public function getNascitaNazioni()
     {
-        return $this->hasOne(AmosAdmin::instance()->createModel('IstatNazioni')->className(), ['id' => 'nascita_nazioni_id']);
+        return $this->hasOne($this->adminModule->model('IstatNazioni'), ['id' => 'nascita_nazioni_id']);
     }
 
     /**
@@ -547,7 +578,7 @@ class UserProfile extends NotifyAuditRecord
      */
     public function getUser()
     {
-        return $this->hasOne(AmosAdmin::instance()->createModel('User')->className(), ['id' => 'user_id'])->inverseOf('userProfile');
+        return $this->hasOne($this->adminModule->model('User'), ['id' => 'user_id'])->inverseOf('userProfile');
     }
 
     /**
@@ -555,7 +586,7 @@ class UserProfile extends NotifyAuditRecord
      */
     public function getResidenzaNazione()
     {
-        return $this->hasOne(AmosAdmin::instance()->createModel('IstatNazioni')->className(), ['id' => 'residenza_nazione_id'])->inverseOf('userProfile');
+        return $this->hasOne($this->adminModule->model('IstatNazioni'), ['id' => 'residenza_nazione_id'])->inverseOf('userProfile');
     }
 
     /**
@@ -563,7 +594,7 @@ class UserProfile extends NotifyAuditRecord
      */
     public function getProvinciaResidenza()
     {
-        return $this->hasOne(AmosAdmin::instance()->createModel('IstatProvince')->className(), ['id' => 'provincia_residenza_id']);
+        return $this->hasOne($this->adminModule->model('IstatProvince'), ['id' => 'provincia_residenza_id']);
     }
 
     /**
@@ -571,7 +602,7 @@ class UserProfile extends NotifyAuditRecord
      */
     public function getComuneResidenza()
     {
-        return $this->hasOne(AmosAdmin::instance()->createModel('IstatComuni')->className(), ['id' => 'comune_residenza_id']);
+        return $this->hasOne($this->adminModule->model('IstatComuni'), ['id' => 'comune_residenza_id']);
     }
 
     /**
@@ -579,7 +610,7 @@ class UserProfile extends NotifyAuditRecord
      */
     public function getUserProfileStatiCivili()
     {
-        return $this->hasOne(AmosAdmin::instance()->createModel('UserProfileStatiCivili')->className(), ['id' => 'user_profile_stati_civili_id'])->inverseOf('userProfile');
+        return $this->hasOne($this->adminModule->model('UserProfileStatiCivili'), ['id' => 'user_profile_stati_civili_id'])->inverseOf('userProfile');
     }
 
     /**
@@ -587,7 +618,7 @@ class UserProfile extends NotifyAuditRecord
      */
     public function getFacilitatore()
     {
-        return $this->hasOne(AmosAdmin::instance()->createModel('UserProfile')->className(), ['id' => 'facilitatore_id']);
+        return $this->hasOne($this->adminModule->model('UserProfile'), ['id' => 'facilitatore_id']);
     }
 
 
@@ -596,7 +627,7 @@ class UserProfile extends NotifyAuditRecord
      */
     public function getExternalFacilitator()
     {
-        return $this->hasOne(AmosAdmin::instance()->createModel('UserProfile')->className(), ['id' => 'external_facilitator_id']);
+        return $this->hasOne($this->adminModule->model('UserProfile'), ['id' => 'external_facilitator_id']);
     }
 
     /**
@@ -604,7 +635,7 @@ class UserProfile extends NotifyAuditRecord
      */
     public function getUserProfileTitoliStudio()
     {
-        return $this->hasOne(AmosAdmin::instance()->createModel('UserProfileTitoliStudio')->className(), ['id' => 'user_profile_titoli_studio_id'])->inverseOf('userProfile');
+        return $this->hasOne($this->adminModule->model('UserProfileTitoliStudio'), ['id' => 'user_profile_titoli_studio_id'])->inverseOf('userProfile');
     }
 
     /**
@@ -623,6 +654,7 @@ class UserProfile extends NotifyAuditRecord
         return $this->hasOne(\open20\amos\admin\models\UserProfileRole::className(), ['id' => 'user_profile_role_id']);
     }
 
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -637,6 +669,14 @@ class UserProfile extends NotifyAuditRecord
     public function getUserProfileReactivationRequest()
     {
         return $this->hasOne(\open20\amos\admin\models\UserProfileReactivationRequest::className(), ['user_profile_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getMainUserProfile()
+    {
+        return $this->hasOne($this->adminModule->model('UserProfile'), ['id' => 'main_user_profile_id']);
     }
 
 
@@ -661,11 +701,7 @@ class UserProfile extends NotifyAuditRecord
      */
     public function getSexValues()
     {
-        return [
-            'None' => AmosAdmin::t('amosadmin', 'Non Definito'),
-            'Maschio' => AmosAdmin::t('amosadmin', 'Male'),
-            'Femmina' => AmosAdmin::t('amosadmin', 'Female')
-        ];
+        return UserProfileUtility::getGenderValues();
     }
 
     /**
@@ -695,4 +731,10 @@ class UserProfile extends NotifyAuditRecord
         return $this->hasOne(\open20\amos\admin\models\UserProfileExternalFacilitator::className(), ['user_profile_id' => 'id'])->orderBy('id DESC');
     }
 
+    public function getProfileClasses()
+    {
+        return $this->hasMany(\open20\amos\admin\models\UserProfileClasses::className(),
+                ['id' => 'user_profile_classes_id'])->viaTable(\open20\amos\admin\models\UserProfileClassesUserMm::tableName(),
+                ['user_id' => 'user_id']);
+    }
 }

@@ -18,8 +18,17 @@ use open20\amos\core\helpers\Html;
  * @var \open20\amos\admin\models\UserProfile $model
  */
 
-$this->title = AmosAdmin::t('amosadmin', 'Add contacts');
+
 $this->params['breadcrumbs'][] = AmosAdmin::t('amosadmin', 'Add contacts');
+$this->params['breadcrumbs'][] = $this->title;
+$this->params['forceBreadcrumbs'][] = [
+    'label' => AmosAdmin::t('amosadmin', "Users"),
+    'url' => '/' .AmosAdmin::getModuleName() . '/user-profile/index',
+    'route' => '/' .AmosAdmin::getModuleName() . '/user-profile/index',
+];
+$this->params['forceBreadcrumbs'][] = [
+    'label' => $this->title,
+];
 
 $userProfileId = Yii::$app->request->get("id");
 $model = UserProfile::findOne($userProfileId);
@@ -59,7 +68,7 @@ if (isset($post['genericSearch'])) {
         'query' => $query,
     ],
     'targetFooterButtons' => Html::a(AmosAdmin::t('amosadmin', 'Close'), Yii::$app->urlManager->createUrl([
-        '/admin/user-contact/annulla-m2m',
+        '/'.AmosAdmin::getModuleName().'/user-contact/annulla-m2m',
         'id' => $userProfileId
     ]), ['class' => 'btn btn-secondary', 'AmosAdmin' => Yii::t('amosadmin', 'Close')]),
     'renderTargetCheckbox' => false,
@@ -95,7 +104,7 @@ if (isset($post['genericSearch'])) {
             'label' => AmosAdmin::t('amosadmin', 'Name'),
             'value' => function($model){
                 /** @var UserProfile $model */
-                return Html::a($model->surnameName, ['/admin/user-profile/view', 'id' => $model->id ], [
+                return Html::a($model->surnameName, ['/'.AmosAdmin::getModuleName().'/user-profile/view', 'id' => $model->id ], [
                     'title' => AmosAdmin::t('amosnews', 'Apri il profilo di {nome_profilo}', ['nome_profilo' => $model->surnameName])
                 ]);
             },

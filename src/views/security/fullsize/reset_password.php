@@ -25,10 +25,10 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 
 <div id="bk-formDefaultLogin" class="loginContainerFullsize">
-    <div class="login-block resetpwd-block col-xs-12 nop">
+    <div class="login-block resetpwd-block">
         <div class="login-body">
-            <h2 class="title-login"><?= AmosAdmin::t('amosadmin', '#fullsize_reset_pwd'); ?></h2>
-            <h3 class="title-login"><?= AmosAdmin::t('amosadmin', '#fullsize_reset_pwd_subtitle'); ?></h3>
+            <p class="title-login"><?= AmosAdmin::t('amosadmin', '#fullsize_reset_pwd'); ?></p>
+            <p class="title-login"><?= AmosAdmin::t('amosadmin', '#fullsize_reset_pwd_subtitle'); ?></p>
             <?php
             $form = ActiveForm::begin([
                 'id' => 'login-form',
@@ -39,10 +39,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="col-xs-12">
                     <?= Html::beginTag('div', ['class' => 'form-group field-firstaccessform-password']) ?>
                     <?= Html::tag('span', $model->getAttributeLabel('username')) ?>
-                    <?= Html::tag('strong', $model->username) ?>
+                    <?= Html::tag('strong', Html::encode($model->username)) ?>
                     <?= Html::endTag('div') ?>
                 </div>
-                <div class="col-xs-12">
+                <div class="col-md-6">
                     <?=
                     $form->field($model, 'password')->widget(PasswordInput::classname(), [
                         'language' => 'it',
@@ -52,15 +52,16 @@ $this->params['breadcrumbs'][] = $this->title;
                             'language' => 'it'
                         ],
                         'options' => [
+                            'autocomplete' => 'off',
                             'placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_reset_pwd_1')
                         ]
-                    ])->label('');
+                    ])->label('Nuova password');
                     ?>
-                    <?= AmosIcons::show('lucchetto', '', AmosIcons::IC) ?>
+                   
                 </div>
-                <div class="col-xs-12">
-                    <?= $form->field($model, 'ripetiPassword')->passwordInput(['placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_reset_pwd_2')])->label('') ?>
-                    <?= AmosIcons::show('lucchetto', '', AmosIcons::IC) ?>
+                <div class="col-md-6">
+                    <?= $form->field($model, 'ripetiPassword')->passwordInput(['autocomplete' => 'off', 'placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_reset_pwd_2')])->label('Ripeti la nuova password') ?>
+                    
                 </div>
                 <?php if (!empty($isFirstAccess) && $isFirstAccess) { ?>
                     <div class="cookie-privacy col-xs-12">
@@ -76,7 +77,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?php } ?>
                 <?= $form->field($model, 'token')->hiddenInput()->label(false) ?>
                 <div class="col-xs-12 action">
-                    <?= Html::submitButton(AmosAdmin::t('amosadmin', '#text_button_login'), ['class' => 'btn btn-navigation-primary', 'name' => 'first-access-button', 'title' => AmosAdmin::t('amosadmin', '#text_button_login')]) ?>
+                    <?= Html::submitButton(AmosAdmin::t('amosadmin', '#text_button_login'), ['class' => 'btn btn-primary', 'name' => 'first-access-button', 'title' => AmosAdmin::t('amosadmin', '#text_button_login')]) ?>
                 </div>
             </div>
         </div>

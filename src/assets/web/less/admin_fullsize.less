@@ -339,6 +339,7 @@ IMPORT STYLE-CUSTOM
     text-align: center;
     display: flex;
     flex-direction: column;
+    align-items: flex-end;
     @media (max-width: 420px) {
       width: 100%;
     }
@@ -365,6 +366,9 @@ IMPORT STYLE-CUSTOM
 }
 
 .social-admin-section {
+  h2.spid-title{
+    font-size: 1.3em;
+  }
   .google-services {
     > div:not(:first-child) {
       margin-top: @margin-default;
@@ -372,15 +376,24 @@ IMPORT STYLE-CUSTOM
   }
   .label-social {
     margin-top: 15px;
-    float: left;
+
   }
   .wrap-btn-social {
-    float: left;
-    margin-left: @margin-medium;
+    //float: left;
+    //margin-left: @margin-medium;
+    display: flex;
+    flex-direction: column;
     .btn {
-      height: 40px;
-      min-width: 40px;
+      //height: 40px;
+      //min-width: 40px;
       border: 0;
+      height: 37px;
+      width: 200px;
+      border: 0;
+      display: block;
+
+      padding: 6px 12px;
+
       &[class*='-square'] {
         font-size: 2em;
         padding: 3px 0;
@@ -403,8 +416,21 @@ IMPORT STYLE-CUSTOM
           font-size: 2em;
         }
       }
+      &.btn-spid {
+        background: #0462C5;
+        color: #FFF;
+        padding: 7px 0;
+        width: 50%;
+        font-size: 1em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        @media (max-width:575px){
+          width: 100%;
+        }
+      }
       + .btn {
-        margin-left: @margin-min;
+        margin-top: @margin-min;
       }
     }
   }
@@ -593,3 +619,74 @@ same as amos-layout form default style
 /**
 end user profile ajax
  */
+
+//GRAFICA CAMBIO UTENTE
+.change-user-index {
+  margin-top: 30px;
+  div[data-role="list-view"] {
+    display: flex;
+    flex-wrap: wrap;
+    .change-user-card-container {
+      position: relative;
+      background-color: #D8D8D8;
+      margin: 30px 0;
+      padding: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      min-height: 200px;
+      .change-user-card-img {
+        display: flex;
+        .container-round-img {
+          border-radius: 0;
+          width: 100px;
+          height: 100px;
+          overflow: hidden;
+          background-color: #fff;
+          margin: 0;
+          border: 1px solid #d8d8d8;
+          z-index: 2;
+          margin-top: -60px;
+          a {
+              display: flex;
+              height: 100%;
+            img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+            }
+          }
+        }
+        .change-user-organization {
+          font-weight: bold;
+          padding-left: 10px;
+          /* width: 60%; */
+        }
+      }
+      .change-user-card-body {
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: auto;
+        .change-user-card-info {
+          display: flex;
+          strong {
+            margin-right: 5px;
+          }
+          span {
+            word-break: break-word;
+          }
+        }
+        .change-user-cta {
+          margin-top: 15px;
+          text-transform: uppercase;
+          font-weight: bold;
+          width: 100%;
+          &:not(.btn) {
+            line-height: 1.42857143;
+            padding-top: 6px;
+            padding-bottom: 6px;
+          }
+        }
+      }
+    }
+  }
+}

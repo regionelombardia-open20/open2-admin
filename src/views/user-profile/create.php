@@ -18,7 +18,7 @@ use open20\amos\admin\AmosAdmin;
  */
 
 $this->title = AmosAdmin::t('amosadmin', 'Crea');
-$this->params['breadcrumbs'][] = ['label' => AmosAdmin::t('amosadmin', 'Utenti'), 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Yii::$app->session->get('previousTitle'), 'url' => Yii::$app->session->get('previousUrl')];
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
@@ -26,6 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= $this->render('_form', [
         'model' => $model,
         'user' => $user,
+        'profiles' => $profiles,
         'permissionSave' => $permissionSave,
     ]) ?>
 </div>

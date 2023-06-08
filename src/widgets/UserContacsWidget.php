@@ -75,7 +75,7 @@ class UserContacsWidget extends Widget
 
         $gridId = $this->gridId;
         $url = \Yii::$app->urlManager->createUrl([
-            '/admin/user-profile/contacts',
+            '/'.AmosAdmin::getModuleName().'/user-profile/contacts',
             'id' => $this->userProfile->id,
             'isUpdate' => $this->isUpdate
             ]);
@@ -124,9 +124,9 @@ class UserContacsWidget extends Widget
                         $userProfile = User::findOne($model->user_id)->getProfile();
                         $name = $userProfile->getNomeCognome();
                     }
-                    return Html::a($name, ['/admin/user-profile/view', 'id' => $userProfile->id ], [
+                    return Html::a($name, ['/'.((!empty(\Yii::$app->params['befe']) && \Yii::$app->params['befe'] == true)? 'amosadmin' : AmosAdmin::getModuleName()).'/user-profile/view', 'id' => $userProfile->id ], [
                         'title' => AmosAdmin::t('amoscommunity', 'Apri il profilo di {nome_profilo}', ['nome_profilo' => $name]),
-                        'data' => $confirm
+                        'data-url-confirm' => $confirm
                     ]);
                 }
             ],
@@ -214,8 +214,8 @@ class UserContacsWidget extends Widget
             'btnAssociaId' => 'user-contacts-widget-associa-btn-id',
             'btnAssociaLabel' => AmosAdmin::t('amosadmin', 'Add new contacts'),
             'actionColumnsTemplate' => $this->isUpdate ? '{googleContact}{connect}{deleteRelation}' : '{googleContact}',
-            'targetUrl' => '/admin/user-contact/associate-contacts',
-            'createNewTargetUrl' => '/admin/user-profile/create',
+            'targetUrl' => '/'.AmosAdmin::getModuleName().'/user-contact/associate-contacts',
+            'createNewTargetUrl' => '/'.AmosAdmin::getModuleName().'/user-profile/create',
             'moduleClassName' => AmosAdmin::className(),
             'targetUrlController' => 'user-contact',
             'postName' => 'UserContact',
@@ -236,7 +236,7 @@ class UserContacsWidget extends Widget
 
                 'deleteRelation' => function ($url, $model) use($loggedUserId) {
                     /** @var UserContact $model */
-                    $url = '/admin/user-contact/delete-contact';
+                    $url = '/'.AmosAdmin::getModuleName().'/user-contact/delete-contact';
                     $urlDelete = Yii::$app->urlManager->createUrl([
                         $url,
                         'id' => $model->id,
@@ -278,9 +278,7 @@ class UserContacsWidget extends Widget
     public function getConfirm(){
         $controller = Yii::$app->controller;
         $isActionUpdate = ($controller->action->id == 'update');
-        $confirm = $isActionUpdate ? [
-            'confirm' => \open20\amos\core\module\BaseAmosModule::t('amoscore', '#confirm_exit_without_saving')
-        ] : null;
+        $confirm = $isActionUpdate ? \open20\amos\core\module\BaseAmosModule::t('amoscore', '#confirm_exit_without_saving') : null;
         return $confirm;
     }
 }

@@ -19,7 +19,7 @@ use open20\amos\core\helpers\Html;
  * @var \open20\amos\admin\models\UserProfile $model
  */
 
-$partnershipUrl = ['/admin/first-access-wizard/associate-prevalent-partnership', 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true];
+$partnershipUrl = ['/'.AmosAdmin::getModuleName().'/first-access-wizard/associate-prevalent-partnership', 'id' => $model->id, 'viewM2MWidgetGenericSearch' => true];
 
 /* @var \open20\amos\cwh\AmosCwh $moduleCwh */
 $moduleCwh = \Yii::$app->getModule('cwh');
@@ -43,15 +43,15 @@ $moduleTag = \Yii::$app->getModule('tag');
     <?= $this->render('parts/header', ['model' => $model]) ?>
 
     <section>
-        <div class="col-xs-12 nop">
-            <h4><?= AmosAdmin::t('amosadmin', '#faw_partnership_text') ?></h4>
+        <div>
+            <p class="lead"><?= AmosAdmin::t('amosadmin', '#faw_partnership_text') ?></p>
         </div>
     </section>
     <section>
-        <div class="col-xs-12 nop">
-            <div>
+        <div >
+            <div class="row">
                 <?php if (!is_null($model->prevalentPartnership)): ?>
-                    <div class="col-xs-3 col-md-2">
+                    <div class="col-xs-3 col-md-2 img-wizard-partnership">
                         <?php
                         $admin =  AmosAdmin::getInstance();
                         /** @var  $organizationsModule OrganizationsModuleInterface*/
@@ -61,12 +61,12 @@ $moduleTag = \Yii::$app->getModule('tag');
                         ?>
                     </div>
                     <div class="col-xs-4">
-                        <div><?= $model->prevalentPartnership->getTitle() ?></div>
+                        <div><h4><?= $model->prevalentPartnership->getTitle() ?></h4></div>
                         <div><?= Html::a(AmosAdmin::t('amosadmin', 'Change prevalent partnership'), $partnershipUrl, ['class' => 'btn btn-primary']) ?></div>
                     </div>
                 <?php else: ?>
-                    <div class="col-xs-12 text-center nop">
-                        <div><?= AmosAdmin::tHtml('amosadmin', 'Prevalent partnership not selected') ?></div>
+                    <div class="col-xs-12 m-t-35">
+                        <p><?= AmosAdmin::tHtml('amosadmin', 'Prevalent partnership not selected') ?></p>
                         <div><?= Html::a(AmosAdmin::t('amosadmin', 'Select prevalent partnership'), $partnershipUrl, ['class' => 'btn btn-primary']) ?></div>
                     </div>
                 <?php endif; ?>
@@ -77,7 +77,7 @@ $moduleTag = \Yii::$app->getModule('tag');
     
     <?= WizardPrevAndContinueButtonWidget::widget([
         'model' => $model,
-        'previousUrl' => (isset($moduleCwh) && isset($moduleTag)) ? Yii::$app->getUrlManager()->createUrl(['/admin/first-access-wizard/interests']) : Yii::$app->getUrlManager()->createUrl(['/admin/first-access-wizard/role-and-area']),
+        'previousUrl' => (isset($moduleCwh) && isset($moduleTag)) ? Yii::$app->getUrlManager()->createUrl(['/'.AmosAdmin::getModuleName().'/first-access-wizard/interests']) : Yii::$app->getUrlManager()->createUrl(['/'.AmosAdmin::getModuleName().'/first-access-wizard/role-and-area']),
     ]) ?>
     <?php ActiveForm::end(); ?>
 </div>

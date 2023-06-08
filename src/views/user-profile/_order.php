@@ -23,7 +23,7 @@ use yii\widgets\ActiveForm;
 
 <div class="user-profile-order element-to-toggle" data-toggle-element="form-order">
     <div class="col-xs-12">
-        <h2><?= AmosAdmin::t('amosadmin', 'Order by') ?>:</h2>
+        <p class="h3"><?= AmosAdmin::t('amosadmin', 'Order by') ?>:</p>
     </div>
     
     <?php $form = ActiveForm::begin([

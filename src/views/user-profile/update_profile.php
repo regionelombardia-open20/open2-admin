@@ -28,6 +28,7 @@ $this->params['breadcrumbs'][] = AmosAdmin::t('amosadmin', 'Il mio profilo');
         'user' => $user,
         'model' => $model,
         'tipologiautente' => $tipologiautente,
+        'profiles' => $profiles,
         'permissionSave' => $permissionSave,
     ]) ?>
 </div>

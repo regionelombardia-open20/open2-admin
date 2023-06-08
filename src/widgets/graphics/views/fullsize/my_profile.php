@@ -30,7 +30,7 @@ use open20\amos\core\icons\AmosIcons;
             <?= AmosAdmin::tHtml('amosadmin', 'Il mio profilo') ?>
         </h2>
     </div>
-    <div class="read-all"><?= Html::a(AmosAdmin::t('amosadmin', '#go_to_your_profile'), ['/admin/user-profile/update', 'id' => $userProfile->id], ['class' => '']); ?></div>
+    <div class="read-all"><?= Html::a(AmosAdmin::t('amosadmin', '#go_to_your_profile'), ['/'.AmosAdmin::getModuleName().'/user-profile/update', 'id' => $userProfile->id], ['class' => '']); ?></div>
 </div>
 
 <div class="box-widget myprofile">
@@ -43,7 +43,7 @@ use open20\amos\core\icons\AmosIcons;
                         <span class="pull-left">
                             <?= Html::a(
                                 $widget->getUserProfileRoundImage(),
-                                ['/admin/user-profile/update', 'id' => $userProfile->id],
+                                ['/'.AmosAdmin::getModuleName().'/user-profile/update', 'id' => $userProfile->id],
                                 ['title' => AmosAdmin::t('amosadmin', '#go_to_your_profile'), 'class' => 'container-square-img-sm']
                             ) ?>
                         </span>

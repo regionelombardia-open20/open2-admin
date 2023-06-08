@@ -24,13 +24,15 @@ class ConfigurationManager extends BaseObject
     // Form and view types
     const VIEW_TYPE_FORM = 'form';
     const VIEW_TYPE_VIEW = 'view';
+    const VIEW_TYPE_FORM_INVISIBLE = 'invisibleForm';
+    const VIEW_TYPE_VIEW_INVISIBLE = 'invisibleView';
 
     // Configuration types
     const CONF_TYPE_BOXES = 'boxes';
     const CONF_TYPE_FIELDS = 'fields';
 
     /**
-     * @var array $fieldsTypesToCheck This is internal configurations useful to check the integrity of the array content.
+     * @var array $fieldsTypes This is internal configurations useful to check the integrity of the array content.
      */
     private static $fieldsTypes = [
         self::CONF_TYPE_BOXES => 'ARRAY',
@@ -38,17 +40,28 @@ class ConfigurationManager extends BaseObject
         self::VIEW_TYPE_FORM => 'BOOL',
         self::VIEW_TYPE_VIEW => 'BOOL',
         'referToBox' => 'STRING',
+        self::VIEW_TYPE_FORM_INVISIBLE => 'BOOL',
+        self::VIEW_TYPE_VIEW_INVISIBLE => 'BOOL'
     ];
 
     private static $allowedFieldsConfKeys = [
         self::VIEW_TYPE_FORM,
         self::VIEW_TYPE_VIEW,
-        'referToBox'
+        'referToBox',
+        self::VIEW_TYPE_FORM_INVISIBLE,
+        self::VIEW_TYPE_VIEW_INVISIBLE
     ];
 
     private static $allowedBoxesConfKeys = [
         self::VIEW_TYPE_FORM,
-        self::VIEW_TYPE_VIEW
+        self::VIEW_TYPE_VIEW,
+        self::VIEW_TYPE_FORM_INVISIBLE,
+        self::VIEW_TYPE_VIEW_INVISIBLE
+    ];
+    
+    private static $mapInvisibleConfKeys = [
+        self::VIEW_TYPE_FORM => self::VIEW_TYPE_FORM_INVISIBLE,
+        self::VIEW_TYPE_VIEW => self::VIEW_TYPE_VIEW_INVISIBLE
     ];
 
     private static $defaultFormFields = [
@@ -170,7 +183,16 @@ class ConfigurationManager extends BaseObject
     private function isVisible($confType, $name, $viewType)
     {
         try {
-            return $this->fieldsConfigurations[$confType][$name][$viewType];
+            return (
+                $this->fieldsConfigurations[$confType][$name][$viewType] &&
+                (
+                    !isset($this->fieldsConfigurations[$confType][$name][self::$mapInvisibleConfKeys[$viewType]]) ||
+                    (
+                        isset($this->fieldsConfigurations[$confType][$name][self::$mapInvisibleConfKeys[$viewType]]) &&
+                        ($this->fieldsConfigurations[$confType][$name][self::$mapInvisibleConfKeys[$viewType]] === false)
+                    )
+                )
+            );
         } catch (\Exception $exception) {
             return false;
         }
@@ -303,5 +325,14 @@ class ConfigurationManager extends BaseObject
     public function getViewFields()
     {
         return $this->getFields(self::VIEW_TYPE_VIEW);
+    }
+    
+    /**
+     * This method returns true if in the platform are enabled the facilitators.
+     * @return bool
+     */
+    public function isFacilitatorsEnabled($boxName = 'box_facilitatori')
+    {
+        return ($this->isVisibleBoxInForm($boxName) && $this->isVisibleFieldInForm('facilitatore_id'));
     }
 }

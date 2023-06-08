@@ -133,11 +133,11 @@ $communityId = Yii::$app->request->get('community');
                 <div class="col-xs-12">
                     <?= Html::submitButton(AmosAdmin::t('amosadmin', '#register_now'), ['class' => 'btn btn-primary btn-administration-primary pull-right', 'name' => 'login-button', 'title' => AmosAdmin::t('amosadmin', '#register_now')]) ?>
                     <?php ActiveForm::end(); ?>
-                    <?= Html::a(AmosAdmin::t('amosadmin', '#go_to_login'), ['/admin/security/login'], ['class' => 'btn btn-secondary pull-left', 'title' => AmosAdmin::t('amosadmin', '#go_to_login_title'), 'target' => '_self']) ?>
+                    <?= Html::a(AmosAdmin::t('amosadmin', '#go_to_login'), ['/'.AmosAdmin::getModuleName().'/security/login'], ['class' => 'btn btn-secondary pull-left', 'title' => AmosAdmin::t('amosadmin', '#go_to_login_title'), 'target' => '_self']) ?>
                 </div>
 
                 <div class="col-xs-12 footer-link text-center">
-                    <?= Html::a(AmosAdmin::t('amosadmin', '#reactive_profile'), ['/admin/security/reactivate-profile'], ['class' => '', 'title' => AmosAdmin::t('amosadmin', '#reactive_profile'), 'target' => '_self']) ?>
+                    <?= Html::a(AmosAdmin::t('amosadmin', '#reactive_profile'), ['/'.AmosAdmin::getModuleName().'/security/reactivate-profile'], ['class' => '', 'title' => AmosAdmin::t('amosadmin', '#reactive_profile'), 'target' => '_self']) ?>
                 </div>
             </div>
         </div>

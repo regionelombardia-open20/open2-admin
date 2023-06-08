@@ -1,14 +1,9 @@
 <?php
-
 /**
- * Aria S.p.A.
- * OPEN 2.0
- *
- *
- * @package    Open20Package
- * @category   CategoryName
- */
-/**
+ * Created by PhpStorm.
+ * User: michele.lafrancesca
+ * Date: 25/07/2019
+ * Time: 11:18
  */
 
 namespace open20\amos\admin\widgets;
@@ -56,7 +51,7 @@ class UserProfileTooltipWidget extends Widget
      */
     public function fieldsProfile($model){
         $enabledFields = [];
-        $adminModule = \Yii::$app->getModule('admin');
+        $adminModule = \Yii::$app->getModule(AmosAdmin::getModuleName());
         $enabledFields []=  [
             'label' => AmosAdmin::t('amosadmin', 'Cognome e nome'),
             'value' => $model->surnameName

@@ -76,97 +76,121 @@ $redirectUrl = \Yii::$app->request->get('redirectUrl');
         <p class="welcome-message"><?= AmosAdmin::t('amosadmin', '#login_welcome_message') ?></p>
     <?php endif; ?>
 
-    <?php if ($socialAuthModule && $socialAuthModule->enableLogin && !$socialMatch) : ?>
-        <div class="social-block social-register-block col-xs-12 nop">
-            <?= $this->render('parts' . DIRECTORY_SEPARATOR . 'social', [
-                'type' => 'register',
-                'communityId' => $communityId,
-                'redirectUrl' => $redirectUrl
-            ]); ?>
-        </div>
-    <?php endif; ?>
 
-    <?php if ($socialProfile) :
-        echo Html::tag('div',
-            Html::tag('p',
-                AmosAdmin::t('amosadmin', 'You are right to register using {provider} account', ['provider' => $socialMatch]), ['class' => '']
-            ),
-            ['class' => 'social-block social-register-block col-xs-12 nop']
-        );
-    endif;
-    ?>
 
-    <div class="col-xs-12 nop login-block registration-block">
+    <div class="login-block registration-block">
         <?php $form = ActiveForm::begin(['id' => 'login-form']); ?>
         <div class="login-body">
-            <?= Html::tag('h2', AmosAdmin::t('amosadmin', '#fullsize_register'), ['class' => 'title-login']) ?>
+
             <div class="row">
-                <div class="col-xs-12 nop">
-                    <div class="col-xs-12">
-                        <?= $form->field($model, 'nome')->textInput(['placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_name')])->label('') ?>
-                        <?= AmosIcons::show('user', '', AmosIcons::IC) ?>
+                <div class="col-md-6">
+                    <?= Html::tag('h5', AmosAdmin::t('amosadmin', '#fullsize_register'), ['class' => 'title-login']) ?>
+                    <div class="m-t-20">
+                        <?= $form->field($model, 'nome')->textInput(['placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_name')])->label('Nome') ?>
                     </div>
-                    <div class="col-xs-12">
-                        <?= $form->field($model, 'cognome')->textInput(['placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_surname')])->label('') ?>
-                        <?= AmosIcons::show('user', '', AmosIcons::IC) ?>
+                    <div>
+                        <?= $form->field($model, 'cognome')->textInput(['placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_surname')])->label('Cognome') ?>
                     </div>
-                    <div class="col-xs-12">
-                        <?= $form->field($model, 'email')->textInput(['placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_email')])->label('') ?>
-                        <?= AmosIcons::show('mail', '', AmosIcons::IC) ?>
+                    <div>
+                        <?= $form->field($model, 'email')->textInput(['placeholder' => AmosAdmin::t('amosadmin', '#fullsize_field_email')])->label('E-mail') ?>
+                    </div>
+                    <?= Html::hiddenInput(Html::getInputName($model, 'moduleName'), $model->moduleName, ['id' => Html::getInputId($model, 'moduleName')]) ?>
+                    <?= Html::hiddenInput(Html::getInputName($model, 'contextModelId'), $model->contextModelId, ['id' => Html::getInputId($model, 'contextModelId')]) ?>
+                    <div>
+                        <div class="cookie-privacy small">
+                            <?php
+                            $urlPrivacy = '/site/privacy';
+                            if( !empty(\Yii::$app->params['befe'])){
+                                $urlPrivacy = '/privacy-policy';
+                            }?>
+                            <?= Html::a(AmosAdmin::t('amosadmin', '#cookie_policy_message'), '/privacy-policy', ['title' => AmosAdmin::t('amosadmin', '#cookie_policy_title'), 'target' => '_blank']) ?>
+                            <?= Html::tag('p', AmosAdmin::t('amosadmin', '#cookie_policy_content')) ?>
+                            <?= $form->field($model, 'privacy')->radioList([
+                                1 => AmosAdmin::t('amosadmin', '#cookie_policy_ok'),
+                                0 => AmosAdmin::t('amosadmin', '#cookie_policy_not_ok')
+                            ]); ?>
+                        </div>
+                        <div class="recaptcha"><?= $form->field($model, 'reCaptcha')->widget(\himiklab\yii2\recaptcha\ReCaptcha::className())->label('') ?></div>
+
+                        <?php
+                        if ($communityId) { ?>
+                            <?= Html::hiddenInput('community', $communityId) ?>
+                        <?php } else if ($redirectUrl) { ?>
+                            <?= Html::hiddenInput('redirectUrl', $redirectUrl) ?>
+                        <?php } ?>
+
+                        <?php
+                        if ($iuid) { ?>
+                            <?= Html::hiddenInput('iuid', $iuid) ?>
+                        <?php }
+                        ?>
                     </div>
 
-                    <div class="col-xs-12 cookie-privacy">
-                        <?= Html::a(AmosAdmin::t('amosadmin', '#cookie_policy_message'), '/site/privacy', ['title' => AmosAdmin::t('amosadmin', '#cookie_policy_title'), 'target' => '_blank']) ?>
-                        <?= Html::tag('p', AmosAdmin::t('amosadmin', '#cookie_policy_content')) ?>
-                        <?= $form->field($model, 'privacy')->radioList([
-                            1 => AmosAdmin::t('amosadmin', '#cookie_policy_ok'),
-                            0 => AmosAdmin::t('amosadmin', '#cookie_policy_not_ok')
-                        ]); ?>
-                    </div>
-                    <div class="col-xs-12 recaptcha"><?= $form->field($model, 'reCaptcha')->widget(\himiklab\yii2\recaptcha\ReCaptcha::className())->label('') ?></div>
 
-                    <?php
-                    if ($communityId) { ?>
-                        <?= Html::hiddenInput('community', $communityId) ?>
-                    <?php }else if($redirectUrl){ ?>
-                        <?= Html::hiddenInput('redirectUrl', $redirectUrl) ?>
-                    <?php } ?>
-
-                    <?php
-                    if ($iuid) { ?>
-                        <?= Html::hiddenInput('iuid', $iuid)?>
-                    <?php } 
-                    ?>
-                    
                 </div>
+                <div class="col-md-6">
+                    <?php if ($socialAuthModule && $socialAuthModule->enableSpid) : ?>
+                        <div class="spid-block m-b-20">
+                            <?= $this->render('parts' . DIRECTORY_SEPARATOR . 'spid'); ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if ($socialAuthModule && $socialAuthModule->enableLogin && !$socialMatch) : ?>
+                    <hr class="m-b-30">
+                        <div class="social-block social-register-block m-t-30 m-b-20">
+                            <?= $this->render('parts' . DIRECTORY_SEPARATOR . 'social', [
+                                'type' => 'register',
+                                'communityId' => $communityId,
+                                'redirectUrl' => $redirectUrl
+                            ]); ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if ($socialProfile) :
+                        echo Html::tag(
+                            'div',
+                            Html::tag(
+                                'p',
+                                AmosAdmin::t('amosadmin', 'You are right to register using {provider} account', ['provider' => $socialMatch]),
+                                ['class' => '']
+                            ),
+                            ['class' => 'social-block social-register-block']
+                        );
+                    endif;
+                    ?>
+                </div>
+
             </div>
         </div>
-        <div class="col-xs-12 action-block">
-            <?= Html::submitButton(AmosAdmin::t('amosadmin', '#text_button_register'), ['class' => 'btn btn-secondary', 'name' => 'login-button', 'title' => AmosAdmin::t('amosadmin', '#text_button_register')]) ?>
+        <div class="caction-block">
+        <?= Html::a(AmosAdmin::t('amosadmin', '#go_to_login'), ['/' . AmosAdmin::getModuleName() . '/security/login'], ['class' => 'btn btn-outline-primary btn-lg', 'title' => AmosAdmin::t('amosadmin', '#go_to_login_title'), 'target' => '_self']) ?>
+            <?= Html::submitButton(AmosAdmin::t('amosadmin', '#text_button_register'), ['class' => 'btn btn-primary btn-lg', 'name' => 'login-button', 'title' => AmosAdmin::t('amosadmin', '#text_button_register')]) ?>
             <?php ActiveForm::end(); ?>
-            <?= Html::a(AmosAdmin::t('amosadmin', '#go_to_login'), ['/admin/security/login'], ['class' => 'btn btn-navigation-primary', 'title' => AmosAdmin::t('amosadmin', '#go_to_login_title'), 'target' => '_self']) ?>
+           
         </div>
     </div>
 
-    <div class="col-xs-12 reactivate-profile-block">
-        <?= Html::a(AmosAdmin::t('amosadmin', '#reactive_profile'), ['/admin/security/reactivate-profile'], ['class' => '', 'title' => AmosAdmin::t('amosadmin', '#reactive_profile'), 'target' => '_self']) ?>
+    <div class="reactivate-profile-block m-t-20">
+        <?= Html::a(AmosAdmin::t('amosadmin', '#reactive_profile'), ['/' . AmosAdmin::getModuleName() . '/security/reactivate-profile'], ['class' => '', 'title' => AmosAdmin::t('amosadmin', '#reactive_profile'), 'target' => '_self']) ?>
     </div>
 
     <?php
     \yii\bootstrap\Modal::begin(['id' => 'modal-privacy']);
 
-    echo Html::tag('div',
+    echo Html::tag(
+        'div',
 
         Html::a(AmosAdmin::t('amosadmin', '#cookie_policy_message'), '/site/privacy', ['title' => AmosAdmin::t('amosadmin', '#cookie_policy_title'), 'target' => '_blank']) .
-        Html::tag('p', AmosAdmin::t('amosadmin', '#cookie_policy_content')) .
-        Html::radioList('privacy', null, [AmosAdmin::t('amosadmin', '#cookie_policy_ok'), AmosAdmin::t('amosadmin', '#cookie_policy_not_ok')], ['class' => 'radio radio-privacy'])
+            Html::tag('p', AmosAdmin::t('amosadmin', '#cookie_policy_content')) .
+            Html::radioList('privacy', null, [AmosAdmin::t('amosadmin', '#cookie_policy_ok'), AmosAdmin::t('amosadmin', '#cookie_policy_not_ok')], ['class' => 'radio radio-privacy']),
+        ['class' => 'text-bottom']
+    );
 
-        , ['class' => 'text-bottom']);
-
-    echo Html::tag('div',
+    echo Html::tag(
+        'div',
 
         Html::submitButton(AmosAdmin::t('amosadmin', '#register_now'), ['class' => 'btn btn-primary btn-administration-primary pull-right', 'id' => 'confirm-privacy-button', 'title' => AmosAdmin::t('amosadmin', '#register_now')]) .
-        Html::a(AmosAdmin::t('amosadmin', '#go_to_login'), null, ['data-dismiss' => 'modal', 'class' => 'btn btn-secondary pull-left', 'title' => AmosAdmin::t('amosadmin', '#go_to_login_title'), 'target' => '_self'])
+            Html::a(AmosAdmin::t('amosadmin', '#go_to_login'), null, ['data-dismiss' => 'modal', 'class' => 'btn btn-secondary pull-left', 'title' => AmosAdmin::t('amosadmin', '#go_to_login_title'), 'target' => '_self'])
 
     );
 
