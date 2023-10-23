@@ -505,10 +505,11 @@ $form = ActiveForm::begin([
                             ?>
                         <?php else : ?>
                             <?php
+                        $moduleadminstr = AmosAdmin::getModuleName().
                             $this->registerJs("
                             $(\"ajax-privileges-loading\").hide();
                             $.ajax({
-                                    url: \"/amosadmin/user-profile/privileges-ajax?userId={$model->user_id}\",
+                                    url: \"/{$moduleadminstr}/user-profile/privileges-ajax?userId={$model->user_id}\",
                                     timeout: 15000,
                                     type: \"GET\",
                                     dataType: \"html\",

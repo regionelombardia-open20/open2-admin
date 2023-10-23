@@ -163,7 +163,7 @@ $adminModule = AmosAdmin::instance();
                 $utente = Yii::$app->getUser();
                 if ($utente->can('ADMIN')) {
                     return Html::a('Impersona', Yii::$app->urlManager->createUrl([
-                        '/amosadmin/security/impersonate',
+                            '/'.AmosAdmin::getModuleName().'/security/impersonate',
                         'user_id' => $model->user_id
                     ]),
                         [

@@ -26,6 +26,9 @@ $this->params['breadcrumbs'][] = ['label' => AmosAdmin::t('amosadmin', 'Utenti')
 $this->params['breadcrumbs'][] = ['label' => AmosAdmin::t('amosadmin', 'Elenco'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => AmosAdmin::t('amosadmin', 'Drop Account'), 'url' => ['update', 'id' => $id]];
 $this->params['breadcrumbs'][] = $this->title;
+
+$adminModule = Yii::$app->getModule('amosadmin');
+
 ?>
 <div class="user-profile-index row nom">
     <div class="tab-content">
@@ -36,9 +39,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'id' => 'drop-form',
             'options' => ['class' => 'form-horizontal', 'autocomplete' => 'off'],
         ]) ?>
-        <div class="col-sm-5 col-xs-12">
-            <?= $form->field($model, 'vecchiaPassword')->passwordInput(['autocomplete' => 'off'])->label('Password') ?>
-        </div>
+        <?php if($adminModule->requireAdminPassword) : ?>
+            <div class="col-sm-5 col-xs-12">
+                <?= $form->field($model, 'vecchiaPassword')->passwordInput(['autocomplete' => 'off'])->label('Password') ?>
+            </div>
+        <?php endif; ?>
         <div class="clearfix"></div>
 
         <div class="bk-btnFormContainer">

@@ -508,6 +508,11 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface, CmsModuleIn
     public $idProfileClassesOperators = [1,2];
 
     /**
+     * @var bool $requireAdminPassword Operations normally requiring admin password, will ask it.
+     */
+    public $requireAdminPassword = true;
+
+    /**
      * @return string
      */
     public function getOrganizationModuleName()
@@ -847,7 +852,7 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface, CmsModuleIn
     public function defaultControllerIndexRoute()
     {
         return [
-            'user-profile' => '/amosadmin/user-profile/operators',
+            'user-profile' => '/'.self::getModuleName().'/user-profile/validated-users',
         ];
     }
 
@@ -857,7 +862,7 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface, CmsModuleIn
     public function defaultControllerIndexRouteSlogged()
     {
         return [
-            'user-profile' => '/amosadmin/user-profile/operators',
+            'user-profile' => '/'.self::getModuleName().'/user-profile/validated-users',
         ];
     }
 

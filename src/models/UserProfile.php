@@ -710,7 +710,7 @@ class UserProfile extends BaseUserProfile implements ContentModelInterface, View
             } else {
                 $url = '/img/defaultProfilo.png';
             }
-            $url = Yii::$app->params['platform']['frontendUrl'] . $url;
+            $url = Yii::$app->params['platform']['BackednUrl'] . $url;
         } else {
             if ($this->sesso == 'Maschio') {
                 $url = \Yii::$app->getUrlManager()->createAbsoluteUrl(Url::to('/img/defaultProfiloM.png'));

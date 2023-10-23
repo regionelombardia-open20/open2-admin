@@ -58,7 +58,7 @@ class AdminWorkflowEvent implements AdminWorkflowEventInterface
         $userProfile = $event->data;
         /** @var UserProfileValidationNotify $newModel */
         $newModel = AmosAdmin::instance()->createModel('UserProfileValidationNotify');
-        $newModel::createNotify($userProfile->user_id, UserProfileValidationNotify::STATUS_ACTIVE);
+        $newModel->createNotify($userProfile->user_id, UserProfileValidationNotify::STATUS_ACTIVE);
     }
     
     /**
@@ -69,7 +69,7 @@ class AdminWorkflowEvent implements AdminWorkflowEventInterface
         $userProfile = $event->data;
         /** @var UserProfileValidationNotify $newModel */
         $newModel = AmosAdmin::instance()->createModel('UserProfileValidationNotify');
-        $newModel::createNotify($userProfile->user_id, UserProfileValidationNotify::STATUS_DISABLED);
+        $newModel->createNotify($userProfile->user_id, UserProfileValidationNotify::STATUS_DISABLED);
         UserProfileMailUtility::sendEmailValidationRejected($userProfile);
     }
     

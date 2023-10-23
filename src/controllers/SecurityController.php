@@ -186,11 +186,7 @@ class SecurityController extends BackendController {
         $token = \Yii::$app->request->get('token');
 
         if (!Yii::$app->user->isGuest && empty($token)) {
-            return $this->redirect([
-                '/site/to-menu-url',
-                'url' => Yii::$app->params['platform']['frontendUrl'] . '/admin/login/login-cms-admin?redirect=' . \Yii::$app->getHomeUrl()
-            ]);
-            //   return $this->goHome();
+              return $this->goHome();
         }
 
         //login by token and redirect
@@ -297,19 +293,11 @@ class SecurityController extends BackendController {
 //                return $this->redirect($url);
 
                 if (!empty($url)) {
-                    $red = $url;
-                    //    return $this->redirect($url);
+                    return $this->redirect($url);
                 } else if (!empty(\Yii::$app->request->referrer)) {
-                    $red = \Yii::$app->request->referrer;
-                    //return $this->redirect(\Yii::$app->request->referrer);
-                } else {
-                    $red = \Yii::$app->getHomeUrl();
+                    return $this->redirect(\Yii::$app->request->referrer);
                 }
-                return $this->redirect([
-                    '/site/to-menu-url',
-                    'url' => Yii::$app->params['platform']['frontendUrl'] . '/admin/login/login-cms-admin?redirect=' . $red
-                ]);
-//                return $this->goHome();
+                return $this->goHome();
             } else {
                 return $this->render('login', [
                     'model' => $model,

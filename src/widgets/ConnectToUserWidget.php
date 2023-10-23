@@ -185,10 +185,10 @@ JS;
                     . $model->getNomeCognome() . "</strong> " . AmosAdmin::t('amosadmin',
                         "once your profile will have been validated. Take some minutes to complete your profile, in order to fully use all the functionality that the platform offers."));
                 echo Html::tag('div',
-                    Html::a(AmosAdmin::t('amosadmin', 'Not now'), null, $this->modalButtonCancelOptions)
+                    Html::a(AmosAdmin::t('amosadmin', 'Not now'), null, array_merge($this->modalButtonCancelOptions, ['title' => AmosAdmin::t('amosadmin', 'Not now')]))
                     . Html::a(AmosAdmin::t('amosadmin', 'Complete the profile'),
                         ['/'.AmosAdmin::getModuleName().'/first-access-wizard/introduction', 'id' => $userProfile->id],
-                        $this->modalButtonConfirmationOptions),
+                        array_merge($this->modalButtonConfirmationOptions, ['title' => AmosAdmin::t('amosadmin', 'Complete the profile')])),
                     ['class' => 'pull-right m-15-0']
                 );
                 Modal::end();
@@ -210,10 +210,10 @@ JS;
                         . $model->getNomeCognome() . "</strong> " . AmosAdmin::t('amosadmin',
                             "to join your contact network?"));
                     echo Html::tag('div',
-                        Html::a(AmosAdmin::t('amosadmin', 'Cancel'), null, $this->modalButtonCancelOptions)
+                        Html::a(AmosAdmin::t('amosadmin', 'Cancel'), null, array_merge($this->modalButtonCancelOptions, ['title' => AmosAdmin::t('amosadmin', 'Cancel')]))
                         . Html::a(AmosAdmin::t('amosadmin', 'Invite contact'),
                             ['/'.AmosAdmin::getModuleName().'/user-contact/connect', 'contactId' => $model->user_id],
-                            $this->modalButtonConfirmationOptions),
+                            array_merge($this->modalButtonConfirmationOptions, ['title' => AmosAdmin::t('amosadmin', 'Invite contact')])),
                         ['class' => 'pull-right m-15-0']
                     );
                     Modal::end();
@@ -256,10 +256,10 @@ JS;
                                 . $invitedName . " " . AmosAdmin::t('amosadmin',
                                     "reminding to answer to your request") . ". ");
                             echo Html::tag('div',
-                                Html::a(AmosAdmin::t('amosadmin', 'Cancel'), null, $this->modalButtonCancelOptions)
+                                Html::a(AmosAdmin::t('amosadmin', 'Cancel'), null, array_merge($this->modalButtonCancelOptions, ['title' => AmosAdmin::t('amosadmin', 'Cancel')]))
                                 . Html::a(AmosAdmin::t('amosadmin', 'Send reminder'),
                                     ['/'.AmosAdmin::getModuleName().'/user-contact/send-reminder', 'id' => $userContact->id],
-                                    $this->modalButtonConfirmationOptions),
+                                    array_merge($this->modalButtonConfirmationOptions, ['title' => AmosAdmin::t('amosadmin', 'Send reminder')])),
                                 ['class' => 'pull-right m-15-0']
                             );
                             Modal::end();
@@ -302,11 +302,11 @@ JS;
                             echo Html::tag('div',
                                 Html::a(AmosAdmin::t('amosadmin', 'Reject invitation'),
                                     $urlReject,
-                                    $btnRejectOpts
+                                    array_merge($btnRejectOpts, ['title' => AmosAdmin::t('amosadmin', 'Reject invitation')])
                                 )
                                 . Html::a(AmosAdmin::t('amosadmin', 'Accept invitation'),
                                     $urlAccept,
-                                    $this->modalButtonConfirmationOptions),
+                                    array_merge($this->modalButtonConfirmationOptions, ['title' => AmosAdmin::t('amosadmin', 'Accept invitation')])),
                                 ['class' => 'pull-right m-15-0']
                             );
                             Modal::end();
@@ -349,9 +349,9 @@ JS;
                             $btnOptions['class'] .= ' send-message-btn';
                             echo Html::tag('div',
                                     Html::a(AmosAdmin::t('amosadmin', 'Cancel'), null,
-                                        $this->modalButtonCancelOptions)
+                                        array_merge($this->modalButtonCancelOptions, ['title' => AmosAdmin::t('amosadmin', 'Cancel')]))
                                     . Html::a(AmosAdmin::t('amosadmin', 'Send message'), '/chat/default/send-message?contactId=' . $recipientId,
-                                        ArrayHelper::merge($btnOptions, ['id' => 'send-message-btn-' . $recipientId, 'data-recipient_id' => $recipientId])),
+                                        ArrayHelper::merge($btnOptions, ['id' => 'send-message-btn-' . $recipientId, 'data-recipient_id' => $recipientId, 'title' => AmosAdmin::t('amosadmin', 'Send message')])),
                                     ['class' => 'pull-right m-15-0']
                                 ) . '</div>';//Html::endForm();
                             Modal::end();
@@ -376,9 +376,10 @@ JS;
             ]);
         }
         $btn = Html::a($title, $buttonUrl, $this->btnOptions);
+		
         if (!empty($this->divClassBtnContainer)) {
             $btn = Html::tag('div', $btn, ['class' => $this->divClassBtnContainer]);
-        }
+        } 
         return $btn;
     }
 }

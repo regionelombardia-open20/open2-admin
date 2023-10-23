@@ -150,7 +150,7 @@ if ($socialAuthModule->enableSpid) {
                 <?php
                 $connected = false;
                 $label = AmosAdmin::t('amosadmin', $socialAuthModule->shibbolethConfig['buttonLabel']);
-                $url = \Yii::$app->params['platform']['frontendUrl'] . "/$moduleName/user-profile/connect-spid?id=" . $model->id;
+                $url = \Yii::$app->params['platform']['BackednUrl'] . "/$moduleName/user-profile/connect-spid?id=" . $model->id;
                 $idm = \open20\amos\socialauth\models\SocialIdmUser::find()->andWhere(['user_id' => $model->user_id])->one();
 
                 if ($idm) {

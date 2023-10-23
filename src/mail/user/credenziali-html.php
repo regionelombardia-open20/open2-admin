@@ -20,9 +20,9 @@ use yii\helpers\Html;
  * @var bool $socialAccount
  */
 
-$appLink = Yii::$app->params['platform'] ['frontendUrl'];//Yii::$app->urlManager->createAbsoluteUrl(['/']);
+$appLink = Yii::$app->params['platform'] ['backendUrl'];//Yii::$app->urlManager->createAbsoluteUrl(['/']);
 $appLink = substr($appLink, -1) == '/' ? $appLink : $appLink . '/';
-$appLinkPrivacy = Yii::$app->params['platform'] ['frontendUrl'] .'/'.AmosAdmin::getModuleName().'/user-profile/privacy'; //Yii::$app->urlManager->createAbsoluteUrl(['/'.AmosAdmin::getModuleName().'/user-profile/privacy']);
+$appLinkPrivacy = Yii::$app->params['platform'] ['backendUrl'] .'/'.AmosAdmin::getModuleName().'/user-profile/privacy'; //Yii::$app->urlManager->createAbsoluteUrl(['/'.AmosAdmin::getModuleName().'/user-profile/privacy']);
 $appName = Yii::$app->name;
 $loginLink = CoreCommonUtility::getLoginLink();
 $loginLink = substr($loginLink, 0) == '/' ? substr($loginLink, 1) : $loginLink;
