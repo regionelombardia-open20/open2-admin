@@ -513,6 +513,11 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface, CmsModuleIn
     public $requireAdminPassword = true;
 
     /**
+     * @var bool $showCredentialsOptionsUnderVpn
+     */
+    public $showCredentialsOptionsUnderVpn = false;
+
+    /**
      * @return string
      */
     public function getOrganizationModuleName()

@@ -126,8 +126,8 @@ $this->registerJs($js);
                                 ]);
                                 Yii::$app->imageUtility->methodGetImageUrl = 'getAvatarUrl';
                                 try {
-                                    $getHorizontalImageClass = Yii::$app->imageUtility->getHorizontalImage($facilitatorUserProfile->userProfileImage)['class'];
-                                    $getHorizontalImageMarginLeft = 'margin-left:' . Yii::$app->imageUtility->getHorizontalImage($facilitatorUserProfile->userProfileImage)["margin-left"] . 'px;margin-top:' . Yii::$app->imageUtility->getHorizontalImage($facilitatorUserProfile->userProfileImage)["margin-top"] . 'px;';
+                                    $getHorizontalImageClass = (!empty($facilitatorUserProfile->userProfileImage) ? Yii::$app->imageUtility->getHorizontalImage($facilitatorUserProfile->userProfileImage)['class'] : '');
+                                    $getHorizontalImageMarginLeft = (!empty($facilitatorUserProfile->userProfileImage) ? 'margin-left:' . Yii::$app->imageUtility->getHorizontalImage($facilitatorUserProfile->userProfileImage)["margin-left"] . 'px;margin-top:' . Yii::$app->imageUtility->getHorizontalImage($facilitatorUserProfile->userProfileImage)["margin-top"] . 'px;' : '');
                                 } catch (\Exception $ex) {
                                     $getHorizontalImageClass = '';
                                     $getHorizontalImageMarginLeft = '';

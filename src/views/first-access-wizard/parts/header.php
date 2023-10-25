@@ -29,8 +29,8 @@ use open20\amos\core\helpers\Html;
                 ]);
                 Yii::$app->imageUtility->methodGetImageUrl = 'getAvatarUrl';
                 try {
-                    $getHorizontalImageClass = Yii::$app->imageUtility->getHorizontalImage($model->userProfileImage)['class'];
-                    $getHorizontalImageMarginLeft = 'margin-left:' . Yii::$app->imageUtility->getHorizontalImage($model->userProfileImage)["margin-left"] . 'px;margin-top:' . Yii::$app->imageUtility->getHorizontalImage($model->userProfileImage)["margin-top"] . 'px;';
+                    $getHorizontalImageClass = (!empty($model->userProfileImage) ? Yii::$app->imageUtility->getHorizontalImage($model->userProfileImage)['class'] : '');
+                    $getHorizontalImageMarginLeft = (!empty($model->userProfileImage) ? 'margin-left:' . Yii::$app->imageUtility->getHorizontalImage($model->userProfileImage)["margin-left"] . 'px;margin-top:' . Yii::$app->imageUtility->getHorizontalImage($model->userProfileImage)["margin-top"] . 'px;' : '');
                 } catch (\Exception $ex) {
                     $getHorizontalImageClass = '';
                     $getHorizontalImageMarginLeft = '';

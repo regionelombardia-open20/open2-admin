@@ -43,12 +43,7 @@ $nome        = $arr[0];
 $cognome     = $arr[1];
 $initials    = strtoupper(substr($nome, 0, 1) . substr($cognome, 0, 1));
 
-if (Yii::$app->user->can('ADMIN') || ($userId == Yii::$app->user->id)){
-    $viewUrl = "/" . AmosAdmin::getModuleName() . "/user-profile/view?id=" . $model->id;
-} else {
-
-    $viewUrl = null;
-}
+$viewUrl = "/" . AmosAdmin::getModuleName() . "/user-profile/view?id=" . $model->id;
 
 
 $prevalentPartnershipTruncated = '';

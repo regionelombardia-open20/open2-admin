@@ -403,7 +403,9 @@ class SecurityController extends BackendController {
      */
     public function actionLogout($goToFrontPage = false, $backTo = null) {
         Yii::$app->user->logout();
-        Yii::$app->adminuser->logout();
+        if(isset(Yii::$app->adminuser)) {
+            Yii::$app->adminuser->logout();
+        }
         if (isset(\Yii::$app->params['template-amos']) && \Yii::$app->params['template-amos']) {
             $idUtente = Yii::$app->getUser()->getId();
             $ids = \open20\amos\dashboard\models\AmosUserDashboards::find()->andWhere(['user_id' => $idUtente])->select('id');

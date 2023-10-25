@@ -93,7 +93,7 @@ $this->registerJs($jsReadMore);
                     $url = $model->getAvatarUrl('original');
                     Yii::$app->imageUtility->methodGetImageUrl = 'getAvatarUrl';
                     try {
-                        $getHorizontalImageClass = Yii::$app->imageUtility->getHorizontalImage($model->userProfileImage)['class'];
+                        $getHorizontalImageClass = (!empty($model->userProfileImage)? Yii::$app->imageUtility->getHorizontalImage($model->userProfileImage)['class'] : '');
                     } catch (\Exception $ex) {
                         $getHorizontalImageClass = '';
                     }

@@ -66,7 +66,7 @@ $adminModule = Yii::$app->controller->module;
 
                                         <div class="checkbox">
                                             <input type="checkbox" id="UserProfile[profiles][]<?= $k ?>" name="UserProfile[profiles][]" value="<?= $k ?>" <?=
-                                                                                                                                                            (array_key_exists($k, $model->profiles) ? 'checked' : '')
+                                                                                                                                                            ((!empty($model->profiles) && array_key_exists($k, $model->profiles)) ? 'checked' : '')
                                                                                                                                                             ?>>
                                             <label class="no-asterisk" for="UserProfile[profiles][]<?= $k ?>">
 
