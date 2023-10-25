@@ -21,14 +21,15 @@ use open20\amos\admin\AmosAdmin;
  * @var yii\data\ActiveDataProvider $dataProvider
  */
 
+$adminModule = Yii::$app->getModule(AmosAdmin::getModuleName());
 $this->title = AmosAdmin::t('amosadmin', 'Inserisci la tua password per confermare la cancellazione.');
+if(!$adminModule->requireAdminPassword){
+   $this->title =  AmosAdmin::t('amosadmin', 'Conferma cancellazione utente.');
+}
 $this->params['breadcrumbs'][] = ['label' => AmosAdmin::t('amosadmin', 'Utenti'), 'url' => ['/admin']];
 $this->params['breadcrumbs'][] = ['label' => AmosAdmin::t('amosadmin', 'Elenco'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => AmosAdmin::t('amosadmin', 'Drop Account'), 'url' => ['update', 'id' => $id]];
 $this->params['breadcrumbs'][] = $this->title;
-
-$adminModule = Yii::$app->getModule('amosadmin');
-
 ?>
 <div class="user-profile-index row nom">
     <div class="tab-content">

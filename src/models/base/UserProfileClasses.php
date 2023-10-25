@@ -2,6 +2,7 @@
 
 namespace open20\amos\admin\models\base;
 
+use open20\amos\core\validators\StringHtmlValidator;
 use Yii;
 use open20\amos\core\record\Record;
 
@@ -42,6 +43,7 @@ class UserProfileClasses extends Record
     {
         return [
             [['description'], 'string'],
+            [['description'], StringHtmlValidator::className()],
             [['enabled', 'created_by', 'updated_by', 'deleted_by'], 'integer'],
             [['created_at', 'updated_at', 'deleted_at'], 'safe'],
             [['name', 'code'], 'string', 'max' => 255],

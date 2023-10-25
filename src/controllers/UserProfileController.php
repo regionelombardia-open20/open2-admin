@@ -127,8 +127,6 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
                                             'complete-profile',
                                             'send-request-external-facilitator',
                                             'connect-spid',
-                                            'drop-account',
-                                            'modify-email',
                                             'my-network',
                                             'find-name',
                                             'read-confirmation',
@@ -159,7 +157,8 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
                                             'update-profile',
                                             'remove-prevalent-partnership',
                                             'drop-account-by-email',
-                                            'drop-account'
+                                            'drop-account',
+                                            'modify-email',
                                         ],
                                         'roles' => ['UpdateOwnUserProfile']
                                     ],
@@ -2251,7 +2250,7 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
             'grid' => $this->gridView
         ]);
         $params = ArrayHelper::merge(Yii::$app->request->getQueryParams(), ['endUsers' => $this->module->idProfileClassesOperators]);
-        $this->setDataProvider($this->getModelSearch()->search($params));                
+        $this->setDataProvider($this->getModelSearch()->search($params));
 
 //        $this->setCreateNewBtnParams();
 //        if (
