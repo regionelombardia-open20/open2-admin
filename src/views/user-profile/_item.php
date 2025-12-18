@@ -101,7 +101,7 @@ $this->registerJs($jsReadMore);
                 $logoOptions                               = [
                     'class' => Yii::$app->imageUtility->getRoundImage($model)['class'],
                     //'style' => "margin-left: " . Yii::$app->imageUtility->getRoundImage($model)['margin-left'] . "%; margin-top: " . Yii::$app->imageUtility->getRoundImage($model)['margin-top'] . "%;",
-                    'alt' => $model->getNomeCognome(),
+                    'alt' => "",
                 ];
                 $options                                   = [];
                 if (strlen($nomeCognome) > 0) {

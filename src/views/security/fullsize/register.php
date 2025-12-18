@@ -16,6 +16,18 @@ use open20\amos\core\forms\ActiveForm;
 use open20\amos\core\icons\AmosIcons;
 use yii\helpers\ArrayHelper;
 
+$spidData = \Yii::$app->session->get('IDM');
+if (empty($spidData) || empty($spidData['nome'])) {
+    $js = <<<JS
+localStorage.clear();
+
+window.location.href = '/socialauth/shibboleth/endpoint';
+
+JS;
+    $this->registerJs($js);
+    return;
+}
+
 ModuleAdminAsset::register(Yii::$app->view);
 
 /**
@@ -51,6 +63,26 @@ $js = <<<JS
         }
     });
 
+    $('#registerform-privacy input:radio').click(function(){
+         let checked = $('#registerform-privacy input:radio:checked').val();
+         if (checked != 1){
+            // $('#registerform-privacy input:radio').append('<p class="help-block help-block-error">Acconsentire al trattamento dei dati per poter continuare la registrazione</p>');
+            $("button[name='login-button']").attr("disabled", true);
+            $('.field-registerform-privacy .tooltip-error-field .help-block-error').html("Acconsentire al trattamento dei dati per poter continuare la registrazione");
+        }
+        else {
+            //    $('#registerform-privacy input:radio p').remove();
+            $("button[name='login-button']").attr("disabled", false);
+            $('.field-registerform-privacy .tooltip-error-field .help-block-error').html("");
+        }
+    });
+
+    $(document).ready(function () {
+        if ( $('#registerform-privacy input:radio:checked').val() != 1) {
+            $("button[name='login-button']").attr("disabled", true);
+        }
+    });
+
 
 JS;
 
@@ -68,6 +100,8 @@ $socialMatch = Yii::$app->session->get('social-pending');
 $socialProfile = Yii::$app->session->get('social-profile');
 $communityId = \Yii::$app->request->get('community');
 $redirectUrl = \Yii::$app->request->get('redirectUrl');
+
+$amosAdminModule = \Yii::$app->getModule('amosadmin');
 ?>
 
 <div id="bk-formDefaultLogin" class="loginContainerFullsize">
@@ -103,14 +137,16 @@ $redirectUrl = \Yii::$app->request->get('redirectUrl');
                             if( !empty(\Yii::$app->params['befe'])){
                                 $urlPrivacy = '/privacy-policy';
                             }?>
-                            <?= Html::a(AmosAdmin::t('amosadmin', '#cookie_policy_message'), '/privacy-policy', ['title' => AmosAdmin::t('amosadmin', '#cookie_policy_title'), 'target' => '_blank']) ?>
+                            <?= Html::a(AmosAdmin::t('amosadmin', '#cookie_policy_message'), '/privacy', ['title' => AmosAdmin::t('amosadmin', '#cookie_policy_title'), 'target' => '_blank']) ?>
                             <?= Html::tag('p', AmosAdmin::t('amosadmin', '#cookie_policy_content')) ?>
                             <?= $form->field($model, 'privacy')->radioList([
                                 1 => AmosAdmin::t('amosadmin', '#cookie_policy_ok'),
                                 0 => AmosAdmin::t('amosadmin', '#cookie_policy_not_ok')
                             ]); ?>
                         </div>
+                        <?php if (empty($amosAdminModule) || empty($amosAdminModule->disableRecatchaRegistration)): ?>
                         <div class="recaptcha"><?= $form->field($model, 'reCaptcha')->widget(\himiklab\yii2\recaptcha\ReCaptcha::className())->label('') ?></div>
+                        <?php endif; ?>
 
                         <?php
                         if ($communityId) { ?>
@@ -128,7 +164,7 @@ $redirectUrl = \Yii::$app->request->get('redirectUrl');
 
 
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6"<?= !empty($spidData) ? ' style="display:none"' : '' ?>>
                     <?php if ($socialAuthModule && $socialAuthModule->enableSpid) : ?>
                         <div class="spid-block m-b-20">
                             <?= $this->render('parts' . DIRECTORY_SEPARATOR . 'spid'); ?>

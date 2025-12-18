@@ -234,7 +234,7 @@ class UserProfileClassesController extends CrudController
 			 $newModel->name =  $this->model->name."_copy".($this->model->id+1);
 			 $newModel->description =  $this->model->description;
 			 $newModel->code =  $this->model->code;
-			 $newModel->type =  $this->model->type;
+			 // $newModel->type =  $this->model->type;
 			 $newModel->enabled =  $this->model->enabled;
 			 $newModel->configuration = $this->model->configuration;
 			 if($newModel->save()){

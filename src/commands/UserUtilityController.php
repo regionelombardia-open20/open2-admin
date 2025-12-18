@@ -15,10 +15,29 @@ use open20\amos\admin\AmosAdmin;
 use open20\amos\core\user\User;
 use yii\console\Controller;
 use Yii;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Console;
 
 class UserUtilityController  extends Controller
 {
 
+    public $data = [];
+
+    /**
+     * @var string[] $passedOptions
+     */
+    public $passedOptions = [
+        'data'
+    ];
+
+    /**
+     * @param $actionID
+     * @return array|string[]
+     */
+    public function options($actionID)
+    {
+        return ArrayHelper::merge(parent::options($actionID), $this->passedOptions);
+    }
 
     /**
      *
@@ -43,5 +62,29 @@ class UserUtilityController  extends Controller
      */
     private function log($message){
         echo ($message ."\n");
+    }
+
+    /** Modifica i log dell'utente rimosso (procedura gemella di UserDropController)
+     * @return void
+     * @throws \yii\db\Exception
+     */
+    public function actionDropLogs() {
+        Console::stdout('INIZIO cancellazione logs per l\'utente cancellato' . PHP_EOL);
+        \Yii::$app->db->createCommand()
+            ->delete('audit_mail', ['to' => $this->data['userEmail']])
+            ->execute();
+
+        \Yii::$app->db->createCommand()
+            ->update('email_spool', ['to_address' => '#####'], ['to_address' => $this->data['userEmail']])
+            ->execute();
+
+        \Yii::$app->db->createCommand()
+            ->update('email_spool', ['message' => '#####'], ['like', 'message', $this->data['userEmail']])
+            ->execute();
+
+        Yii::$app->db->createCommand()
+            ->delete('session', ['like', 'data', $this->data['userEmail']])
+            ->execute();
+        Console::stdout('FINE cancellazione logs per l\'utente cancellato' . PHP_EOL);
     }
 }

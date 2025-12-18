@@ -125,11 +125,11 @@ class UserContactController extends CrudController
     
     /**
      * @param $contactId
-     * @param null $userId
+     * @param int $userId
      * @param bool $accept
      * @return \yii\web\Response
      */
-    public function actionConnect($contactId, $userId = null, $accept = false)
+    public function actionConnect($contactId, $userId = null, $accept = false, $previousUrl = null)
     {
         if (!empty($contactId)) {
             if (empty($userId)) {
@@ -166,29 +166,28 @@ class UserContactController extends CrudController
                 // check if connection request to accept exists and if the logged user correspond to the user who is accepting/refusing request
                 if (!empty($userContact) && $contactId == Yii::$app->user->id) {
                     if ($accept) {
+                         Yii::$app->session->addFlash('success', AmosAdmin::t('amosadmin', '#acceptedInvitationRequest'));
                         $userContact->status = UserContact::STATUS_ACCEPTED;
                         $userContact->accepted_at = date('Y-m-d H:i:s');
                         $userContact->save();
                         $this->sendContactRequest($userContact, true);
                     } else {
+                        Yii::$app->session->addFlash('success', AmosAdmin::t('amosadmin', '#ignoredInvitationRequest'));
                         $userContact->status = UserContact::STATUS_REFUSED;
                         $userContact->delete();
                     }
                 }
             }
         }
-    
-        $urlRedirect = Url::previous();
-        if (is_null($urlRedirect)) {
-            if (Yii::$app->request->get('fromView')) {
-                /** @var UserProfile $userProfileModel */
-                $userProfileModel = AmosAdmin::instance()->createModel('UserProfile');
-                $userProfile = $userProfileModel::findOne(['user_id' => $userId]);
-                $urlRedirect = ['/' - AmosAdmin::getModuleName() . '/user-profile/view', 'id' => $userProfile->id];
-            } else {
-                $urlRedirect = Yii::$app->request->getReferrer();
-            }
+        if (Yii::$app->request->get('fromView')) {
+            /** @var UserProfile $userProfileModel */
+            $userProfileModel = AmosAdmin::instance()->createModel('UserProfile');
+            $userProfile = $userProfileModel::findOne(['user_id' => $userId]);
+            $urlRedirect = ['/' - AmosAdmin::getModuleName() . '/user-profile/view', 'id' => $userProfile->id];
+        } else {
+            $urlRedirect = Yii::$app->request->getReferrer();
         }
+        
         
         return $this->redirect($urlRedirect);
     }
@@ -202,7 +201,7 @@ class UserContactController extends CrudController
         //cta
         $this->view->params =[
             //GESTIONE TITOLO
-            'titleSection' => 'Associa contatti',
+            'titleSection' => AmosAdmin::t('amosadmin', 'Associa contatti'),
         ]; 
 
         Url::remember();
@@ -226,7 +225,7 @@ class UserContactController extends CrudController
         }
         
         $userContact->delete();
-        
+        Yii::$app->session->addFlash('success', AmosAdmin::t('amosadmin', 'Contatto eliminato con successo'));
         return $this->redirect(Url::previous());
     }
     
@@ -280,7 +279,7 @@ class UserContactController extends CrudController
                 'url' => $url,
                 'messageLink' => $messageLink
             ]);
-            $this->sendMail(null, $tos, $subject, $text);
+            $this->sendMail(null, $tos, $subject, $text, [], [], true);
         }
     }
     
@@ -322,8 +321,9 @@ class UserContactController extends CrudController
      * @param string $text
      * @param array $files
      * @param array $bcc
+     * @param bool $useSpamBlock
      */
-    public function sendMail($from, $tos, $subject, $text, $files = [], $bcc = [])
+    public function sendMail($from, $tos, $subject, $text, $files = [], $bcc = [], $useSpamBlock = false)
     {
         /** @var \open20\amos\emailmanager\AmosEmail $mailModule */
         $mailModule = Yii::$app->getModule("email");
@@ -336,7 +336,7 @@ class UserContactController extends CrudController
                     $from = 'assistenza@open20.it';
                 }
             }
-            Email::sendMail($from, $tos, $subject, $text, $files, $bcc, [], 0, false);
+            Email::sendMail($from, $tos, $subject, $text, $files, $bcc, [], 0, false, [], [], $useSpamBlock);
         }
     }
 

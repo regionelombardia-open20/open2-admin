@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Aria S.p.A.
  * OPEN 2.0
@@ -19,8 +20,8 @@ use yii\rbac\Rule;
  * Class UpdateOwnUserProfile
  * @package open20\amos\admin\rbac
  */
-class UpdateOwnUserProfile extends Rule
-{
+class UpdateOwnUserProfile extends Rule {
+
     public $name = 'isYourProfile';
     public $description = '';
 
@@ -30,9 +31,13 @@ class UpdateOwnUserProfile extends Rule
      * @param array $params parameters passed to ManagerInterface::checkAccess().
      * @return boolean a value indicating whether the rule permits the role or permission it is associated with.
      */
-    public function execute($user, $item, $params)
-    {
+    public function execute($user, $item, $params) {
         $model = ((isset($params['model']) && $params['model']) ? $params['model'] : new UserProfile());
+
+        // This logic is only for UserProfile
+        if(!($model instanceof UserProfile)) {
+            return false;
+        }
 
         if (!$model->id) {
             $post = \Yii::$app->getRequest()->post();
@@ -42,6 +47,8 @@ class UpdateOwnUserProfile extends Rule
                 $model = $this->instanceModel($model, $get['id']);
             } elseif (isset($post['id'])) {
                 $model = $this->instanceModel($model, $post['id']);
+            } else if (isset($get['token'])) {
+                $model = $this->instanceModelByToken($model, $get['token']);
             }
         }
 
@@ -61,15 +68,15 @@ class UpdateOwnUserProfile extends Rule
             if (!empty($tightCouplingModel) && !empty($tightCouplingField)) {
                 $my = [];
                 $myGroups = $tightCouplingModel::find()
-                    ->andWhere(['user_id' => $user])
-                    ->select($tightCouplingField)
-                    ->andWhere(['exclude_from_query' => 1])
-                    ->orderBy($tightCouplingField)->asArray()->all();
+                                ->andWhere(['user_id' => $user])
+                                ->select($tightCouplingField)
+                                ->andWhere(['exclude_from_query' => 1])
+                                ->orderBy($tightCouplingField)->asArray()->all();
                 $groupUserUpdate = $tightCouplingModel::find()
-                    ->andWhere(['user_id' => $model->user_id])
-                    ->select($tightCouplingField)
-                    ->andWhere(['exclude_from_query' => 1])
-                    ->orderBy($tightCouplingField)->asArray()->all();
+                                ->andWhere(['user_id' => $model->user_id])
+                                ->select($tightCouplingField)
+                                ->andWhere(['exclude_from_query' => 1])
+                                ->orderBy($tightCouplingField)->asArray()->all();
                 foreach ($myGroups as $k => $v) {
                     foreach ($groupUserUpdate as $k1 => $v1) {
                         if ($v[$tightCouplingField] == $v1[$tightCouplingField]) {
@@ -90,11 +97,20 @@ class UpdateOwnUserProfile extends Rule
      * @param int $modelId
      * @return mixed
      */
-    private function instanceModel($model, $modelId)
-    {
+    private function instanceModel($model, $modelId) {
         /** @var UserProfile $userProfileInstance */
         $userProfileInstance = AmosAdmin::instance()->createModel('UserProfile');
         $instancedModel = $userProfileInstance::findOne($modelId);
+        if (!is_null($instancedModel)) {
+            $model = $instancedModel;
+        }
+        return $model;
+    }
+
+    private function instanceModelByToken($model, $token) {
+        /** @var UserProfile $userProfileInstance */
+        $userProfileInstance = AmosAdmin::instance()->createModel('UserProfile');
+        $instancedModel = $userProfileInstance::find()->andWhere(['delete_token' => $token])->one();
         if (!is_null($instancedModel)) {
             $model = $instancedModel;
         }

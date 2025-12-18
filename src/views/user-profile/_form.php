@@ -20,7 +20,7 @@ use open20\amos\core\forms\CloseSaveButtonWidget;
 use open20\amos\core\forms\RequiredFieldsTipWidget;
 use open20\amos\core\forms\Tabs;
 use open20\amos\core\helpers\Html;
-use open20\amos\privileges\widgets\UserPrivilegesWidget;
+
 use kartik\alert\Alert;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
@@ -202,11 +202,44 @@ if ($model->id) {
         $this->registerJs($jsIsProfileModified, View::POS_READY);
     }
 }
+
+$jsModal = <<<JS
+    $(document).on('hidden.bs.modal', function () {
+        $('body').removeClass('modal-open');
+        // $('.modal-backdrop').remove();
+    });
+JS;
+$this->registerJs($jsModal);
+
 $enableUserContacts = $adminModule->enableUserContacts;
 $enableExternalFacilitator = $adminModule->enableExternalFacilitator;
 $userCanChangeWorkflow = (!$adminModule->completeBypassWorkflow && Yii::$app->user->can('CHANGE_USERPROFILE_WORKFLOW_STATUS'));
 
 ?>
+<style>
+    .nav.nav-tabs {
+        display: flex;
+    }
+
+    .nav.nav-tabs li:has(a[href='#tab-insights']){
+        order: 1;
+    }
+    .nav.nav-tabs li:has(a[href='#tab-network']){
+        order: 2;
+    }
+    .nav.nav-tabs li:has(a[href='#tab-tags']){
+        order: 3;
+    }
+    .nav.nav-tabs li:has(a[href='#tab-notifications']){
+        order: 4;
+    }
+    .nav.nav-tabs li:has(a[href='#tab-settings']){
+        order: 5;
+    }
+    .nav.nav-tabs li:has(a[href='#tab-administration']){
+        order: 6;
+    }
+</style>
 
 <?php
 $form = ActiveForm::begin([
@@ -294,61 +327,74 @@ $form = ActiveForm::begin([
     <div class="wrap-single-tabs row">
         <div class="col-xs-12">
             <!-- APPROFONDIMENTI -->
-            <?php $this->beginBlock($idTabInsights); ?>
+            <?php $this->beginBlock($idTabInsights);
+            $tabInsightsIsEmpty = true; ?>
             <div class="col-md-8 col-xs-12">
                 <?php if ($adminModule->confManager->isVisibleBox('box_custom_insights_begin', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                     <?= $this->render('boxes/box_custom_insights_begin', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
+                    <?php $tabInsightsIsEmpty = false; ?>
                 <?php endif; ?>
 
                 <?php if ($adminModule->confManager->isVisibleBox('box_presentazione_personale', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                     <?= $this->render('boxes/box_presentazione_personale', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
+                    <?php $tabInsightsIsEmpty = false; ?>
                 <?php endif; ?>
 
                 <?php if ($adminModule->confManager->isVisibleBox('box_role_and_area', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                     <?= $this->render('boxes/box_role_and_area', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
+                    <?php $tabInsightsIsEmpty = false; ?>
                 <?php endif; ?>
 
                 <?php if ($adminModule->confManager->isVisibleBoxInForm('box_agid_rtd')) : ?>
                     <?= $this->render('boxes/box_agid_rtd', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
+                    <?php $tabInsightsIsEmpty = false; ?>
                 <?php endif; ?>
 
                 <?php if ($adminModule->confManager->isVisibleBox('box_ulteriori_informazioni', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                     <?= $this->render('boxes/box_ulteriori_informazioni', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
+                    <?php $tabInsightsIsEmpty = false; ?>
                 <?php endif; ?>
 
                 <?php if ($adminModule->confManager->isVisibleBox('box_dati_residenza', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                     <?= $this->render('boxes/box_dati_residenza', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
+                    <?php $tabInsightsIsEmpty = false; ?>
                 <?php endif; ?>
 
                 <?php if ($adminModule->confManager->isVisibleBox('box_dati_nascita', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                     <?= $this->render('boxes/box_dati_nascita', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
+                    <?php $tabInsightsIsEmpty = false; ?>
                 <?php endif; ?>
 
                 <?php if ($adminModule->confManager->isVisibleBox('box_dati_fiscali_amministrativi', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                     <?= $this->render('boxes/box_dati_fiscali_amministrativi', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
+                    <?php $tabInsightsIsEmpty = false; ?>
                 <?php endif; ?>
 
                 <?php if ($adminModule->confManager->isVisibleBox('box_custom_insights_end', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                     <?= $this->render('boxes/box_custom_insights_end', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
+                    <?php $tabInsightsIsEmpty = false; ?>
                 <?php endif; ?>
             </div>
             <div class="col-md-4 col-xs-12">
                 <?php if ($adminModule->confManager->isVisibleBox('box_prevalent_partnership', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                     <?= $this->render('boxes/box_prevalent_partnership', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
+                    <?php $tabInsightsIsEmpty = false; ?>
                 <?php endif; ?>
             </div>
             <?php $this->endBlock(); ?>
 
             <?php
-            $itemsTab[] = [
-                'label' => AmosAdmin::t('amosadmin', 'Insights'),
-                'content' => $this->blocks[$idTabInsights],
-                'options' => ['id' => $idTabInsights]
-            ];
+            if(!$adminModule->hideTabInsightsIfEmpty || ($adminModule->hideTabInsightsIfEmpty && !$tabInsightsIsEmpty)){
+                $itemsTab[] = [
+                    'label' => AmosAdmin::t('amosadmin', 'Insights'),
+                    'content' => $this->blocks[$idTabInsights],
+                    'options' => ['id' => $idTabInsights]
+                ];
+            }
             ?>
 
             <!-- NETWORK -->
-            <?php if ($model->isNewRecord || ($enableUserContacts && $model->validato_almeno_una_volta) || isset($moduleCwh)) : ?>
+            <?php if ((empty($adminModule->disableSocialInteraction)) && ($model->isNewRecord || ($enableUserContacts && $model->validato_almeno_una_volta) || isset($moduleCwh))) : ?>
                 <?php $this->beginBlock($idTabNetwork); ?>
                 <div>
                     <?php if ($model->isNewRecord) : ?>
@@ -362,7 +408,8 @@ $form = ActiveForm::begin([
                         if ($enableUserContacts && $model->validato_almeno_una_volta) {
                             echo \open20\amos\admin\widgets\UserContacsWidget::widget([
                                 'userId' => $model->user_id,
-                                'isUpdate' => true
+                                'isUpdate' => true,
+                                'iconView' => true,
                             ]);
                         }
                         if (isset($moduleCwh)) {
@@ -428,6 +475,10 @@ $form = ActiveForm::begin([
                         <?php if ($adminModule->confManager->isVisibleBox('box_social_account', ConfigurationManager::VIEW_TYPE_FORM)) : ?>
                             <?= $this->render('boxes/box_social_account', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
                         <?php endif; ?>
+                        <?php $moduleCommunity =\Yii::$app->getModule('community'); ?>
+                        <?php if($moduleCommunity && $moduleCommunity->hasProperty('enableMicrosoftTeams') &&  \Yii::$app->getModule('community')->enableMicrosoftTeams){?>
+                            <?= $this->render('boxes/box_microsoft', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
+                        <?php }?>
                     </div>
 
                 <?php endif; ?>
@@ -505,7 +556,7 @@ $form = ActiveForm::begin([
                             ?>
                         <?php else : ?>
                             <?php
-                        $moduleadminstr = AmosAdmin::getModuleName().
+                            $moduleadminstr = AmosAdmin::getModuleName();
                             $this->registerJs("
                             $(\"ajax-privileges-loading\").hide();
                             $.ajax({
@@ -549,6 +600,7 @@ $form = ActiveForm::begin([
                 }
             }
             ?>
+            
             <?= Tabs::widget([
                 'encodeLabels' => false,
                 'items' => $itemsTab,
@@ -691,7 +743,7 @@ $form = ActiveForm::begin([
                 ['class' => 'btn btn-navigation-primary', 'id' => $model->getWorkflowStatus()->getId()]
             )
                 . Html::a(AmosAdmin::t('amosadmin', 'Annulla'), null, ['data-dismiss' => 'modal', 'class' => 'btn btn-secondary']),
-            ['class' => 'pull-right m-15-0']
+            ['class' => 'pull-right m-15-0 d-flex']
         );
         \yii\bootstrap\Modal::end();
     }

@@ -1,0 +1,61 @@
+// HEADER MODAL 18PX
+.modal .modal-content .modal-header{
+    font-size: 18px;
+}
+
+//BUTTOM UNIFORMI
+.m2mwidget-generic-search {
+    .btn, input{
+        line-height: 22px;
+        min-height: 38px !important;
+    }
+}
+
+
+//AVATAR LIST DISCUSSIONI LISTE{
+.user-list-container{
+    .admin-container{
+        .avatar-wrapper.avatar-extra-text{
+            box-shadow: none;
+            padding: 0;
+            border-radius: 0;
+        }
+    }
+}
+
+//
+
+
+//USER-PROVILE - La mia rete - 32157
+.btn-search-admin {
+    > input {
+        min-height: auto !important;
+    }
+    > a.btn {
+        //min-height: 45px !important;
+        //min-width: 45px !important;
+    }
+}
+#user-contanct-grid,
+#community-members-grid,
+#user-community-grid,
+#user-organizzazioni-grid,
+#user-organizations-grid
+{
+    @media (min-width: 992px) {
+        .container-tools{
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            .btn-add-admin{
+                text-align: right;
+                padding-right: 0;
+            }
+            .btn-search-admin{
+                padding-left: 0;
+            }
+        }    
+    }
+}
+//USER-PROVILE - La mia rete - 32157

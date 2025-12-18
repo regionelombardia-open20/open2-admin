@@ -10,7 +10,7 @@ IMPORT AMOS-LAYOUT VARIABLES
 
 .avatar-wrapper.avatar-extra-text {
     display: inline-flex;
-    align-items: start;
+    align-items: start; 
     position: relative;
     padding-top: @margin-default;
     padding-bottom: @margin-default;
@@ -36,8 +36,9 @@ IMPORT AMOS-LAYOUT VARIABLES
             width: auto;
             border-radius: 4px;
             border: 1px solid @black-color;
-            padding: 2px 6px;
+            padding: 2px 12px;
             margin-right: 0 !important;
+            margin-top: 0 !important;
             font-size: 16px;
 
             .am {
@@ -393,6 +394,7 @@ IMPORT AMOS-LAYOUT VARIABLES
     .flexbox-row;
     align-items: center;
     flex-wrap: wrap;
+
     .img-profile {
         background: none;
         border: none;
@@ -421,6 +423,108 @@ IMPORT AMOS-LAYOUT VARIABLES
                 font-size: 1.4rem;
             }
         }
+    }
+}
+
+/*v2*/
+.profile-view {
+
+    // #user-contanct-grid,
+    // #user-community-grid,
+    // #user-organizzazioni-grid {
+    //     display: flex;
+    //     align-items: center;
+    //     flex-wrap: wrap;
+    // }
+    #user-organizzazioni-grid {
+        margin-top: 50px;
+    }
+
+    .basic-info {
+        display: inline-flex;
+        background-color: #f5f5f5;
+        padding: 24px;
+        width: 100%;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+        position: relative;
+        .manage {
+            position: absolute;
+            right: -4px;
+            top: 4px;
+        }
+        >.row {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .img-profile {
+            .img-profile-circle {
+                img {
+                    border-radius: 50%;
+                    aspect-ratio: 1 / 1;
+                }
+            }
+
+            .under-img {
+                .container-info-icons.text-info {
+                    text-align: center;
+                }
+            }
+        }
+
+        .basic-data-container {
+            display: flex;
+            flex-wrap: wrap;
+
+            p.data-label {
+                font-weight: bold;
+                display: inline-flex;
+                color: #555555;
+            }
+
+            .basic-data-box {
+                display: flex;
+                flex-direction: column;
+
+                hr {
+                    flex-grow: 1;
+                    border-top: 0;
+                    border-bottom: 1px solid @secondary-color;
+                    margin: 20px 0;
+                }
+
+                .prevalent-partnership-section {
+                    .wrap-partnership {
+                        display: flex;
+                        gap: 16px;
+
+                        img {
+                            max-width: 100px;
+                            aspect-ratio: 16 / 9;
+                            object-fit: contain;
+                            max-height: 85px;
+                        }
+
+                        a.btn {
+                            margin: 5px 0;
+                            font-size: 13px;
+                            margin-right: 12px;
+                            line-height: 1;
+                        }
+                    }
+
+                }
+            }
+        }
+
+    }
+
+    .connection-info {
+        margin-top: 30px;
     }
 }
 
@@ -638,10 +742,12 @@ CHECKBOX ADMIN FORM GESTIONE PERMESSI
     }
 
 }
-.section-data { 
+
+.section-data {
     border-top: 1px dotted #576F84;
     padding-top: 20px !important;
     margin-top: 30px;
+
     .section-data {
         border-top: none;
     }

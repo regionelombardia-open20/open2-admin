@@ -11,7 +11,8 @@
 
 echo \open20\amos\admin\widgets\UserContacsWidget::widget([
     'userId' => $model->user_id,
-    'isUpdate' => $isUpdate
+    'isUpdate' => $isUpdate,
+    'iconView' => true,
 ]);
 
 

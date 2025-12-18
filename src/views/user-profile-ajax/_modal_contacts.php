@@ -217,7 +217,7 @@ echo \open20\amos\core\views\AmosGridView::widget([
                         'title' => \open20\amos\admin\AmosAdmin::t('amosadmin', "Non è possibile condividere il contenuto con questo utente. Il contenuto si trova in una community non accessibile a questo utente")
                     ];
                 }
-                return '';
+                return [];
             }
         ],
 //        [

@@ -185,6 +185,9 @@ class UserProfileController extends CrudController
      */
     public function actionIndex($layout = null)
     {
+        if(!$this->adminModule->completeBypassWorkflow && !(Yii::$app->user->can('AMMINISTRA_UTENTI') || Yii::$app->user->can('FACILITATOR'))){
+            return $this->redirect(['/amosadmin/user-profile/my-network']);
+        }
         Url::remember();
         if (!empty(Yii::$app->session['cwh-scope'])) {
             $this->setAvailableViews([
@@ -335,6 +338,8 @@ class UserProfileController extends CrudController
             $this->setTightCouplingUser($profile->user_id, $postTightCoupling);
 
             $this->assignProfileClasses($profile, \Yii::$app->request->post(), []);
+
+          //  $this->operationsAfterSave();
 
             //setting personal validation scope for contents if cwh module is enabled
             if ($savedProfile) {
@@ -531,6 +536,15 @@ class UserProfileController extends CrudController
                 if (($currentStatus == UserProfile::USERPROFILE_WORKFLOW_STATUS_VALIDATED) && !empty($isProfileModified) && $isProfileModified == 1) {
                     $this->model->status = UserProfile::USERPROFILE_WORKFLOW_STATUS_TOVALIDATE;
                 }
+                
+                // Reset campo user_profile_role_other se non è selezionato il ruolo "altro"
+                if($this->model->user_profile_role_id != 1) {
+                    $this->model->user_profile_role_other = null;
+                }
+                // Reset campo user_profile_area_other se non è selezionata l'area "altro"
+                if($this->model->user_profile_area_id != 1) {
+                    $this->model->user_profile_area_other = null;
+                }
 
                 if ($this->model->save() && $this->model->user->save()) {
                     $postTightCoupling = (!empty(\Yii::$app->request->post()['UserProfile']['tightCouplingField']) ?
@@ -562,6 +576,9 @@ class UserProfileController extends CrudController
                         $emailFrequency = 0;
                         $smsFrequency   = 0;
                         $atLeastOne     = false;
+                        if(isset($notifyModule->disableUserNotificationConfiguration) && $notifyModule->disableUserNotificationConfiguration){
+                            $atLeastOne = true;
+                        }
                         if (isset($post[NotifyFrequencyWidget::emailFrequencySelectorName()])) {
                             $atLeastOne     = true;
                             $emailFrequency = Yii::$app->request->post()[NotifyFrequencyWidget::emailFrequencySelectorName()];
@@ -1014,29 +1031,32 @@ class UserProfileController extends CrudController
     {
 
         try {
+            if ($this->adminModule->disablePrivilegesEnableProfiles == true &&
+                    \Yii::$app->user->can($this->adminModule->roleOfEditingProfiles)) {
 
-            if ($model->user_id > 1 && isset($post[StringHelper::basename(get_class($model))]['profiles'])) {
-                $profiles = (array) $post[StringHelper::basename(get_class($this->model))]['profiles'];
-                UserProfileClassesUserMm::deleteAll(['user_id' => $model->user_id]);
-                $auth     = \Yii::$app->authManager;
-                if ($this->adminModule->enableForceRoleByProfiles == true) {
-                    $auth->revokeAll($model->user_id);
-                } else {
-                    foreach ($previousPermissions as $del) {
-                        if (!in_array($del, $profiles)) {
-                            $permissionsDel = UserProfileClassesAuthMm::find()->andWhere(['user_profile_classes_id' => $del])->asArray()->all();
-                            foreach ($permissionsDel as $valueDel) {
+                if ($model->user_id > 1 && isset($post[StringHelper::basename(get_class($model))]['profiles'])) {
+                    $profiles = (array) $post[StringHelper::basename(get_class($this->model))]['profiles'];
+                    UserProfileClassesUserMm::deleteAll(['user_id' => $model->user_id]);
+                    $auth = \Yii::$app->authManager;
+                    if ($this->adminModule->enableForceRoleByProfiles == true) {
+                        $auth->revokeAll($model->user_id);
+                    } else {
+                        foreach ($previousPermissions as $del) {
+                            if (!in_array($del, $profiles)) {
+                                $permissionsDel = UserProfileClassesAuthMm::find()->andWhere(['user_profile_classes_id' => $del])->asArray()->all();
+                                foreach ($permissionsDel as $valueDel) {
 
-                                $rolePermD = $auth->getRole($valueDel['item_id']);
-                                if (empty($rolePermD)) {
-                                    $rolePermD = $auth->getPermission($valueDel['item_id']);
+                                    $rolePermD = $auth->getRole($valueDel['item_id']);
+                                    if (empty($rolePermD)) {
+                                        $rolePermD = $auth->getPermission($valueDel['item_id']);
+                                    }
+                                    $auth->revoke($rolePermD, $model->user_id);
                                 }
-                                $auth->revoke($rolePermD, $model->user_id);
                             }
                         }
                     }
+                    $model->assignProfiles($profiles);
                 }
-                $model->assignProfiles($profiles);
             }
         } catch (\Exception $e) {
             \Yii::getLogger()->log($e->getMessage(), \yii\log\Logger::LEVEL_ERROR);
@@ -1050,6 +1070,10 @@ class UserProfileController extends CrudController
      */
     public function operationsAfterSave()
     {
+        \Yii::$app->cache->flush();
+        if (\Yii::$app->has('queryCache')) {
+            \Yii::$app->queryCache->flush();
+        }
         return true;
     }
 }

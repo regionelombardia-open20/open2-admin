@@ -118,6 +118,10 @@ class BiSendMessageToUserWidget extends Widget
 
         // Register javascript to send private message to connected users
         $js = <<<JS
+                
+        $('.modal').on('hidden.bs.modal', function (e) {
+            $('body').removeAttr('style');
+        });        
         $(".send-message-btn").on("click",function(e) {
             e.preventDefault();
             var href = $(this).attr('href');

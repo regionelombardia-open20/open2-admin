@@ -43,6 +43,7 @@ if (isset(\Yii::$app->params['linkConfigurations']['privacyPolicyLinkCommon'])) 
                     <a href="<?= $linkPrivacy ?>" target='_blank' title="<?= AmosAdmin::t('amosadmin', 'Visualizza il documento della privacy in nuova finestra') ?>">
                         <?= AmosAdmin::t('amosadmin', 'Visualizza il documento della privacy') . ' ' . AmosIcons::show('square-right') ?>
                     </a>
+                    <?= $form->field($model, 'privacy')->hiddenInput(['value' => 1]); ?>
                 </div>
             <?php endif; ?>
         </div>

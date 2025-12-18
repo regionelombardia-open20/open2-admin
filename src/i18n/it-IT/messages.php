@@ -11,7 +11,7 @@
 
 return [
     '#passwords_dont_match' => 'Le password non coincidono',
-    
+
     'Accepted at' => 'Data accettazione',
     'accepted your connection invitation and is now active in your contact list' => 'ha accettato la tua richiesta di collegamento ed è ora un tuo contatto attivo',
     'Accept invitation' => 'Accetta invito',
@@ -22,8 +22,9 @@ return [
     'Account' => 'Account',
     'Account Deleted.' => 'Account Cancellato.',
     'Active' => 'Attivo',
+    'Add users' => 'Aggiungi utenti',
     'Add contacts' => 'Aggiungi contatti',
-    'Add new contacts' => 'Aggiungi nuovi contatti',
+    'Add new contacts' => 'Aggiungi un nuovo contatto',
     'Add new user' => 'Aggiungi nuovo utente',
     'Add the credentials to access' => 'Inserisci le credenziali per accedere',
     'Admin' => 'Amministratore',
@@ -139,9 +140,7 @@ return [
     'Consultant' => 'Consulente',
     'Contact request' => 'Richiesta di collegamento',
     '#contacts' => 'Contatti',
-    'Contacts' => 'Contatti',
     'Contact User ID' => 'ID Utente Contatto',
-    'Contatti' => 'Contatti',
     '#contextModelId' => 'Identificativo',
     '#cookie_policy_content' => 'Ai sensi dell\'articolo 23 del Codice in materia di protezione dei dati personali (D.Lgs 196/03), presa visione dell\'informativa privacy sopra riportata, esprimo il consenso al trattamento dei miei dati personali per la finalità di cui al punto 1 dell\'informativa stessa.',
     '#cookie_policy_message' => 'Prendi visione del trattamento dei dati personali e dell\'informativa sull\'uso dei cookie',
@@ -935,5 +934,21 @@ return [
     '#disable_collaborations_notifications_submit_button' => 'Disabilita',
     '#disable_collaborations_notifications_submit_button_title' => 'Disabilita notifiche proposte di collaborazione',
     '#disable_notification_info_message' => 'Puoi riabilitare le notifiche relative alle proposte di collaborazione dalla sezione "Notifiche" del tuo profilo.',
-    '#disable_notification_message_already_disabled' => 'Notifiche già disabilitate'
-    ];
+    '#disable_notification_message_already_disabled' => 'Notifiche già disabilitate',
+    '#confirm_exit_without_saving' => 'Cliccando su questo link le tue modifiche potrebbero essere perse, controllare di aver salvato tutti i dati.',
+    '#contactmine_title' => 'Utenti a cui sono collegato',
+    '#contactother_title' => 'Utenti a cui è collegato {name}',
+    'Reject' => 'Ignora',
+    'Accept' => 'Accetta',
+    '#acceptInvitationPopup_header' => 'Vuoi accettare la richiesta di collegamento?',
+    '#acceptInvitationPopup_body' => 'Conferma la richiesta di {invitedBy} per aggiungere l\'utente alla tua rete e iniziare subito una conversazione. Se ignori la richiesta, dovrà essere inviata di nuovo da te o dall\'altro utente.',
+    '#ignoreInvitationPopup_header' => 'Vuoi ignorare la richiesta di collegamento?',
+    '#ignoreInvitationPopup_body_1' => 'Confermi di voler ignorare l\'invito di {invitedBy}?',
+    '#ignoreInvitationPopup_body_2' => 'Se ignori la richiesta, dovrà essere inviata di  nuovo da te o dall\'altro utente.',
+    'Accept request' => 'Accetta la richiesta',
+    'Ignore request' => 'Ignora la richiesta',
+    'Abort' => 'Annulla',
+    '#acceptedInvitationRequest' => 'Richiesta di collegamento accettata con successo',
+    '#ignoredInvitationRequest' => 'Richiesta di collegamento ignorata con successo',
+    '#UserDropLogsWithTaskManager' => 'I log dell\'utente verranno cancellati nei prossimi minuti',
+];

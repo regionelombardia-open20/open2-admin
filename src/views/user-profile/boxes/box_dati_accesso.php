@@ -24,8 +24,8 @@ use open20\amos\core\icons\AmosIcons;
 
 /** @var AmosAdmin $adminModule */
 $adminModule = Yii::$app->controller->module;
-$enableDlSpemplification = $adminModule->enableDlSemplification;
-//pr($enableDlSpemplification);
+$enableDlSemplification = $adminModule->enableDlSemplification;
+//pr($enableDlSemplification);
 
 ?>
 <section class="access-admin-section col-xs-12 nop">
@@ -42,7 +42,7 @@ $enableDlSpemplification = $adminModule->enableDlSemplification;
         </div>
     <?php endif; ?>
 
-    <?php if (!$enableDlSpemplification) { ?>
+    <?php if (!$enableDlSemplification) { ?>
         <div id="user-password" class="col-xs-8 col-sm-6 text-right pull-right">
             <div id="form-credenziali" class="bk-form-credenziali">
                 <?php // if (!$model->isNewRecord && isset($user['email']) && strlen(trim($user['email']))):

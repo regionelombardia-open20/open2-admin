@@ -28,6 +28,7 @@ use yii\web\View;
  */
 /** @var AmosAdmin $adminModule */
 $adminModule = Yii::$app->controller->module;
+$moduleGamification = \Yii::$app->getModule('gamification');
 
 $js = "
 $('#extended-presentation-link').click(function(event) {
@@ -156,6 +157,13 @@ $this->registerJs($js, View::POS_READY);
             </div>
         </div>
     <?php endif; ?>
+	<?php if($moduleGamification): ?>
+		<div class="row">
+            <div class="col-xs-12 m-b-20">
+				<?= $this->render('box_gamification', ['form' => $form, 'model' => $model, 'user' => $user]); ?>
+		 </div>
+        </div>
+		<?php endif; ?>
     <!--    <?php /* if ($adminModule->confManager->isVisibleField('note', ConfigurationManager::VIEW_TYPE_FORM)): */ ?>
             <hr>
             <div class="row">

@@ -17,13 +17,16 @@ use open20\amos\admin\models\UserProfile;
 use open20\amos\core\rbac\DbManagerCached;
 use open20\amos\core\user\User;
 use open20\amos\core\utilities\Email;
+use open20\amos\core\utilities\CoreCommonUtility;
 use open20\amos\cwh\utility\CwhUtil;
 use open20\amos\notificationmanager\AmosNotify;
 use open20\amos\tag\models\Tag;
 use raoul2000\workflow\base\SimpleWorkflowBehavior;
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\db\Expression;
 use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use yii\log\Logger;
 
 /**
@@ -103,6 +106,8 @@ class UserProfileUtility
 
         self::setCwhPersonalValidation($userProfile);
         $ok = self::setBasicUserRoleToUser($user->id, $module_name);
+        \Yii::$app->authManager->cache->flush();
+        \Yii::$app->cache->flush();
 
         if (!$ok) {
             return [
@@ -629,7 +634,7 @@ class UserProfileUtility
                 ->innerJoin('user_contact', 'user.id = user_contact.contact_id')
                 ->innerJoin('user_profile', 'user_profile.user_id = user.id')
                 ->andWhere('user_contact.deleted_at IS NULL AND user_profile.deleted_at IS NULL')
-                ->andWhere("user_contact.user_id = " . $userId)
+                ->andWhere(["user_contact.user_id" => $userId])
                 ->andWhere(['user_contact.status' => UserContact::STATUS_ACCEPTED])
                 ->andWhere(['attivo' => 1]);
 
@@ -638,7 +643,7 @@ class UserProfileUtility
                 ->innerJoin('user_contact', 'user.id = user_contact.user_id')
                 ->innerJoin('user_profile', 'user_profile.user_id = user.id')
                 ->andWhere('user_contact.deleted_at IS NULL AND user_profile.deleted_at IS NULL')
-                ->andWhere("user_contact.contact_id = " . $userId)
+                ->andWhere(["user_contact.contact_id"  => $userId])
                 ->andWhere(['user_contact.status' => UserContact::STATUS_ACCEPTED])
                 ->andWhere(['attivo' => 1]);
 
@@ -872,5 +877,129 @@ class UserProfileUtility
             'Maschio' => AmosAdmin::t('amosadmin', '#man'),
             'Femmina' => AmosAdmin::t('amosadmin', '#women')
         ];
+    }
+
+    /**
+     * Check whether to display sections of the interfaces and fields relating
+     * to login with username and password
+     * @return bool True if the sections and fields can be viewed or false
+     * otherwise
+     */
+    public static function checkShowLoginFieldsAndCredenzialSections()
+    {
+        //performe some checks with AmosAdmin
+        /** @var AmosAdmin $adminModule */
+        $adminModule = AmosAdmin::instance();
+        $enableDlSemplificationAdmin = $adminModule->enableDlSemplification;
+
+        //performe some checks with AmosCore utilities
+        $accessPermittedCore = CoreCommonUtility::platformSeenFromHeadquarter();
+        
+        //performs some checks on the platform parameters
+        $canBasicAuthPlatform = ArrayHelper::getValue(Yii::$app->params,
+            'showLoginStandard');
+        
+        //perform some checks with socialauth
+        $socialAuthModule = Yii::$app->getModule('socialauth');
+        $enableSpidSocialAuth = false;
+        if (!empty($socialAuthModule)) {
+            $enableSpidSocialAuth = $socialAuthModule->enableLogin
+                && $socialAuthModule->enableSpid;
+        }
+
+        //check if frontend userauth exists and perform some checks
+        $accessPermittedUserauth = false;
+        $canBasicAuthUserauth = null;
+        $enableDlSemplificationLightUserauth = false;
+        $enableSpidUserauth = false;
+        $enablePuaLoginUserauth = false;
+        if (class_exists('amos\userauth\frontend\Module')) {
+            $userauthModule = \amos\userauth\frontend\Module::instance();
+            if (!empty($userauthModule)) {
+                /** @var amos\userauth\frontend\Module $userauthModule */
+                //check if frontend CmsUserauthUtility exists and perform some checks
+                if (class_exists('amos\userauth\frontend\utility\CmsUserauthUtility')) {
+                    $cmsUserauthUtility =
+                        new \amos\userauth\frontend\utility\CmsUserauthUtility;
+                    $accessPermittedUserauth =
+                        $cmsUserauthUtility::isAccessPermitted();
+                }
+                $canBasicAuthUserauth = $userauthModule->enableUserPasswordLogin;
+                $enableDlSemplificationLightUserauth =
+                    $userauthModule->enableDlSemplificationLight;
+                $enableSpidUserauth = $userauthModule->enableSPID;
+                if (empty($userauthModule->enableSocial)) {
+                    $enableSpidSocialAuth = false;
+                }
+                $enableAgidLoginUserauth = $userauthModule->enableAgidLogin;
+                if($userauthModule->hasProperty('enablePuaLogin') && $userauthModule->enablePuaLogin){
+                    $enablePuaLoginUserauth = $userauthModule->enablePuaLogin;
+                }
+            }
+        }
+
+        //check if show credenzial section
+        $accessPermitted = $accessPermittedCore || $accessPermittedUserauth;
+        if (!empty($accessPermitted)) {
+            return true;
+        }
+        $enableDlSemplification = $enableDlSemplificationAdmin
+            || $enableDlSemplificationLightUserauth;
+        if (!$enableDlSemplification) {
+            return true;
+        }
+        if ((is_null($canBasicAuthPlatform))
+            && (is_null($canBasicAuthUserauth))) {
+            $canBasicAuth = false;
+        }
+        elseif ((is_null($canBasicAuthPlatform))
+            && (!is_null($canBasicAuthUserauth))) {
+            $canBasicAuth = $canBasicAuthUserauth;
+        }
+        elseif ((!is_null($canBasicAuthPlatform))
+            && (is_null($canBasicAuthUserauth))) {
+            $canBasicAuth = $canBasicAuthPlatform;
+        }
+        elseif ((!is_null($canBasicAuthPlatform))
+            && (!is_null($canBasicAuthUserauth))) {
+            $canBasicAuth = $canBasicAuthPlatform && $canBasicAuthUserauth;
+        }
+        if (!empty($canBasicAuth)) {
+            return true;
+        }
+        $enableSpid = $enableSpidSocialAuth || $enableSpidUserauth;
+        if (!$enableSpid) {
+            return true;
+        }
+        if ((!empty($enableAgidLoginUserauth))
+            || (!empty($enablePuaLoginUserauth))) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @param int $limit number of user profiles to return
+     * @param bool $excludeLoggedUser if true exclude logged user from result
+     * @return UserProfile[]|null
+     * @throws InvalidConfigException
+     */
+    public static function getLastOnlineUserProfiles($limit = 5, $excludeLoggedUser = true)
+    {
+        /** @var AmosAdmin $moduleAdmin */
+        $moduleAdmin = AmosAdmin::instance();
+        if ($moduleAdmin->enableOnlineUsers) {
+            $lastOnlineUserProfiles = UserProfile::find()
+                //->andWhere(['not', ['last_online' => null]])
+                ->orderBy(['last_online' => SORT_DESC])
+                ->limit($limit);
+
+            if ($excludeLoggedUser) {
+                $lastOnlineUserProfiles = $lastOnlineUserProfiles->andWhere(['!=', 'user_id', Yii::$app->user->id]);
+            }
+            return $lastOnlineUserProfiles->all();
+        } else {
+            return null;
+        }
     }
 }

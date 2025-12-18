@@ -57,10 +57,7 @@ $adminModule = Yii::$app->controller->module;
 $js = <<<JS
 $('#confirm-remove-pp-btn').on("click", function(e) {
     e.preventDefault();
-    $.ajax({
-        url: $(this).attr('href'),
-        type : "POST"
-    });
+    window.location.href = $(this).attr('href');
     return false;
 });
 $('#confirm-associate-pp-btn').on("click", function(e) {
@@ -77,12 +74,12 @@ $this->registerJs($js);
         <h3><?= AmosAdmin::t('amosadmin', '#cooperation'); ?></h3>
     </div>
     <div class="col-xs-12">
-        <p><?= AmosAdmin::t('amosadmin', 'Choose the organization with which you mainly work with those already on the platform. If the organization is not present, you may be required to register later.') ?></p>
+        <p><small><?= AmosAdmin::t('amosadmin', 'Choose the organization with which you mainly work with those already on the platform. If the organization is not present, you may be required to register later.') ?></small></p>
     </div>
     <div id="prevalent-partnership-section" class="col-xs-12">
         <?php if (!is_null($model->prevalentPartnership)): ?>
-            <div class="prevalent-partnership-section col-xs-12">
-                <div class="col-xs-3">
+            <div class="prevalent-partnership-section">
+                
                     <div class="img-profile">
                         <?php
                         /** @var OrganizationsModuleInterface $organizationsModule */
@@ -93,8 +90,8 @@ $this->registerJs($js);
                         ?>
                         <?= $widgetClass::widget(['model' => $model->prevalentPartnership]); ?>
                     </div>
-                </div>
-                <div class="col-xs-9 title">
+               
+                <div class="title">
                     <?= $model->prevalentPartnership->getTitle() ?>
                 </div>
             </div>

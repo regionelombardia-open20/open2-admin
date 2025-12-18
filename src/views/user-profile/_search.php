@@ -11,8 +11,11 @@
 
 use open20\amos\admin\AmosAdmin;
 use open20\amos\admin\base\ConfigurationManager;
+use open20\amos\admin\models\UserProfileClasses;
+use open20\amos\admin\utility\UserProfileUtility;
 use open20\amos\core\helpers\Html;
 use open20\amos\core\utilities\FormUtility;
+use yii\helpers\ArrayHelper;
 use yii\widgets\ActiveForm;
 
 /**
@@ -60,8 +63,9 @@ $enableAutoOpenSearchPanel = !isset(\Yii::$app->params['enableAutoOpenSearchPane
             </div>
         <?php } ?>
 
-        <?php if ($adminModule->confManager->isVisibleBox('box_dati_accesso', ConfigurationManager::VIEW_TYPE_FORM) &&
-            $adminModule->confManager->isVisibleField('username', ConfigurationManager::VIEW_TYPE_FORM)) {
+        <?php if (($adminModule->confManager->isVisibleBox('box_dati_accesso', ConfigurationManager::VIEW_TYPE_FORM) &&
+            $adminModule->confManager->isVisibleField('username', ConfigurationManager::VIEW_TYPE_FORM))
+            && (UserProfileUtility::checkShowLoginFieldsAndCredenzialSections())) {
             ?>
             <div class="col-sm-6 col-lg-3">
                 <?= $form->field($model, 'username')->textInput(['placeholder' => AmosAdmin::t('amosadmin', 'Search by username')]) ?>
@@ -82,6 +86,17 @@ $enableAutoOpenSearchPanel = !isset(\Yii::$app->params['enableAutoOpenSearchPane
             <div class="col-sm-6 col-lg-3">
                 <?= $form->field($model, 'sesso')->dropDownList($model->getSexValuesForSelect(),
                     ['prompt' => AmosAdmin::t('amosadmin', 'Select/Choose') . '...', 'disabled' => false])->hint(false);
+                ?>
+            </div>
+        <?php } ?>
+
+        <?php if ($adminModule->disablePrivilegesEnableProfiles == true && $adminModule->enableProfileSearch == true) {
+            ?>
+            <div class="col-sm-6 col-lg-3">
+                <?=
+                $form->field($model, 'profiles')->dropDownList(ArrayHelper::map(UserProfileClasses::find()->all(), 'id', 'name'),
+                    ['prompt' => AmosAdmin::t('amosadmin', 'Select/Choose') . '...', 'disabled' => false])
+                    ->label($model->getAttributeLabel('profiles'));
                 ?>
             </div>
         <?php } ?>

@@ -118,7 +118,7 @@ class UserCardWidget extends Widget
         } else if ($this->hideNameSurname || (isset(\Yii::$app->params['hideListsContentCreatorName']) && (\Yii::$app->params['hideListsContentCreatorName'] === true))) {
             $alt = '';
         } else {
-            $alt = $model->getNomeCognome();
+            $alt ='';
         }
 
         // if ($this->absoluteUrl) {
@@ -383,7 +383,7 @@ class UserCardWidget extends Widget
         $action = $controller->action->id;
         $isActionUpdate = ($action != 'view') && ($action == 'update' || $action == 'associa-m2m');
         $confirm = $isActionUpdate ? [
-            'confirm' => BaseAmosModule::t('amoscore', '#confirm_exit_without_saving')
+            'confirm' => AmosAdmin::t('amosadmin', '#confirm_exit_without_saving')
         ] : null;
 
         return $confirm;

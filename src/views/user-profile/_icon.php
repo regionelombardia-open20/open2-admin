@@ -24,8 +24,9 @@ use open20\amos\core\helpers\Html;
 $userId        = $model->user_id;
 /** @var \open20\amos\admin\controllers\UserProfileController $appController */
 $appController = Yii::$app->controller;
-$appController->setCwhScopeNetworkInfo($userId);
-
+if (method_exists($appController, 'setCwhScopeNetworkInfo')) {
+    $appController->setCwhScopeNetworkInfo($userId);
+}
 /** @var AmosAdmin $adminModule */
 $adminModule = AmosAdmin::instance();
 
@@ -48,13 +49,50 @@ $viewUrl = "/" . AmosAdmin::getModuleName() . "/user-profile/view?id=" . $model-
 
 $prevalentPartnershipTruncated = '';
 $prevalentPartnershipName      = '';
-if (!is_null($model->prevalentPartnership)) {
-    $prevalentPartnershipTruncated = $model->prevalentPartnership;
-    $prevalentPartnershipName      = $model->prevalentPartnership->name;
+$userProfileRole = '';
+
+if (
+$adminModule->confManager->isVisibleBox('box_role_and_area', ConfigurationManager::VIEW_TYPE_VIEW)
+) {
+    if($model->user_profile_role_id == 1) { // ruolo "altro"
+        $userProfileRole = AmosAdmin::t('amosadmin', $model->user_profile_role_other);
+    } else {
+        $userProfileRole = $model->userProfileRole;
+        if(!is_null($userProfileRole)) {
+            $userProfileRole = AmosAdmin::t('amosadmin', $userProfileRole->name);
+        }
+    }
+}
+if (
+($adminModule->confManager->isVisibleBox('box_prevalent_partnership', ConfigurationManager::VIEW_TYPE_VIEW)) &&
+($adminModule->confManager->isVisibleField('prevalent_partnership_id', ConfigurationManager::VIEW_TYPE_VIEW))
+) {
+    if (!is_null($model->prevalentPartnership)) {
+        $prevalentPartnershipTruncated = $model->prevalentPartnership;
+        $prevalentPartnershipName = $prevalentPartnershipTruncated->name;
+    }
+}
+$wrapperMyProfileClass = (Yii::$app->user->id == $model->user_id) ? ' my-profile-card' : '';
+
+if ($adminModule->confManager->isVisibleBox('box_informazioni_base', ConfigurationManager::VIEW_TYPE_VIEW)) {
+    if ($adminModule->confManager->isVisibleField('nome', ConfigurationManager::VIEW_TYPE_VIEW)) {
+        $nomeCognome .= $model->nome;
+    }
+    if ($adminModule->confManager->isVisibleField('cognome', ConfigurationManager::VIEW_TYPE_VIEW)) {
+        $nomeCognome .= ' ' . $model->cognome;
+    }
+}
+
+// Definizione classi pulsanti azione card
+$defaultButtonClass = 'profile-action-button';
+
+$prefixPrevalentPartnershipName = '';
+if(!empty($userProfileRole)) {
+    $prefixPrevalentPartnershipName = '<span>@ </span>';
 }
 ?>
 
-<div class="avatar-wrapper avatar-extra-text mb-0">
+<div class="avatar-wrapper avatar-extra-text test-mev1 mb-0<?= $wrapperMyProfileClass ?>">
     <div class="avatar-box-img">
         <?php
         if (($adminModule->confManager->isVisibleBox('box_foto', ConfigurationManager::VIEW_TYPE_VIEW)) &&
@@ -67,7 +105,7 @@ if (!is_null($model->prevalentPartnership)) {
             $logoOptions                               = [
                 'class' => Yii::$app->imageUtility->getRoundImage($model)['class'],
                 //'style' => "margin-left: " . Yii::$app->imageUtility->getRoundImage($model)['margin-left'] . "%; margin-top: " . Yii::$app->imageUtility->getRoundImage($model)['margin-top'] . "%;",
-                'alt' => $model->getNomeCognome(),
+                'alt' => "",
             ];
             $options                                   = [];
             if (strlen($nomeCognome) > 0) {
@@ -148,25 +186,20 @@ if (!is_null($model->prevalentPartnership)) {
             ?>
 
         </div>
-        <?php
-        if (
-            ($adminModule->confManager->isVisibleBox('box_prevalent_partnership', ConfigurationManager::VIEW_TYPE_VIEW))
-            &&
-            ($adminModule->confManager->isVisibleField('prevalent_partnership_id', ConfigurationManager::VIEW_TYPE_VIEW))
-        ) :
-            ?>
-            <!-- "additionalInfo" -->
-            <small class="avatar-info font-weight-normal mb-0">
-                <?= (!empty($prevalentPartnershipTruncated)) ? $prevalentPartnershipTruncated : ''; ?>
-            </small>
-        <?php endif; ?>
+        <!-- "additionalInfo" -->
+        <small class="avatar-info-role font-weight-normal mb-0">
+            <?= (!empty($userProfileRole)) ? $userProfileRole : ''; ?>
+        </small>
+        <small class="avatar-info font-weight-normal mb-0">
+            <?= (!empty($prevalentPartnershipName)) ? $prefixPrevalentPartnershipName . $prevalentPartnershipName : ''; ?>
+        </small>
 
         <?php if (Yii::$app->user->id != $model->user_id) : ?>
             <?php if ($adminModule->enableUserContacts && !$adminModule->enableSendMessage) : ?>
-                <?= ConnectToUserWidget::widget(['model' => $model, 'divClassBtnContainer' => '']) ?>
+                <?= ConnectToUserWidget::widget(['model' => $model, 'divClassBtnContainer' => $defaultButtonClass]) ?>
             <?php endif; ?>
             <?php if (!$adminModule->enableUserContacts && $adminModule->enableSendMessage) : ?>
-                <?= SendMessageToUserWidget::widget(['model' => $model, 'divClassBtnContainer' => '']) ?>
+                <?= SendMessageToUserWidget::widget(['model' => $model, 'divClassBtnContainer' => $defaultButtonClass]) ?>
             <?php endif; ?>
             <?php if ($adminModule->enableInviteUserToEvent) : ?>
                 <?php
@@ -177,6 +210,15 @@ if (!is_null($model->prevalentPartnership)) {
                     <?= $eventsModule->getInviteUserToEventWidget($model) ?>
                 <?php endif; ?>
             <?php endif; ?>
+        <?php else : ?>
+            <div class="<?= $defaultButtonClass ?>">
+                <?= Html::a(
+                    'Il mio profilo' . '<span class="mdi mdi-18px mdi-account-outline"></span>',
+                        ['user-profile/view', 'id' => $model->id],
+                        ['class' => ['btn btn-outline-tertiary']]
+                    )
+                ?>
+            </div>
         <?php endif; ?>
 
     </div>

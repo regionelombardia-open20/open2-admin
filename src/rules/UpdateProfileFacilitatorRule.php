@@ -31,14 +31,18 @@ class UpdateProfileFacilitatorRule extends BasicContentRule
         if (is_null($model)) {
             return false;
         }
-        /** @var UserProfile $model */
-        
-        // Check if the profile has a facilitator
-        if (is_null($model->facilitatore)) {
-            return false;
+
+        // Only UserProfile contains param facilitatore
+        if($model instanceof UserProfile) {
+            // Check if the profile has a facilitator
+            if (is_null($model->facilitatore)) {
+                return false;
+            }
+
+            // Check if the profile facilitator is the logged user
+            return ($model->facilitatore->user_id == $user);
         }
-        
-        // Check if the profile facilitator is the logged user
-        return ($model->facilitatore->user_id == $user);
+
+        return false;
     }
 }

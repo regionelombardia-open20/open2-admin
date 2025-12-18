@@ -23,6 +23,7 @@ use open20\amos\core\interfaces\SearchModuleInterface;
 use open20\amos\core\module\AmosModule;
 use open20\amos\core\user\User;
 use Yii;
+use yii\console\Application;
 use yii\helpers\ArrayHelper;
 use open20\amos\core\interfaces\CmsModuleInterface;
 
@@ -109,6 +110,11 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface, CmsModuleIn
      * @var bool $completeBypassWorkflow If true the plugin bypass the user profile workflow and show nothing of it.
      */
     public $completeBypassWorkflow = false;
+
+    /**
+     * @var bool $enableProfileSearch If true the search field in user-profile will allow filtering also by associated profile.
+     */
+    public $enableProfileSearch = false;
 
     /**
      * This is the html used to render the subject of the e-mail. In the view is available the variable $profile
@@ -513,9 +519,59 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface, CmsModuleIn
     public $requireAdminPassword = true;
 
     /**
-     * @var bool $showCredentialsOptionsUnderVpn
+     * @var bool $hideTabInsightsIfEmpty
      */
-    public $showCredentialsOptionsUnderVpn = false;
+    public $hideTabInsightsIfEmpty = false;
+
+    /**
+     * If this parameter is set to true, social interactions between users will
+     * be disabled (invitations, connection between users, chat and community)
+     * @var bool $disableSocialInteraction
+     */
+    public $disableSocialInteraction = false;
+
+    /**
+     * Enable news download in console with plugin open20/taskmanager instead of standard download with ExportMenu.
+     * Useful if you have a lot of news to download and ExportMenu goes in timeout.
+     * In order to work, you have to install open20/taskmanager plugin
+     * and configure $backgroundDownloadOptions array param if you need to change options.
+     * @var bool $enableCustomActivities
+     */
+    public $enableBackgroundDownload = false;
+
+    /**
+     * Options for background download.
+     * @var array $backgroundDownloadOptions
+     */
+    public $backgroundDownloadOptions = [
+        'exportAction' => '/amosadmin/user-profile/extract-users',
+        'redirectUrl' => '/taskmanager',
+    ];
+
+
+    /**
+     * If true, it's saved the last online date when users navigate in the platform.
+     * @var bool $enableOnlineUsers
+     */
+    public $enableOnlineUsers = false;
+
+    /** If true, then the function dropLogs in UserDropController will be executed with the Task Manager
+     * @var bool $enableDropEverythingTaskManager
+     */
+    public $enableDropLogsTaskManager = false;
+
+    /** If true, whenever the Task Manager clears the logs (thanks to the previous parameter), an alert message will be displayed
+     * @var bool $enableDropLogsTaskManagerMessage
+     */
+    public $enableDropLogsTaskManagerMessage = false;
+
+    /**
+     * The path to the action that will be called when the user clicks on the "Drop Account" button.
+     * If empty, it will use the default path initialized in init() method.
+     * @var string $dropAccountPathUrl
+     */
+    public $dropAccountPathUrl = '';
+    public $dropAccountPlatformParams = 'frontendUrl';
 
     /**
      * @return string
@@ -606,6 +662,11 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface, CmsModuleIn
             \Yii::$app->set('reCaptcha', $this->reCaptcha);
         }
         $this->profileRequiredFields = array_unique($this->profileRequiredFields);
+        $this->dropAccountPathUrl = $this->dropAccountPathUrl ?: self::getModuleName() . '/user-profile/drop-account';
+
+        if (\Yii::$app instanceof Application) {
+            $this->controllerNamespace = 'open20\amos\admin\commands';
+        }
     }
 
     /**
@@ -683,6 +744,15 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface, CmsModuleIn
         ];
     }
 
+    /**
+     * @param \yii\base\Application $app
+     */
+    public function bootstrap($app)
+    {
+        if ($app instanceof \yii\console\Application) {
+            $this->controllerNamespace = 'open20\amos\admin\commands';
+        }
+    }
     /**
      * @return bool
      */
@@ -828,7 +898,7 @@ class AmosAdmin extends AmosModule implements SearchModuleInterface, CmsModuleIn
         if (!\open20\amos\core\utilities\CurrentUser::isPlatformGuest()) {
             //if (Yii::$app->user->can('GESTIONE_UTENTI')) {
             $menu .= $this->addFrontEndMenu(AmosAdmin::t('amosadmin', '#menu_front_events'),
-                AmosAdmin::toUrlModule('/user-profile/index'));
+                AmosAdmin::toUrlModule('/user-profile/index'),$dept);
             //}
         }
         return $menu;

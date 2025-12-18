@@ -1,5 +1,6 @@
 <?php
 
+use open20\amos\admin\AmosAdmin;
 use open20\amos\core\module\BaseAmosModule;
 
 $js = <<< JS
@@ -24,7 +25,7 @@ $this->registerJs($js);
                 </button>
             </div>
             <div class="modal-body">
-                <p><?= BaseAmosModule::t('amoscore', '#confirm_exit_without_saving'); ?></p>
+                <p><?= AmosAdmin::t('amosadmin', '#confirm_exit_without_saving'); ?></p>
             </div>
             <div class="modal-footer">
                 <a class="btn btn-default" data-dismiss="modal">

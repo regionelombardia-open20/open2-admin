@@ -119,6 +119,10 @@ class SendMessageToUserWidget extends Widget
 
         // Register javascript to send private message to connected users
         $js = <<<JS
+                
+        $('.modal').on('hidden.bs.modal', function (e) {
+            $('body').removeAttr('style');
+        });
         $(".send-message-btn").on("click",function(e) {
             e.preventDefault();
             var href = $(this).attr('href');
@@ -190,7 +194,7 @@ JS;
                             $this->modalButtonCancelOptions)
                         . Html::a(AmosAdmin::t('amosadmin', 'Send message'), '/chat/default/send-message?contactId=' . $recipientId,
                             ArrayHelper::merge($btnOptions, ['id' => 'send-message-btn-' . $recipientId, 'data-recipient_id' => $recipientId])),
-                        ['class' => 'pull-right m-15-0']
+                        ['class' => 'pull-right m-15-0 d-flex']
                     ) . '</div>';
                 Modal::end();
             }

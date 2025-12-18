@@ -130,7 +130,10 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
                                             'my-network',
                                             'find-name',
                                             'read-confirmation',
-                                            'privileges-ajax',
+                                            'privileges-ajax'
+                                        /*    'drop-account',
+                                            'modify-email',
+                                            'extract-users' */
                                         ],
                                         'roles' => ['BASIC_USER', 'ADMIN']
                                     ],
@@ -228,7 +231,6 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
                             'verbs' => [
                                 'class' => VerbFilter::class,
                                 'actions' => [
-                                    'remove-prevalent-partnership' => ['post'],
                                     'delete' => ['post', 'get']
                                 ]
                             ]
@@ -249,6 +251,18 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
      * @inheritdoc
      */
     public function beforeAction($action) {
+	if ((in_array($action->id, ['index', 'view', 'validated-users']))
+            && (!Yii::$app->user->can('ADMIN'))
+            && (!empty($this->adminModule->disableSocialInteraction))){
+            if (Yii::$app->user->can('USER_PROFILE_BASIC_LIST_ACTIONS')) {
+                Yii::$app->response->redirect(Url::to(['operators']), 301);
+                Yii::$app->end();
+            }
+            else {
+                throw new ForbiddenHttpException(AmosAdmin::t('amosadmin', "Forbidden"));
+            }
+	}
+
         if (\Yii::$app->user->isGuest) {
             $titleSection = AmosAdmin::t('amosadmin', 'Utenti');
             $urlLinkAll = '';
@@ -786,7 +800,7 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
                 'value' => function ($model) {
                     /** @var \open20\amos\admin\models\UserProfile $model */
                     if ($model->created_at) {
-                        return Yii::$app->formatter->asDatetime($model->created_at, 'start_service_date');
+                        return Yii::$app->formatter->asDatetime($model->created_at, 'humanalwaysdatetime');
                     } else {
                         return '';
                     }
@@ -831,7 +845,7 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
      */
     public function actionAssociatePrevalentPartnership($id) {
         if (!empty(\Yii::$app->params['dashboardEngine']) && \Yii::$app->params['dashboardEngine'] == WidgetAbstract::ENGINE_ROWS) {
-            $this->setUpLayout('mainFullsize');
+            $this->setUpLayout('fullsize/main');
         } else {
             $this->setUpLayout('main');
         }
@@ -841,8 +855,22 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
         $admin = AmosAdmin::getInstance();
         /** @var  $organizationsModule OrganizationsModuleInterface */
         $organizationsModule = \Yii::$app->getModule($admin->getOrganizationModuleName());
+        $this->actionAssociateOneToMany($id);
         $this->setTargetObjClassName($organizationsModule->getOrganizationModelClass());
-        return $this->actionAssociateOneToMany($id);
+
+        $this->setMmTableName($organizationsModule->createModel('ProfiloUserMm')->className());
+        $this->setStartObjClassName(UserProfile::className());
+        $this->setMmStartKey('user_id');
+        $this->setTargetObjClassName($organizationsModule->model('Profilo'));
+        $this->setMmTargetKey('profilo_id');
+        $this->setRedirectAction('update');
+        $this->setTargetUrl('associate-prevalent-partnership');
+        $this->setCustomQuery(true);
+        $this->setRedirectArray('/' . AmosAdmin::getModuleName() . '/user-profile/update?id=' . $id . '#tab-network');
+        $userProfileModel = AmosAdmin::instance()->createModel('UserProfile');
+        $userProfile = $userProfileModel::findOne($id);
+        return $this->actionAssociaM2m($userProfile->user_id);
+
     }
 
     /**
@@ -851,7 +879,7 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
      * @return mixed|null
      */
     public function actionRemovePrevalentPartnership($id) {
-        if (Yii::$app->request->isPost && Yii::$app->request->isAjax) {
+        if (Yii::$app->user->id == $id) {
             $this->model = $this->findModel($id);
             $this->model->prevalent_partnership_id = null;
             $ok = $this->model->save(false);
@@ -860,10 +888,10 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
                         'danger', AmosAdmin::t('amosadmin', 'Si &egrave; verificato un errore durante il salvataggio')
                 );
             }
-            return $this->redirect(['annulla-m2m', 'id' => $id]);
+            return $this->redirect(['/' . AmosAdmin::getModuleName() . '/user-profile/update', 'id' => $id]);
         }
         Yii::$app->session->addFlash('danger', BaseAmosModule::t('amoscore', '#unauthorized_flash_message'));
-        return null;
+        return $this->redirect(['/' . AmosAdmin::getModuleName() . '/user-profile/update', 'id' => $id]);
     }
 
     /**
@@ -909,12 +937,22 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
         $this->view->params['currentDashboard'] = $this->getCurrentDashboard();
 
         if (!\Yii::$app->user->isGuest) {
-            $this->view->params['titleSection'] = AmosAdmin::t('amosadmin', 'Partecipanti');
-            $this->view->params['labelLinkAll'] = AmosAdmin::t('amosadmin', 'La mia rete');
-            $this->view->params['urlLinkAll'] = '/' . AmosAdmin::getModuleName() . '/user-profile/my-network'; //TODO
-            $this->view->params['titleLinkAll'] = AmosAdmin::t(
-                            'amosadmin', 'Visualizza la lista degli utenti della mia rete'
-            );
+             $this->view->params['titleSection'] = AmosAdmin::t('amosadmin', 'Partecipanti');
+            if ($this->adminModule->completeBypassWorkflow) {
+                $this->view->params['labelLinkAll'] = AmosAdmin::t('amosadmin', 'La mia rete');
+                $this->view->params['urlLinkAll']   = '/' . AmosAdmin::getModuleName() . '/user-profile/my-network';
+                $this->view->params['titleLinkAll'] = AmosAdmin::t(
+                    'amosadmin',
+                    'Visualizza gli utenti della mia rete'
+                );
+            } else {
+                $this->view->params['labelLinkAll'] = AmosAdmin::t('amosadmin', 'Tutti gli utenti');
+                $this->view->params['urlLinkAll']   = '/' . AmosAdmin::getModuleName() . '/user-profile/index';
+                $this->view->params['titleLinkAll'] = AmosAdmin::t(
+                    'amosadmin',
+                    'Visualizza la lista di tutti gli utenti'
+                );
+            }
         }
 
         return $this->render(
@@ -2051,13 +2089,21 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
     public static function getManageLinks() {
         $links = [];
 
-        $links[] = [
-            'title' => AmosAdmin::t('amosadmin', 'Visualizza gli utenti della mia rete'),
-            'label' => AmosAdmin::t('amosadmin', 'La mia rete'),
-            'url' => '/' . AmosAdmin::getModuleName() . '/user-profile/my-network'
-        ];
+        //check if social interactions between users will be disabled
+        $adminModule = Yii::$app->getModule(AmosAdmin::getModuleName());
+        $disabledSocialInteractions = ((!Yii::$app->user->can('ADMIN'))
+            && (!empty($adminModule->disableSocialInteraction)));
 
-        if (\Yii::$app->user->can(\open20\amos\admin\widgets\icons\WidgetIconUserProfile::class)) {
+        if (!$disabledSocialInteractions) {
+            $links[] = [
+                'title' => AmosAdmin::t('amosadmin', 'Visualizza gli utenti della mia rete'),
+                'label' => AmosAdmin::t('amosadmin', 'La mia rete'),
+                'url' => '/' . AmosAdmin::getModuleName() . '/user-profile/my-network'
+            ];
+        }
+
+        if ((\Yii::$app->user->can(\open20\amos\admin\widgets\icons\WidgetIconUserProfile::class))
+            && (!$disabledSocialInteractions) && (Yii::$app->user->can('AMMINISTRA_UTENTI') || Yii::$app->user->can('FACILITATOR'))) {
             $links[] = [
                 'title' => AmosAdmin::t('amosadmin', 'Tutti gli utenti'),
                 'label' => AmosAdmin::t('amosadmin', 'Tutti gli utenti'),
@@ -2065,7 +2111,8 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
             ];
         }
 
-        if (\Yii::$app->user->can(\open20\amos\admin\widgets\icons\WidgetIconCommunityManagerUserProfiles::class)) {
+        if ((\Yii::$app->user->can(\open20\amos\admin\widgets\icons\WidgetIconCommunityManagerUserProfiles::class))
+            && (!$disabledSocialInteractions)) {
             $links[] = [
                 'title' => AmosAdmin::t('amosadmin', 'Visualizza gli utenti community manager'),
                 'label' => AmosAdmin::t('amosadmin', 'Community Manager'),
@@ -2073,9 +2120,9 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
             ];
         }
 
-        if (\Yii::$app->user->can(
-                        \open20\amos\admin\widgets\icons\WidgetIconFacilitatorUserProfiles::class) && AmosAdmin::instance()->confManager->isFacilitatorsEnabled()
-        ) {
+        if ((\Yii::$app->user->can(\open20\amos\admin\widgets\icons\WidgetIconFacilitatorUserProfiles::class)
+            && AmosAdmin::instance()->confManager->isFacilitatorsEnabled())
+            && (!$disabledSocialInteractions)) {
             $links[] = [
                 'title' => AmosAdmin::t('amosadmin', 'Visualizza gli utenti facilitatori'),
                 'label' => AmosAdmin::t('amosadmin', 'Facilitatori'),
@@ -2083,7 +2130,8 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
             ];
         }
 
-        if (\Yii::$app->user->can(\open20\amos\admin\widgets\icons\WidgetIconInactiveUserProfiles::class)) {
+        if ((\Yii::$app->user->can(\open20\amos\admin\widgets\icons\WidgetIconInactiveUserProfiles::class))
+            && (!$disabledSocialInteractions)) {
             $links[] = [
                 'title' => AmosAdmin::t('amosadmin', 'Visualizza gli utenti non attivi'),
                 'label' => AmosAdmin::t('amosadmin', 'Non attivi'),
@@ -2095,7 +2143,8 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
                 !AmosAdmin::instance()->disableInvitations &&
                 \Yii::$app->getModule('invitations') &&
                 (\Yii::$app->getUser()->can('INVITATIONS_BASIC_USER') || \Yii::$app->getUser()->can('INVITATIONS_ADMINISTRATOR')) &&
-                !\Yii::$app->getModule(AmosAdmin::getModuleName())->checkManageInviteBlackList() //aggiunta chiamata metodo checkMAnageInviteBlackList
+                !\Yii::$app->getModule(AmosAdmin::getModuleName())->checkManageInviteBlackList() && //aggiunta chiamata metodo checkMAnageInviteBlackList
+                !$disabledSocialInteractions
         ) {
             $widget = new \open20\amos\invitations\widgets\icons\WidgetIconInvitations();
 
@@ -2106,11 +2155,19 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
             ];
         }
 
-        if (\Yii::$app->user->can('ADMIN')) {
+        if (\Yii::$app->user->can('ADMIN' && isset(\Yii::$app->view->params['layoutConfigurations']['showSidebarRedattore']) && \Yii::$app->view->params['layoutConfigurations']['showSidebarRedattore'] == true)) {
             $links[] = [
                 'title' => AmosAdmin::t('amosadmin', 'Visualizza gli Operatori'),
                 'label' => AmosAdmin::t('amosadmin', 'Operatori'),
                 'url' => '/' . AmosAdmin::getModuleName() . '/user-profile/operators'
+            ];
+        }
+
+        if ($disabledSocialInteractions) {
+            $links[] = [
+                'title' => AmosAdmin::t('amosadmin', 'Visualizza gli Utenti Finali'),
+                'label' => AmosAdmin::t('amosadmin', 'Utenti Finali'),
+                'url' => '/' . AmosAdmin::getModuleName() . '/user-profile/end-users'
             ];
         }
 
@@ -2315,6 +2372,50 @@ class UserProfileController extends \open20\amos\admin\controllers\base\UserProf
                             'contextModelId' => ($this->contextModelId) ? $this->contextModelId : null,
                         ]
         );
+    }
+
+    /**
+     * @return \yii\web\Response */
+    public function actionExtractUsers()
+    {
+        $basePath = realpath(\Yii::getAlias('@vendor/../common/uploads/temp'));
+        $filename = "users_export_" . date('Y_m_d_His') . ".xlsx";
+        $outputPath = $basePath . "/" . $filename;
+        $post = \Yii::$app->request->post();
+        $params = [];
+        $encryptionKey = Yii::$app->params['encryptionKey'];
+        if (empty($encryptionKey)) {
+            /** @var \open20\amos\layout\Module $moduleLayout */
+            $moduleLayout = Yii::$app->getModule('layout');
+            $encryptionKey = $moduleLayout->encryptionKey;
+        }
+
+        // Redirect url
+        if (!empty($post['redirectUrl'])) {
+            $redirectUrl = $post['redirectUrl'];
+        } else {
+            $redirectUrl = '/taskmanager';
+        }
+        // Query
+        if (!empty($post['query'])) {
+            $encryptedQuery = $post['query'];
+            $query = openssl_decrypt($encryptedQuery, 'aes-128-ecb', $encryptionKey);
+            if ($query) {
+                $params['query'] = $query;
+            }
+        }
+
+        /** @var \open20\amos\taskmanager\TaskManager $moduleTaskManager     */
+        $moduleTaskManager = \Yii::$app->getModule('taskmanager');
+
+        $moduleTaskManager->scheduleJob(
+            AmosAdmin::getModuleName()."/export/export-users",
+            'Admin',
+            $outputPath,
+            $params
+        );
+
+        return $this->redirect([$redirectUrl]);
     }
 
 }

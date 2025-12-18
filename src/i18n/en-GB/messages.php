@@ -925,5 +925,14 @@ return [
     '#disable_notification_info_message' => 'You can re-enable notifications related to collaboration proposals from the "Notifications" section of your profile.',
     '#disable_notification_message_already_disabled' => 'Notifications already disabled',
     "Invia di nuovo il codice" => "Send code again",
-    'Conferma cancellazione utente.' => 'Drop user confirmation'
+    'Conferma cancellazione utente.' => 'Drop user confirmation',
+    '#confirm_exit_without_saving' => 'By clicking on this link your changes may be lost, please check that you have saved all data.',
+    'Ultima volta online' => 'Last time online',
+    'Data e ora di connessione' => 'Date and time of connection',
+    '#contactmine_title' => 'Users I am connected to',
+    '#contactother_title' => 'Users {name} is connected to',
+    'Accedi con account Microsoft' => 'Access with a Microsoft account',
+    'Abilita le funzionalità avanzate Microsft con Open2.0' => "Enable the Microsft's advanced features with Open2.0",
+    "Disconnetti la tua identità digitale" => "Disconnect you digital identity"
+
 ];

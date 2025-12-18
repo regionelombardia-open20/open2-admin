@@ -17,9 +17,9 @@ use open20\amos\core\helpers\Html;
 /**
  * @var \open20\amos\admin\models\UserProfile $model
  */
+$this->title = $this->params['titleSection'] ?? ''; 
 
-
-$this->params['breadcrumbs'][] = AmosAdmin::t('amosadmin', 'Add contacts');
+$this->params['breadcrumbs'][] = AmosAdmin::t('amosadmin', 'Associa contatti');
 $this->params['breadcrumbs'][] = $this->title;
 $this->params['forceBreadcrumbs'][] = [
     'label' => AmosAdmin::t('amosadmin', "Users"),
@@ -37,14 +37,33 @@ $model = UserProfile::findOne($userProfileId);
  * @var \yii\db\ActiveQuery $query UserProfiles to invite or with pending invitation
  */
 $query = $model->getUserNetworkAssociationQuery();
+$query->leftJoin('user u','u.id = user_profile.user_id');
 
-$query->orderBy([
+$post = Yii::$app->request->post();
+
+if(!empty($post['orderAttribute']) && !empty($post['orderType'])){
+    if($post['orderAttribute'] == 'surnameName'){
+        $query->orderBy([
+            'user_profile.cognome' => $post['orderType'] == 3 ? SORT_DESC : SORT_ASC,
+            'user_profile.nome' => $post['orderType'] == 3 ? SORT_DESC : SORT_ASC,
+        ]);
+    }elseif($post['orderAttribute'] == 'prevalentPartnership'){
+        $query->orderBy([
+            'user_profile.prevalent_partnership_id' => $post['orderType'] == 3 ? SORT_DESC : SORT_ASC,        
+        ]);
+    }else{
+        $query->orderBy([
+            $post['orderAttribute'] => $post['orderType'] == 3 ? SORT_DESC : SORT_ASC,     
+        ]);
+    }
+}else{
+    $query->orderBy([
         'user_profile.cognome' => SORT_ASC,
         'user_profile.nome' => SORT_ASC,
     ]);
+}
 
-$post = Yii::$app->request->post();
-if (isset($post['genericSearch'])) {
+if (empty($post['enableSearch']) && !empty($post['genericSearch']) ) {
     $searchName = $post['genericSearch'];
     $query->andFilterWhere(['or',
         ['like', 'user_profile.nome',$searchName],
@@ -54,8 +73,16 @@ if (isset($post['genericSearch'])) {
     ]);
 }
 
+if(!empty($post['enableSearch']) && !empty($post['UserProfileSearch'])){
+    $query->andFilterWhere(['like', 'u.username',$post['UserProfileSearch']['username']]);
+    $query->andFilterWhere(['like', 'u.email',$post['UserProfileSearch']['email']]);
+    $query->andFilterWhere(['user_profile.prevalent_partnership_id'=>$post['UserProfileSearch']['prevalent_partnership_id']]);
+}
+
 ?>
+
 <?= M2MWidget::widget([
+    'pjaxContainer' => true,
     'model' => $model,
     'modelId' => $model->id,
     'modelData' => $query,
@@ -64,7 +91,7 @@ if (isset($post['genericSearch'])) {
         'to' => 'id'
     ],
     'modelTargetSearch' => [
-        'class' => AmosAdmin::instance()->createModel('UserProfile')->className(),
+        'class' => AmosAdmin::instance()->createModel('UserProfileSearch')->className(),
         'query' => $query,
     ],
     'targetFooterButtons' => Html::a(AmosAdmin::t('amosadmin', 'Close'), Yii::$app->urlManager->createUrl([
@@ -73,11 +100,18 @@ if (isset($post['genericSearch'])) {
     ]), ['class' => 'btn btn-secondary', 'AmosAdmin' => Yii::t('amosadmin', 'Close')]),
     'renderTargetCheckbox' => false,
     'viewSearch' => (isset($viewM2MWidgetGenericSearch) ? $viewM2MWidgetGenericSearch : false),
+    'hideInlineSearch' => true,
     'targetUrlController' => 'user-contact',
     'targetActionColumnsTemplate' => '{googleContact}{connect}',
     'moduleClassName' => \open20\amos\admin\AmosAdmin::className(),
     'postName' => 'UserContact',
     'postKey' => 'user-contact',
+    'iconView' => '@vendor/open20/amos-admin/src/views/user-profile/_icon',
+    'listView' => '@vendor/open20/amos-admin/src/views/user-profile/_item',
+    'currentView' => 'icon',
+    'advancedSearch' => true,
+    'viewFilter' => '@vendor/open20/amos-admin/src/views/user-contact/_search',
+    'viewOrder' => '@vendor/open20/amos-admin/src/views/user-contact/_order',
     'targetColumnsToView' => [
         'photo' => [
             'headerOptions' => [

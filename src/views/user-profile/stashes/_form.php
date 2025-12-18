@@ -277,7 +277,7 @@ $form = ActiveForm::begin([
             ?>
 
             <!-- NETWORK -->
-            <?php if ($model->isNewRecord || ($enableUserContacts && $model->validato_almeno_una_volta) || isset($moduleCwh)): ?>
+            <?php if ((empty($adminModule->disableSocialInteraction)) && ($model->isNewRecord || ($enableUserContacts && $model->validato_almeno_una_volta) || isset($moduleCwh))): ?>
                 <?php $this->beginBlock($idTabNetwork); ?>
                 <div>
                     <?php if ($model->isNewRecord): ?>
@@ -536,7 +536,7 @@ $form = ActiveForm::begin([
             Html::submitButton(AmosAdmin::t('amosadmin', 'Ok'),
                 ['class' => 'btn btn-navigation-primary', 'id' => $model->getWorkflowStatus()->getId()])
             . Html::a(AmosAdmin::t('amosadmin', 'Annulla'), null, ['data-dismiss' => 'modal', 'class' => 'btn btn-secondary']),
-            ['class' => 'pull-right m-15-0']
+            ['class' => 'pull-right m-15-0 d-flex']
         );
         \yii\bootstrap\Modal::end();
     }

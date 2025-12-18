@@ -16,8 +16,19 @@ use yii\widgets\ActiveForm;
 /**
  * @var yii\web\View $this
  * @var \open20\amos\admin\models\search\UserProfileSearch $model
+ * @var AmosAdmin $adminModule
  * @var yii\widgets\ActiveForm $form
  */
+
+
+// Remove last online from order fields if module parameter 'enableOnlineUsers' is false
+if (isset(Yii::$app->controller->module->params['orderParams']['user-profile'])) {
+    $orderParams = Yii::$app->controller->module->params['orderParams']['user-profile'];
+    if (!$adminModule->enableOnlineUsers && !empty($orderParams) && $orderParams['enable'] && in_array('user_profile.last_online', $orderParams['fields'])) {
+        unset($orderParams['fields'][array_search('user_profile.last_online', $orderParams['fields'])]);
+        $model->setOrderAttributes($orderParams['fields']);
+    }
+}
 
 ?>
 

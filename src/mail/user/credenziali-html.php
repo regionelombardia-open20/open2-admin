@@ -25,7 +25,6 @@ $appLink = substr($appLink, -1) == '/' ? $appLink : $appLink . '/';
 $appLinkPrivacy = Yii::$app->params['platform'] ['backendUrl'] .'/'.AmosAdmin::getModuleName().'/user-profile/privacy'; //Yii::$app->urlManager->createAbsoluteUrl(['/'.AmosAdmin::getModuleName().'/user-profile/privacy']);
 $appName = Yii::$app->name;
 $loginLink = CoreCommonUtility::getLoginLink();
-$loginLink = substr($loginLink, 0) == '/' ? substr($loginLink, 1) : $loginLink;
 
 
 $regWihSpid = \Yii::$app->request->post('reg_with_spid');

@@ -24,22 +24,43 @@ use open20\amos\core\views\DataProviderView;
  * @var string $fromAction
  */
 
+$this->params['forceBreadcrumbs'][] = [
+    'label' => $this->title,
+];
+
 $fromAction = (isset($fromAction) ? $fromAction : 'index');
 
 /** @var \open20\amos\admin\controllers\UserProfileController $appController */
 $appController = Yii::$app->controller;
 $adminModule = AmosAdmin::instance();
 
+$js = <<< JS
+$('.pagination-wrapper .pagination li.prev').each(function(){
+    let el = $(this).find('a'); 
+            el.attr('title', 'Vai alla pagina precedente').attr('aria-label', 'Vai alla pagina precedente').attr('data-toggle', 'tooltip');
+        });
+$('.pagination-wrapper .pagination li:not(.next):not(.prev)').each(function(){
+    let el = $(this).find('a'); 
+            el.attr('title', 'Vai alla pagina ' + el.html()).attr('aria-label', 'Vai alla pagina ' + el.html()).attr('data-toggle', 'tooltip');
+        });
+$('.pagination-wrapper .pagination li.next').each(function(){
+    let el = $(this).find('a'); 
+            el.attr('title', 'Vai alla pagina successiva').attr('aria-label', 'Vai alla pagina successiva').attr('data-toggle', 'tooltip');
+        });
+JS;
+
+$this->registerJs($js);
+
 ?>
 <div class="user-profile-index">
-    <?= $this->render(
-        '_search',
-        [
-            'model' => $model,
-            'originAction' => $appController->action->id
-        ]);
-    ?>
-    <?= $this->render('_order', ['model' => $model]); ?>
+    <?= $this->render('_search', [
+        'model' => $model,
+        'originAction' => $appController->action->id
+    ]); ?>
+    <?= $this->render('_order', [
+        'model' => $model,
+        'adminModule' => $adminModule
+    ]); ?>
 
     <?php
     $columns = [];
@@ -140,11 +161,11 @@ $adminModule = AmosAdmin::instance();
 
     if(!Yii::$app->request->get('currentView') || (Yii::$app->request->get('currentView')=='icon')){
         $dataProvider->pagination= [
-            'pageSize' => 21,
+            'pageSize' => 12,
         ];
     }
 
-    
+
     $dataProviderViewWidgetConf = [
         'dataProvider' => $dataProvider,
         //'filterModel' => $model,
@@ -158,7 +179,7 @@ $adminModule = AmosAdmin::instance();
         'gridView' => [
             'columns' => $columns
         ],
-        
+
         /* 'mapView' => [
             'itemView' => '_map',
             'markerConfig' => [
@@ -173,7 +194,9 @@ $adminModule = AmosAdmin::instance();
     if (Yii::$app->user->can('ADMIN') || Yii::$app->user->can('AMMINISTRATORE_UTENTI')) {
         $dataProviderViewWidgetConf['exportConfig'] = [
             'exportEnabled' => true,
-            'exportColumns' => $appController->getExportColumns($model)
+            'exportColumns' => $appController->getExportColumns($model),
+            'enableBackgroundDownload' => $adminModule->enableBackgroundDownload,
+            'backgroundDownloadOptions' => $adminModule->backgroundDownloadOptions,
         ];
     }
     ?>

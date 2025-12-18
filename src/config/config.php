@@ -29,7 +29,7 @@ return [
                 'enable' => true
             ]
         ],
-        
+
         // Active the order
         'orderParams' => [
             'user-profile' => [
@@ -39,7 +39,8 @@ return [
                     'cognome',
                     'surnameName',
                     'prevalentPartnership',
-                    'user_profile.created_at'
+                    'user_profile.created_at',
+                    'user_profile.last_online',
                 ],
                 'default_field' => 'surnameName',
                 'order_type' => SORT_ASC

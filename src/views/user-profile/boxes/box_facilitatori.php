@@ -94,7 +94,7 @@ $facilitatorRequest = null;
                                 <?= Html::a(
                                     AmosIcons::show('comments') .
                                     Html::tag('span', AmosAdmin::t('amosadmin', 'Send message'), ['class' => 'sr-only']),
-                                    ['/messages/' . $facilitatorUserProfile->id],
+                                    ['/messages/' . $facilitatorUserProfile->user_id],
                                     ['class' => 'btn btn-secondary', 'title' => AmosAdmin::t('amosadmin', 'Apri la chat diretta con il tuo facilitatore')]
                                 );
                                 ?>

@@ -19,6 +19,7 @@ use open20\amos\core\user\User;
 use open20\amos\core\utilities\Email;
 use open20\amos\socialauth\models\SocialAuthUsers;
 use open20\amos\socialauth\models\SocialIdmUser;
+use open20\amos\taskmanager\TaskManager;
 use Yii;
 use yii\console\Application;
 use yii\db\ActiveRecord;
@@ -37,12 +38,19 @@ class UserDropController extends Controller
      */
     protected $adminModule;
 
+    /** @var TaskManager $taskManagerModule*/
+    protected $taskManagerModule;
+
     /**
      * @inheritdoc
      */
     public function init()
     {
         $this->adminModule = AmosAdmin::instance();
+        $module = \Yii::$app->getModule('taskmanager');
+        if($module) {
+            $this->taskManagerModule = $module;
+        }
         
         parent::init();
 
@@ -87,6 +95,9 @@ class UserDropController extends Controller
 
             //Drop friendships to avoid friendship zombies and similiar things
             $this->dropFriendshipsRelations($user);
+            
+            //Delete logs
+            $this->dropLogs($user);
 
             //Logout user to avoid any problem
             $this->logoutUser();
@@ -130,6 +141,10 @@ class UserDropController extends Controller
 
             //Delete private messages
             $this->dropMessages($user);
+            
+            
+            //Delete logs
+            $this->dropLogs($user);
 
             //Drop friendships to avoid friendship zombies and similiar things
             $this->dropFriendshipsRelations($user);
@@ -198,6 +213,41 @@ class UserDropController extends Controller
             $record->delete();
         }
 
+        return true;
+    }
+    public function dropLogs($userRecord) {
+        // Se configurato e abilitato, il task manager si occuperà di modificare i log dell'utente rimosso
+        if(isset($this->taskManagerModule) && $this->adminModule->enableDropLogsTaskManager) {
+            $this->taskManagerModule->scheduleJob(
+                AmosAdmin::getModuleName()."/user-utility/drop-logs",
+                "admin",
+                null,
+                [
+                    'userEmail' => $userRecord->email,
+                ]
+            );
+            // Se abilitato, mostra un messaggio sulla procedura avviata
+            if($this->adminModule->enableDropLogsTaskManagerMessage) {
+                \Yii::$app->session->addFlash('success', AmosAdmin::t('amosadmin', '#UserDropLogsWithTaskManager'));
+            }
+            return true;
+        } else {
+            \Yii::$app->db->createCommand()
+                ->delete('audit_mail', ['to' => $userRecord->email])
+                ->execute();
+
+            \Yii::$app->db->createCommand()
+                ->update('email_spool', ['to_address' => '#####'], ['to_address' => $userRecord->email])
+                ->execute();
+
+            \Yii::$app->db->createCommand()
+                ->update('email_spool', ['message' => '#####'], ['like', 'message', $userRecord->email])
+                ->execute();
+
+            Yii::$app->db->createCommand()
+                ->delete('session', ['like', 'data', $userRecord->email])
+                ->execute();
+        }
         return true;
     }
 
@@ -342,7 +392,10 @@ class UserDropController extends Controller
             $newCommManagerId = $adminIds[0];
         }
         if($moduleCommunity){
-            $communityUsers = \open20\amos\community\models\CommunityUserMm::find()->andWhere(['user_id' => $user->id])->all();
+            $communityUsers = \open20\amos\community\models\CommunityUserMm::find()
+                ->joinWith('community')
+                ->andWhere(['user_id' => $user->id])
+                ->all();
             /** @var  $communityUser \open20\amos\community\models\CommunityUserMm */
             foreach ($communityUsers as $communityUser){
                 if(!$this->hasCommunityManagers($communityUser->community_id, $user)){

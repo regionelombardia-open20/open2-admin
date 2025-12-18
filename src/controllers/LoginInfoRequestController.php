@@ -34,8 +34,8 @@ class LoginInfoRequestController extends Controller
      */
     public function actionActivateUser() {
         
-        return $this->redirect(['/login']);
-   
+        // return $this->redirect(['/login']);
+        return $this->redirect(['/site/login']);
     }
 
 }

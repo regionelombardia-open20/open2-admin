@@ -193,8 +193,8 @@ class UserProfileMailUtility
                 <br><br>L'operazione è irreversibile; se confermi, il tuo account e tutti i dati a te associati verranno eliminati.", [
             'nome' => $userProfile->nome,
             'cognome' => $userProfile->cognome,
-            'linkProfile' => \Yii::$app->urlManager->createAbsoluteUrl(['/'.AmosAdmin::getModuleName().'/user-profile/update', 'id'  => $userProfile->id]),
-            'linkDelete' => \Yii::$app->urlManager->createAbsoluteUrl(['/'.AmosAdmin::getModuleName().'/user-profile/drop-account', 'token' => $token]),
+            'linkProfile' => \Yii::$app->params['platform'][AmosAdmin::instance()->dropAccountPlatformParams].'/'.AmosAdmin::getModuleName().'/user-profile/update?id'.$userProfile->id,
+            'linkDelete' => \Yii::$app->params['platform'][AmosAdmin::instance()->dropAccountPlatformParams].AmosAdmin::instance()->dropAccountPathUrl.'?token='. $token,
             'appName' => $appName
 
         ]);

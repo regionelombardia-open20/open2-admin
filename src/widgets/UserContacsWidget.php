@@ -20,6 +20,7 @@ use open20\amos\core\user\User;
 use open20\amos\core\utilities\JsUtility;
 use Yii;
 use yii\base\Widget;
+use yii\helpers\VarDumper;
 use yii\web\View;
 use yii\widgets\PjaxAsset;
 
@@ -27,8 +28,7 @@ use yii\widgets\PjaxAsset;
  * Class UserContacsWidget
  * @package open20\amos\admin\widgets
  */
-class UserContacsWidget extends Widget
-{
+class UserContacsWidget extends Widget {
 
     /**
      * @var int $userId
@@ -46,6 +46,21 @@ class UserContacsWidget extends Widget
     public $gridId = 'user-contanct-grid';
 
     /**
+     * @var array|string|bool $gridId
+     */
+    public $iconView = false;
+
+    /**
+     * @var string $searchSrLabel
+     */
+    public $searchSrLabel;
+
+    /**
+     * @var string $searchPlaceholder
+     */
+    public $searchPlaceholder;
+
+    /**
      * @var
      */
     private $userProfile;
@@ -53,10 +68,8 @@ class UserContacsWidget extends Widget
     /**
      * widget initialization
      */
-    public function init()
-    {
+    public function init() {
         parent::init();
-
 
         if (is_null($this->userId)) {
             throw new \Exception(AmosAdmin::t('amosadmin', 'Missing user id'));
@@ -68,17 +81,17 @@ class UserContacsWidget extends Widget
     /**
      * @return mixed
      */
-    public function run()
-    {
+    public function run() {
+
         $confirm = $this->getConfirm();
         $canAssociateContact = \Yii::$app->user->can('ASSOCIATE_CONTACTS');
 
         $gridId = $this->gridId;
         $url = \Yii::$app->urlManager->createUrl([
-            '/'.AmosAdmin::getModuleName().'/user-profile/contacts',
+            '/' . AmosAdmin::getModuleName() . '/user-profile/contacts',
             'id' => $this->userProfile->id,
             'isUpdate' => $this->isUpdate
-            ]);
+        ]);
         $searchPostName = 'searchContactsName';
 
         $js = JsUtility::getSearchM2mFirstGridJs($gridId, $url, $searchPostName);
@@ -98,9 +111,9 @@ class UserContacsWidget extends Widget
                 'value' => function ($model) {
 
                     /** @var UserContact $model */
-                    if($this->userId == $model->user_id) {
+                    if ($this->userId == $model->user_id) {
                         $profile = User::findOne($model->contact_id)->getProfile();
-                    }else{
+                    } else {
                         $profile = User::findOne($model->user_id)->getProfile();
                     }
                     return UserCardWidget::widget(['model' => $profile]);
@@ -117,14 +130,14 @@ class UserContacsWidget extends Widget
                 'format' => 'raw',
                 'value' => function ($model) use ($confirm) {
                     /** @var UserContact $model */
-                    if($this->userId == $model->user_id) {
+                    if ($this->userId == $model->user_id) {
                         $userProfile = User::findOne($model->contact_id)->getProfile();
                         $name = $userProfile->getNomeCognome();
-                    }else{
+                    } else {
                         $userProfile = User::findOne($model->user_id)->getProfile();
                         $name = $userProfile->getNomeCognome();
                     }
-                    return Html::a($name, ['/'.((!empty(\Yii::$app->params['befe']) && \Yii::$app->params['befe'] == true)? 'amosadmin' : AmosAdmin::getModuleName()).'/user-profile/view', 'id' => $userProfile->id ], [
+                    return Html::a($name, ['/' . ((!empty(\Yii::$app->params['befe']) && \Yii::$app->params['befe'] == true) ? 'amosadmin' : AmosAdmin::getModuleName()) . '/user-profile/view', 'id' => $userProfile->id], [
                         'title' => AmosAdmin::t('amoscommunity', 'Apri il profilo di {nome_profilo}', ['nome_profilo' => $name]),
                         'data-url-confirm' => $confirm
                     ]);
@@ -139,9 +152,9 @@ class UserContacsWidget extends Widget
                 'contentOptions' => [
                     'headers' => AmosAdmin::t('amosadmin', 'Status'),
                 ],
-                'value' => function($model){
+                'value' => function ($model) {
                     /** @var UserContact $model */
-                    if($model->status == UserContact::STATUS_INVITED) {
+                    if ($model->status == UserContact::STATUS_INVITED) {
                         return AmosAdmin::t('amosadmin', 'Waiting for acceptance');
                     } else {
                         return AmosAdmin::t('amosadmin', 'Connected');
@@ -159,29 +172,32 @@ class UserContacsWidget extends Widget
         ];
 
 //        UserContact::find()-> andWhere("user_id = ".$this->userId. " OR contact_id = ".$this->userId)->andWhere(['<>', 'status', UserContact::STATUS_REFUSED]);
+        $currentUserId = Yii::$app->user->id;
 
         $contactsInvited = UserContact::find()
-            ->innerJoin('user_profile', 'user_profile.user_id = user_contact.contact_id')
-            ->andWhere('user_contact.deleted_at IS NULL AND user_profile.deleted_at IS NULL')
-            ->andWhere("user_contact.user_id = ".$this->userId)->andWhere(['<>', 'user_contact.status', UserContact::STATUS_REFUSED])
-            ->andWhere(['user_profile.attivo' => 1]);
+                ->innerJoin('user_profile', 'user_profile.user_id = user_contact.contact_id')
+                ->andWhere('user_contact.deleted_at IS NULL AND user_profile.deleted_at IS NULL')
+                ->andWhere("user_contact.user_id = " . $this->userId)->andWhere(['<>', 'user_contact.status', UserContact::STATUS_REFUSED])
+                ->andWhere(['<>', 'user_profile.id', $currentUserId])
+                ->andWhere(['user_profile.attivo' => 1]);
 
-        $contactsInviting= UserContact::find()->innerJoin('user_profile', 'user_profile.user_id = user_contact.user_id')
-            ->andWhere('user_contact.deleted_at IS NULL AND user_profile.deleted_at IS NULL')
-            ->andWhere("user_contact.contact_id = ".$this->userId)->andWhere(['<>', 'user_contact.status', UserContact::STATUS_REFUSED])
-            ->andWhere(['user_profile.attivo' => 1]);
+        $contactsInviting = UserContact::find()->innerJoin('user_profile', 'user_profile.user_id = user_contact.user_id')
+                ->andWhere('user_contact.deleted_at IS NULL AND user_profile.deleted_at IS NULL')
+                ->andWhere("user_contact.contact_id = " . $this->userId)->andWhere(['<>', 'user_contact.status', UserContact::STATUS_REFUSED])
+                ->andWhere(['<>', 'user_profile.id', $currentUserId])
+                ->andWhere(['user_profile.attivo' => 1]);
 
-        if(isset($_POST[$searchPostName])){
+        if (isset($_POST[$searchPostName])) {
             $searchName = $_POST[$searchPostName];
-            if(!empty($searchName)){
+            if (!empty($searchName)) {
                 $contactsInvited->andWhere(['or',
-                    ['like', 'user_profile.nome',$searchName],
+                    ['like', 'user_profile.nome', $searchName],
                     ['like', 'user_profile.cognome', $searchName],
                     ['like', "CONCAT( user_profile.nome , ' ', user_profile.cognome )", $searchName],
                     ['like', "CONCAT( user_profile.cognome , ' ', user_profile.nome )", $searchName]
                 ]);
                 $contactsInviting->andWhere(['or',
-                    ['like', 'user_profile.nome',$searchName],
+                    ['like', 'user_profile.nome', $searchName],
                     ['like', 'user_profile.cognome', $searchName],
                     ['like', "CONCAT( user_profile.nome , ' ', user_profile.cognome )", $searchName],
                     ['like', "CONCAT( user_profile.cognome , ' ', user_profile.nome )", $searchName]
@@ -189,12 +205,19 @@ class UserContacsWidget extends Widget
             }
         }
         $contacts = UserContact::find()
-            ->select('*')
-            ->from([UserContact::tableName() => $contactsInvited->union($contactsInviting)]);
+                ->select('*')
+                ->from([UserContact::tableName() => $contactsInvited->union($contactsInviting)]);
 
-        $model = User::findOne($this->userId)->getProfile();
+        $userProfileInstance = AmosAdmin::instance()->createModel('UserProfile');
+        $model = $userProfileInstance::find()->andWhere(['user_id' => $this->userId])->one();
+
         $loggedUserId = Yii::$app->getUser()->id;
         $this->isUpdate = $this->isUpdate && ($loggedUserId == $model->user_id) && $canAssociateContact;
+        if (is_bool($this->iconView) && $this->iconView) {
+            $iconView = '@vendor/open20/amos-admin/src/widgets/views/icon_contacts';
+        } elseif (is_string($this->iconView) || is_array($this->iconView)) {
+            $iconView = $this->iconView;
+        }
 
         $widget = \open20\amos\core\forms\editors\m2mWidget\M2MWidget::widget([
             'model' => $model,
@@ -206,11 +229,14 @@ class UserContacsWidget extends Widget
                 'viewM2MWidgetGenericSearch' => true
             ],
             'gridId' => $gridId,
+            'iconView' => $iconView,
             'firstGridSearch' => true,
-            'itemsSenderPageSize' => 10,
+            'itemsSenderPageSize' => 9,
             'pageParam' => 'page-contacts',
             'disableCreateButton' => true,
             'createAssociaButtonsEnabled' => $this->isUpdate,
+            'searchSrLabel' => $this->searchSrLabel,
+            'searchPlaceholder' => $this->searchPlaceholder,
             'btnAssociaId' => 'user-contacts-widget-associa-btn-id',
             'btnAssociaLabel' => AmosAdmin::t('amosadmin', 'Add new contacts'),
             'actionColumnsTemplate' => $this->isUpdate ? '{googleContact}{connect}{deleteRelation}' : '{googleContact}',
@@ -249,36 +275,44 @@ class UserContacsWidget extends Widget
                         }
                         $btnDelete = Html::a( AmosIcons::show('close', ['class' => 'btn-delete-relation']),
 //                            '<p class="btn btn-tool-secondary">' . AmosIcons::show('close') . '</p>'
-                            $urlDelete,
-                            [
-                                'title' => AmosAdmin::t('amosadmin', 'Delete'),
-                                'data-confirm' => AmosAdmin::t('amosadmin', 'Are you sure to remove'). " " . $name ." "
-                                    . AmosAdmin::t('amosadmin', 'from your contact list'),
-                            ]
-                        );
-                    } else {
-                        $btnDelete = '';
-                    }
-                    return $btnDelete;
-                }
-            ],
-            'itemsMittente' => $itemsMittente,
+                                                $urlDelete,
+                                                [
+                                                    'title' => AmosAdmin::t('amosadmin', 'Delete'),
+                                                    'data-confirm' => AmosAdmin::t('amosadmin', 'Are you sure to remove') . " " . $name . " "
+                                                    . AmosAdmin::t('amosadmin', 'from your contact list'),
+                                                ]
+                                );
+                            } else {
+                                $btnDelete = '';
+                            }
+                            return $btnDelete;
+                        }
+                    ],
+                    'itemsMittente' => $itemsMittente,
         ]);
+        $lbl = AmosAdmin::tHtml('amosadmin', '#contacts');
+        if ($loggedUserId == $model->user_id) {
+            $lbl = AmosAdmin::tHtml('amosadmin', '#contacts');
+        } else {
+            $lbl = AmosAdmin::tHtml('amosadmin', '#contactother_title', [
+                        'name' => $this->userProfile->getNomeCognome()
+            ]);
+        }
 
-        echo '';
         return "<div id=\"user-contanct-grid\" data-pjax-container=\"user-contanct-grid-pjax\" data-pjax-timeout=\"1000\">
-                <h3>".AmosAdmin::tHtml('amosadmin', 'Contacts')."</h3>"
-                .$widget
-                ."</div><div class=\"clearfix\"></div> ";
+                <h3>" . $lbl . "</h3>"
+                . $widget
+                . "</div><div class=\"clearfix\"></div> ";
     }
 
     /**
      * @return array|null
      */
-    public function getConfirm(){
+    public function getConfirm() {
         $controller = Yii::$app->controller;
         $isActionUpdate = ($controller->action->id == 'update');
-        $confirm = $isActionUpdate ? \open20\amos\core\module\BaseAmosModule::t('amoscore', '#confirm_exit_without_saving') : null;
+        $confirm = $isActionUpdate ? AmosAdmin::t('amosadmin', '#confirm_exit_without_saving') : null;
         return $confirm;
     }
+
 }
