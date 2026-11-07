@@ -1,5 +1,6 @@
 {
     "name": "open20/amos-admin",
+    "license": "GPL-3.0-or-later",
     "description": "Gestione utenti - plugin",
     "keywords": [
         "amos",
